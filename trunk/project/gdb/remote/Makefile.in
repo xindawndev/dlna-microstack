@@ -1,0 +1,15 @@
+SRC_DIR		:= $(ROOT_DIRECTORY)/third/gdb-7.1.50.20100417
+
+TARGET		:= $(strip $(shell PATH=$(PATH) $(PLATFORM_TOOL_PREFIX)gcc -v 2>&1 | awk -F : '$$1 == "Target" { print $$2 }'))
+
+target:
+	@mkdir -p temp
+	@ln -sf ../Makefile temp/
+	@ln -sf $(RELETIVE_DIR)/BootStrap.mk
+	@make -C temp LOCAL_NAME=/gdb/remote tttt
+
+tttt:
+	$(SRC_DIR)/gdb/gdbserver/configure CC=$(PLATFORM_TOOL_PREFIX)gcc --prefix=$(shell pwd)/.. --host=$(TARGET)
+	make
+	make install
+
