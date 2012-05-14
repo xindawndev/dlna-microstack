@@ -1,40 +1,7 @@
-/*
-* INTEL CONFIDENTIAL
-* Copyright (c) 2002 - 2005 Intel Corporation.  All rights reserved.
-* 
-* The source code contained or described herein and all documents
-* related to the source code ("Material") are owned by Intel
-* Corporation or its suppliers or licensors.  Title to the
-* Material remains with Intel Corporation or its suppliers and
-* licensors.  The Material contains trade secrets and proprietary
-* and confidential information of Intel or its suppliers and
-* licensors. The Material is protected by worldwide copyright and
-* trade secret laws and treaty provisions.  No part of the Material
-* may be used, copied, reproduced, modified, published, uploaded,
-* posted, transmitted, distributed, or disclosed in any way without
-* Intel's prior express written permission.
-
-* No license under any patent, copyright, trade secret or other
-* intellectual property right is granted to or conferred upon you
-* by disclosure or delivery of the Materials, either expressly, by
-* implication, inducement, estoppel or otherwise. Any license
-* under such intellectual property rights must be express and
-* approved by Intel in writing.
-* 
-* $Workfile: MediaServerCP_ControlPoint.c
-* $Revision: #1.0.2777.24812
-* $Author:   Intel Corporation, Intel Device Builder
-* $Date:     2011年10月27日
-*
-*
-*
-*/
-
-
 #if defined(WIN32) || defined(_WIN32_WCE)
-#	ifndef MICROSTACK_NO_STDAFX
-#		include "stdafx.h"
-#	endif
+#    ifndef MICROSTACK_NO_STDAFX
+#        include "stdafx.h"
+#    endif
 char* MediaServerCP_PLATFORM = "WINDOWS UPnP/1.0 PPTV MicroStack/1.0.2777";
 #elif defined(__SYMBIAN32__)
 char* MediaServerCP_PLATFORM = "SYMBIAN UPnP/1.0 PPTV MicroStack/1.0.2777";
@@ -332,9 +299,9 @@ void MediaServerCP_Release(struct UPnPDevice *device)
 }
 //void UPnPDeviceDescriptionInterruptSink(void *sender, void *user1, void *user2)
 //{
-   //	struct CustomUserData *cd = (struct CustomUserData*)user1;
-   //	free(cd->buffer);
-   //	free(user1);
+   //    struct CustomUserData *cd = (struct CustomUserData*)user1;
+   //    free(cd->buffer);
+   //    free(user1);
    //}
 int MediaServerCP_IsLegacyDevice(struct packetheader *header)
 {
@@ -572,7 +539,7 @@ struct UPnPService *MediaServerCP_GetService(struct UPnPDevice *device, char* Se
 }
 
 /*! \fn MediaServerCP_GetService_ConnectionManager(struct UPnPDevice *device)
-\brief Returns the ConnectionManager service from the specified device	\par
+\brief Returns the ConnectionManager service from the specified device    \par
 Service Type = urn:schemas-upnp-org:service:ConnectionManager<br>
 Version >= 1
 \param device The device object to query
@@ -583,7 +550,7 @@ struct UPnPService *MediaServerCP_GetService_ConnectionManager(struct UPnPDevice
    return(MediaServerCP_GetService(device,"urn:schemas-upnp-org:service:ConnectionManager:1",48));
 }
 /*! \fn MediaServerCP_GetService_ContentDirectory(struct UPnPDevice *device)
-\brief Returns the ContentDirectory service from the specified device	\par
+\brief Returns the ContentDirectory service from the specified device    \par
 Service Type = urn:schemas-upnp-org:service:ContentDirectory<br>
 Version >= 1
 \param device The device object to query
@@ -4530,7 +4497,7 @@ void MediaServerCP_Invoke_ConnectionManager_GetProtocolInfo(struct UPnPService *
 \param ObjectID Value of the ObjectID parameter.  <b>MUST</b> be properly escaped.
 \param BrowseFlag Value of the BrowseFlag parameter.  <b>MUST</b> be properly escaped.
 \param Filter Value of the Filter parameter.  <b>MUST</b> be properly escaped.
-\param StartingIndex Value of the StartingIndex parameter. 	\param RequestedCount Value of the RequestedCount parameter. 	\param SortCriteria Value of the SortCriteria parameter.  <b>MUST</b> be properly escaped.
+\param StartingIndex Value of the StartingIndex parameter.     \param RequestedCount Value of the RequestedCount parameter.     \param SortCriteria Value of the SortCriteria parameter.  <b>MUST</b> be properly escaped.
 */
 void MediaServerCP_Invoke_ContentDirectory_Browse(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,char* Result,unsigned int NumberReturned,unsigned int TotalMatches,unsigned int UpdateID), void* user, char* ObjectID, char* BrowseFlag, char* Filter, unsigned int StartingIndex, unsigned int RequestedCount, char* SortCriteria)
 {
@@ -4901,7 +4868,7 @@ void MediaServerCP_Invoke_ContentDirectory_GetSystemUpdateID(struct UPnPService 
 \param ContainerID Value of the ContainerID parameter.  <b>MUST</b> be properly escaped.
 \param SearchCriteria Value of the SearchCriteria parameter.  <b>MUST</b> be properly escaped.
 \param Filter Value of the Filter parameter.  <b>MUST</b> be properly escaped.
-\param StartingIndex Value of the StartingIndex parameter. 	\param RequestedCount Value of the RequestedCount parameter. 	\param SortCriteria Value of the SortCriteria parameter.  <b>MUST</b> be properly escaped.
+\param StartingIndex Value of the StartingIndex parameter.     \param RequestedCount Value of the RequestedCount parameter.     \param SortCriteria Value of the SortCriteria parameter.  <b>MUST</b> be properly escaped.
 */
 void MediaServerCP_Invoke_ContentDirectory_Search(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,char* Result,unsigned int NumberReturned,unsigned int TotalMatches,unsigned int UpdateID), void* user, char* ContainerID, char* SearchCriteria, char* Filter, unsigned int StartingIndex, unsigned int RequestedCount, char* SortCriteria)
 {

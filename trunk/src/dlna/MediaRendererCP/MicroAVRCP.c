@@ -90,7 +90,7 @@ unsigned short RCS_GetMaxVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Max));		
+            return((unsigned short)atoi(SV->Max));        
         }
         SV = SV->Next;
     }
@@ -105,7 +105,7 @@ unsigned short RCS_GetMinVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Min));		
+            return((unsigned short)atoi(SV->Min));        
         }
         SV = SV->Next;
     }
@@ -865,7 +865,7 @@ void UPnPResponseSink_RenderingControl_GetVolume(struct UPnPService* Service,int
     else
     {
         DMRCP_Invoke_RenderingControl_GetVolume(AVRS->connection->Parent->RCS, &UPnPResponseSink_RenderingControl_GetVolume,AVRS,AVRS->connection->RCID,AVRS->connection->Channel[AVRS->index]);
-    }	
+    }    
 }
 void UPnPResponseSink_AVTransport_GetTransportSettings(struct UPnPService* Service,int ErrorCode,void *User,char* PlayMode,char* RecQualityMode)
 {
@@ -1872,7 +1872,7 @@ void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
     struct UPnPStateVariable *SV;
 
     printf("**<< UPnP A/V Renderer Added: %s >>**\r\n", device->FriendlyName);
-    /* 	UPnPPrintUPnPDevice(0,device); */
+    /*     UPnPPrintUPnPDevice(0,device); */
 
 
     memset(AVR,0,sizeof(struct AVRenderer));
@@ -2297,7 +2297,7 @@ void RCP_SetMute(struct AVRendererConnection *connection, char *Channel, int Mut
     s->connection = connection;
     s->Tag = Tag;
 
-    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);	
+    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);    
 }
 void RCP_Stop(struct AVRendererConnection *connection,void *Tag, void (*StopSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {

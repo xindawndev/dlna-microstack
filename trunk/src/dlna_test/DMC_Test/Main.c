@@ -508,7 +508,7 @@ int main( int argc, char **argv )
     MediaServer_GetConfiguration()->ModelNumber = "123456789";
     MediaServer_GetConfiguration()->ModelURL = "http://www.pptv.com";
 
-    backendinit.Path = "./PPTV多媒体";
+    backendinit.Path = "./PPTVDMS";
     DMSObject = DMS_Create(
         MicroStackChain,
         ILib_Pool,

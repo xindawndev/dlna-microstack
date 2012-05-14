@@ -1,40 +1,7 @@
-/*
-* INTEL CONFIDENTIAL
-* Copyright (c) 2002 - 2005 Intel Corporation.  All rights reserved.
-* 
-* The source code contained or described herein and all documents
-* related to the source code ("Material") are owned by Intel
-* Corporation or its suppliers or licensors.  Title to the
-* Material remains with Intel Corporation or its suppliers and
-* licensors.  The Material contains trade secrets and proprietary
-* and confidential information of Intel or its suppliers and
-* licensors. The Material is protected by worldwide copyright and
-* trade secret laws and treaty provisions.  No part of the Material
-* may be used, copied, reproduced, modified, published, uploaded,
-* posted, transmitted, distributed, or disclosed in any way without
-* Intel's prior express written permission.
-
-* No license under any patent, copyright, trade secret or other
-* intellectual property right is granted to or conferred upon you
-* by disclosure or delivery of the Materials, either expressly, by
-* implication, inducement, estoppel or otherwise. Any license
-* under such intellectual property rights must be express and
-* approved by Intel in writing.
-* 
-* $Workfile: DMRCP_ControlPoint.c
-* $Revision: #1.0.2777.24812
-* $Author:   Intel Corporation, Intel Device Builder
-* $Date:     2011年10月27日
-*
-*
-*
-*/
-
-
 #if defined(WIN32) || defined(_WIN32_WCE)
-#	ifndef MICROSTACK_NO_STDAFX
-#		include "stdafx.h"
-#	endif
+#    ifndef MICROSTACK_NO_STDAFX
+#        include "stdafx.h"
+#    endif
 char* DMRCP_PLATFORM = "WINDOWS UPnP/1.0 PPTV MicroStack/1.0.2777";
 #elif defined(__SYMBIAN32__)
 char* DMRCP_PLATFORM = "SYMBIAN UPnP/1.0 PPTV MicroStack/1.0.2777";
@@ -332,9 +299,9 @@ void DMRCP_Release(struct UPnPDevice *device)
 }
 //void UPnPDeviceDescriptionInterruptSink(void *sender, void *user1, void *user2)
 //{
-   //	struct CustomUserData *cd = (struct CustomUserData*)user1;
-   //	free(cd->buffer);
-   //	free(user1);
+   //    struct CustomUserData *cd = (struct CustomUserData*)user1;
+   //    free(cd->buffer);
+   //    free(user1);
    //}
 int DMRCP_IsLegacyDevice(struct packetheader *header)
 {
@@ -573,7 +540,7 @@ struct UPnPService *DMRCP_GetService(struct UPnPDevice *device, char* ServiceNam
 }
 
 /*! \fn DMRCP_GetService_AVTransport(struct UPnPDevice *device)
-\brief Returns the AVTransport service from the specified device	\par
+\brief Returns the AVTransport service from the specified device    \par
 Service Type = urn:schemas-upnp-org:service:AVTransport<br>
 Version >= 1
 \param device The device object to query
@@ -584,7 +551,7 @@ struct UPnPService *DMRCP_GetService_AVTransport(struct UPnPDevice *device)
    return(DMRCP_GetService(device,"urn:schemas-upnp-org:service:AVTransport:1",42));
 }
 /*! \fn DMRCP_GetService_ConnectionManager(struct UPnPDevice *device)
-\brief Returns the ConnectionManager service from the specified device	\par
+\brief Returns the ConnectionManager service from the specified device    \par
 Service Type = urn:schemas-upnp-org:service:ConnectionManager<br>
 Version >= 1
 \param device The device object to query
@@ -595,7 +562,7 @@ struct UPnPService *DMRCP_GetService_ConnectionManager(struct UPnPDevice *device
    return(DMRCP_GetService(device,"urn:schemas-upnp-org:service:ConnectionManager:1",48));
 }
 /*! \fn DMRCP_GetService_RenderingControl(struct UPnPDevice *device)
-\brief Returns the RenderingControl service from the specified device	\par
+\brief Returns the RenderingControl service from the specified device    \par
 Service Type = urn:schemas-upnp-org:service:RenderingControl<br>
 Version >= 1
 \param device The device object to query
@@ -7999,7 +7966,7 @@ void DMRCP_Invoke_AVTransport_Pause(struct UPnPService *service,void (*CallbackP
 \brief Invokes the Play action in the AVTransport service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Speed Value of the Speed parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Speed Value of the Speed parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_AVTransport_Play(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Speed)
 {
@@ -8124,7 +8091,7 @@ void DMRCP_Invoke_AVTransport_Previous(struct UPnPService *service,void (*Callba
 \brief Invokes the Seek action in the AVTransport service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Unit Value of the Unit parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Unit Value of the Unit parameter.  <b>Automatically</b> escaped
 \param unescaped_Target Value of the Target parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_AVTransport_Seek(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Unit, char* unescaped_Target)
@@ -8194,7 +8161,7 @@ void DMRCP_Invoke_AVTransport_Seek(struct UPnPService *service,void (*CallbackPt
 \brief Invokes the SetAVTransportURI action in the AVTransport service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_CurrentURI Value of the CurrentURI parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_CurrentURI Value of the CurrentURI parameter.  <b>Automatically</b> escaped
 \param unescaped_CurrentURIMetaData Value of the CurrentURIMetaData parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_AVTransport_SetAVTransportURI(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_CurrentURI, char* unescaped_CurrentURIMetaData)
@@ -8264,7 +8231,7 @@ void DMRCP_Invoke_AVTransport_SetAVTransportURI(struct UPnPService *service,void
 \brief Invokes the SetPlayMode action in the AVTransport service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_NewPlayMode Value of the NewPlayMode parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_NewPlayMode Value of the NewPlayMode parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_AVTransport_SetPlayMode(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_NewPlayMode)
 {
@@ -8631,7 +8598,7 @@ void DMRCP_Invoke_ConnectionManager_GetProtocolInfo(struct UPnPService *service,
 \param CallbackPtr The function pointer to be called when the invocation returns
 \param unescaped_RemoteProtocolInfo Value of the RemoteProtocolInfo parameter.  <b>Automatically</b> escaped
 \param unescaped_PeerConnectionManager Value of the PeerConnectionManager parameter.  <b>Automatically</b> escaped
-\param PeerConnectionID Value of the PeerConnectionID parameter. 	\param unescaped_Direction Value of the Direction parameter.  <b>Automatically</b> escaped
+\param PeerConnectionID Value of the PeerConnectionID parameter.     \param unescaped_Direction Value of the Direction parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_ConnectionManager_PrepareForConnection(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,int ConnectionID,int AVTransportID,int RcsID), void* user, char* unescaped_RemoteProtocolInfo, char* unescaped_PeerConnectionManager, int PeerConnectionID, char* unescaped_Direction)
 {
@@ -9184,7 +9151,7 @@ void DMRCP_Invoke_RenderingControl_GetHorizontalKeystone(struct UPnPService *ser
 \brief Invokes the GetLoudness action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_GetLoudness(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,int CurrentLoudness), void* user, unsigned int InstanceID, char* unescaped_Channel)
 {
@@ -9249,7 +9216,7 @@ void DMRCP_Invoke_RenderingControl_GetLoudness(struct UPnPService *service,void 
 \brief Invokes the GetMute action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_GetMute(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,int CurrentMute), void* user, unsigned int InstanceID, char* unescaped_Channel)
 {
@@ -9554,7 +9521,7 @@ void DMRCP_Invoke_RenderingControl_GetVerticalKeystone(struct UPnPService *servi
 \brief Invokes the GetVolume action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_GetVolume(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,unsigned short CurrentVolume), void* user, unsigned int InstanceID, char* unescaped_Channel)
 {
@@ -9619,7 +9586,7 @@ void DMRCP_Invoke_RenderingControl_GetVolume(struct UPnPService *service,void (*
 \brief Invokes the GetVolumeDB action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_GetVolumeDB(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,short CurrentVolume), void* user, unsigned int InstanceID, char* unescaped_Channel)
 {
@@ -9684,7 +9651,7 @@ void DMRCP_Invoke_RenderingControl_GetVolumeDB(struct UPnPService *service,void 
 \brief Invokes the GetVolumeDBRange action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_GetVolumeDBRange(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user,short MinValue,short MaxValue), void* user, unsigned int InstanceID, char* unescaped_Channel)
 {
@@ -9809,7 +9776,7 @@ void DMRCP_Invoke_RenderingControl_ListPresets(struct UPnPService *service,void 
 \brief Invokes the SelectPreset action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_PresetName Value of the PresetName parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_PresetName Value of the PresetName parameter.  <b>Automatically</b> escaped
 */
 void DMRCP_Invoke_RenderingControl_SelectPreset(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_PresetName)
 {
@@ -9874,7 +9841,7 @@ void DMRCP_Invoke_RenderingControl_SelectPreset(struct UPnPService *service,void
 \brief Invokes the SetBlueVideoBlackLevel action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredBlueVideoBlackLevel Value of the DesiredBlueVideoBlackLevel parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredBlueVideoBlackLevel Value of the DesiredBlueVideoBlackLevel parameter. */
 void DMRCP_Invoke_RenderingControl_SetBlueVideoBlackLevel(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredBlueVideoBlackLevel)
 {
    int headerLength;
@@ -9934,7 +9901,7 @@ void DMRCP_Invoke_RenderingControl_SetBlueVideoBlackLevel(struct UPnPService *se
 \brief Invokes the SetBlueVideoGain action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredBlueVideoGain Value of the DesiredBlueVideoGain parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredBlueVideoGain Value of the DesiredBlueVideoGain parameter. */
 void DMRCP_Invoke_RenderingControl_SetBlueVideoGain(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredBlueVideoGain)
 {
    int headerLength;
@@ -9994,7 +9961,7 @@ void DMRCP_Invoke_RenderingControl_SetBlueVideoGain(struct UPnPService *service,
 \brief Invokes the SetBrightness action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredBrightness Value of the DesiredBrightness parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredBrightness Value of the DesiredBrightness parameter. */
 void DMRCP_Invoke_RenderingControl_SetBrightness(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredBrightness)
 {
    int headerLength;
@@ -10054,7 +10021,7 @@ void DMRCP_Invoke_RenderingControl_SetBrightness(struct UPnPService *service,voi
 \brief Invokes the SetColorTemperature action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredColorTemperature Value of the DesiredColorTemperature parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredColorTemperature Value of the DesiredColorTemperature parameter. */
 void DMRCP_Invoke_RenderingControl_SetColorTemperature(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredColorTemperature)
 {
    int headerLength;
@@ -10114,7 +10081,7 @@ void DMRCP_Invoke_RenderingControl_SetColorTemperature(struct UPnPService *servi
 \brief Invokes the SetContrast action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredContrast Value of the DesiredContrast parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredContrast Value of the DesiredContrast parameter. */
 void DMRCP_Invoke_RenderingControl_SetContrast(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredContrast)
 {
    int headerLength;
@@ -10174,7 +10141,7 @@ void DMRCP_Invoke_RenderingControl_SetContrast(struct UPnPService *service,void 
 \brief Invokes the SetGreenVideoBlackLevel action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredGreenVideoBlackLevel Value of the DesiredGreenVideoBlackLevel parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredGreenVideoBlackLevel Value of the DesiredGreenVideoBlackLevel parameter. */
 void DMRCP_Invoke_RenderingControl_SetGreenVideoBlackLevel(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredGreenVideoBlackLevel)
 {
    int headerLength;
@@ -10234,7 +10201,7 @@ void DMRCP_Invoke_RenderingControl_SetGreenVideoBlackLevel(struct UPnPService *s
 \brief Invokes the SetGreenVideoGain action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredGreenVideoGain Value of the DesiredGreenVideoGain parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredGreenVideoGain Value of the DesiredGreenVideoGain parameter. */
 void DMRCP_Invoke_RenderingControl_SetGreenVideoGain(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredGreenVideoGain)
 {
    int headerLength;
@@ -10294,7 +10261,7 @@ void DMRCP_Invoke_RenderingControl_SetGreenVideoGain(struct UPnPService *service
 \brief Invokes the SetHorizontalKeystone action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredHorizontalKeystone Value of the DesiredHorizontalKeystone parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredHorizontalKeystone Value of the DesiredHorizontalKeystone parameter. */
 void DMRCP_Invoke_RenderingControl_SetHorizontalKeystone(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, short DesiredHorizontalKeystone)
 {
    int headerLength;
@@ -10354,7 +10321,7 @@ void DMRCP_Invoke_RenderingControl_SetHorizontalKeystone(struct UPnPService *ser
 \brief Invokes the SetLoudness action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 \param DesiredLoudness Value of the DesiredLoudness parameter. */
 void DMRCP_Invoke_RenderingControl_SetLoudness(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Channel, int DesiredLoudness)
 {
@@ -10421,7 +10388,7 @@ void DMRCP_Invoke_RenderingControl_SetLoudness(struct UPnPService *service,void 
 \brief Invokes the SetMute action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 \param DesiredMute Value of the DesiredMute parameter. */
 void DMRCP_Invoke_RenderingControl_SetMute(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Channel, int DesiredMute)
 {
@@ -10488,7 +10455,7 @@ void DMRCP_Invoke_RenderingControl_SetMute(struct UPnPService *service,void (*Ca
 \brief Invokes the SetRedVideoBlackLevel action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredRedVideoBlackLevel Value of the DesiredRedVideoBlackLevel parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredRedVideoBlackLevel Value of the DesiredRedVideoBlackLevel parameter. */
 void DMRCP_Invoke_RenderingControl_SetRedVideoBlackLevel(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredRedVideoBlackLevel)
 {
    int headerLength;
@@ -10548,7 +10515,7 @@ void DMRCP_Invoke_RenderingControl_SetRedVideoBlackLevel(struct UPnPService *ser
 \brief Invokes the SetRedVideoGain action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredRedVideoGain Value of the DesiredRedVideoGain parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredRedVideoGain Value of the DesiredRedVideoGain parameter. */
 void DMRCP_Invoke_RenderingControl_SetRedVideoGain(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredRedVideoGain)
 {
    int headerLength;
@@ -10608,7 +10575,7 @@ void DMRCP_Invoke_RenderingControl_SetRedVideoGain(struct UPnPService *service,v
 \brief Invokes the SetSharpness action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredSharpness Value of the DesiredSharpness parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredSharpness Value of the DesiredSharpness parameter. */
 void DMRCP_Invoke_RenderingControl_SetSharpness(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, unsigned short DesiredSharpness)
 {
    int headerLength;
@@ -10668,7 +10635,7 @@ void DMRCP_Invoke_RenderingControl_SetSharpness(struct UPnPService *service,void
 \brief Invokes the SetVerticalKeystone action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param DesiredVerticalKeystone Value of the DesiredVerticalKeystone parameter. */
+\param InstanceID Value of the InstanceID parameter.     \param DesiredVerticalKeystone Value of the DesiredVerticalKeystone parameter. */
 void DMRCP_Invoke_RenderingControl_SetVerticalKeystone(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, short DesiredVerticalKeystone)
 {
    int headerLength;
@@ -10728,7 +10695,7 @@ void DMRCP_Invoke_RenderingControl_SetVerticalKeystone(struct UPnPService *servi
 \brief Invokes the SetVolume action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 \param DesiredVolume Value of the DesiredVolume parameter. */
 void DMRCP_Invoke_RenderingControl_SetVolume(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Channel, unsigned short DesiredVolume)
 {
@@ -10793,7 +10760,7 @@ void DMRCP_Invoke_RenderingControl_SetVolume(struct UPnPService *service,void (*
 \brief Invokes the SetVolumeDB action in the RenderingControl service
 \param service The UPnPService instance to invoke the action on
 \param CallbackPtr The function pointer to be called when the invocation returns
-\param InstanceID Value of the InstanceID parameter. 	\param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
+\param InstanceID Value of the InstanceID parameter.     \param unescaped_Channel Value of the Channel parameter.  <b>Automatically</b> escaped
 \param DesiredVolume Value of the DesiredVolume parameter. */
 void DMRCP_Invoke_RenderingControl_SetVolumeDB(struct UPnPService *service,void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user), void* user, unsigned int InstanceID, char* unescaped_Channel, short DesiredVolume)
 {

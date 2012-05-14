@@ -1,40 +1,7 @@
-/*
-* INTEL CONFIDENTIAL
-* Copyright (c) 2002 - 2005 Intel Corporation.  All rights reserved.
-* 
-* The source code contained or described herein and all documents
-* related to the source code ("Material") are owned by Intel
-* Corporation or its suppliers or licensors.  Title to the
-* Material remains with Intel Corporation or its suppliers and
-* licensors.  The Material contains trade secrets and proprietary
-* and confidential information of Intel or its suppliers and
-* licensors. The Material is protected by worldwide copyright and
-* trade secret laws and treaty provisions.  No part of the Material
-* may be used, copied, reproduced, modified, published, uploaded,
-* posted, transmitted, distributed, or disclosed in any way without
-* Intel's prior express written permission.
-
-* No license under any patent, copyright, trade secret or other
-* intellectual property right is granted to or conferred upon you
-* by disclosure or delivery of the Materials, either expressly, by
-* implication, inducement, estoppel or otherwise. Any license
-* under such intellectual property rights must be express and
-* approved by Intel in writing.
-* 
-* $Workfile: MediaServer_MicroStack.c
-* $Revision: #1.0.2777.24812
-* $Author:   Intel Corporation, Intel Device Builder
-* $Date:     2011年10月27日
-*
-*
-*
-*/
-
-
 #if defined(WIN32) || defined(_WIN32_WCE)
-#	ifndef MICROSTACK_NO_STDAFX
-#		include "stdafx.h"
-#	endif
+#    ifndef MICROSTACK_NO_STDAFX
+#        include "stdafx.h"
+#    endif
 char* MediaServer_PLATFORM = "WINDOWS";
 #elif defined(__SYMBIAN32__)
 char* MediaServer_PLATFORM = "SYMBIAN";
@@ -47,11 +14,11 @@ char* MediaServer_PLATFORM = "POSIX";
 #endif
 
 #if defined(WINSOCK2)
-#	include <winsock2.h>
-#	include <ws2tcpip.h>
+#    include <winsock2.h>
+#    include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-#	include <winsock.h>
-#	include <wininet.h>
+#    include <winsock.h>
+#    include <wininet.h>
 #endif
 
 #include "ILibParsers.h"
@@ -657,43 +624,43 @@ MediaServer_MicroStackToken MediaServer_CreateMicroStack(void *Chain, const char
 /* UPnP Set Function Pointers Methods */
 void (*MediaServer_FP_PresentationPage) (void* upnptoken,struct packetheader *packet);
 /*! \var MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs
-	\brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionIDs
+    \brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionIDs
 */
 MediaServer__ActionHandler_ConnectionManager_GetCurrentConnectionIDs MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs;
 /*! \var MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo
-	\brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionInfo
+    \brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionInfo
 */
 MediaServer__ActionHandler_ConnectionManager_GetCurrentConnectionInfo MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo;
 /*! \var MediaServer_FP_ConnectionManager_GetProtocolInfo
-	\brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetProtocolInfo
+    \brief Dispatch Pointer for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetProtocolInfo
 */
 MediaServer__ActionHandler_ConnectionManager_GetProtocolInfo MediaServer_FP_ConnectionManager_GetProtocolInfo;
 /*! \var MediaServer_FP_ContentDirectory_Browse
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Browse
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Browse
 */
 MediaServer__ActionHandler_ContentDirectory_Browse MediaServer_FP_ContentDirectory_Browse;
 /*! \var MediaServer_FP_ContentDirectory_CreateObject
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> CreateObject
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> CreateObject
 */
 MediaServer__ActionHandler_ContentDirectory_CreateObject MediaServer_FP_ContentDirectory_CreateObject;
 /*! \var MediaServer_FP_ContentDirectory_DestroyObject
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> DestroyObject
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> DestroyObject
 */
 MediaServer__ActionHandler_ContentDirectory_DestroyObject MediaServer_FP_ContentDirectory_DestroyObject;
 /*! \var MediaServer_FP_ContentDirectory_GetSearchCapabilities
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSearchCapabilities
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSearchCapabilities
 */
 MediaServer__ActionHandler_ContentDirectory_GetSearchCapabilities MediaServer_FP_ContentDirectory_GetSearchCapabilities;
 /*! \var MediaServer_FP_ContentDirectory_GetSortCapabilities
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSortCapabilities
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSortCapabilities
 */
 MediaServer__ActionHandler_ContentDirectory_GetSortCapabilities MediaServer_FP_ContentDirectory_GetSortCapabilities;
 /*! \var MediaServer_FP_ContentDirectory_GetSystemUpdateID
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSystemUpdateID
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSystemUpdateID
 */
 MediaServer__ActionHandler_ContentDirectory_GetSystemUpdateID MediaServer_FP_ContentDirectory_GetSystemUpdateID;
 /*! \var MediaServer_FP_ContentDirectory_Search
-	\brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Search
+    \brief Dispatch Pointer for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Search
 */
 MediaServer__ActionHandler_ContentDirectory_Search MediaServer_FP_ContentDirectory_Search;
 
@@ -710,7 +677,7 @@ struct MediaServer_DataObject;
 
 struct SubscriberInfo
 {
-   char* SID;		// Subscription ID
+   char* SID;        // Subscription ID
    int SIDLength;
    int SEQ;
    
@@ -756,10 +723,10 @@ struct MediaServer_DataObject
    int InitialNotify;
    
    char* ConnectionManager_SourceProtocolInfo;
-	char* ConnectionManager_SinkProtocolInfo;
-	char* ConnectionManager_CurrentConnectionIDs;
-	char* ContentDirectory_ContainerUpdateIDs;
-	char* ContentDirectory_SystemUpdateID;
+    char* ConnectionManager_SinkProtocolInfo;
+    char* ConnectionManager_CurrentConnectionIDs;
+    char* ContentDirectory_ContainerUpdateIDs;
+    char* ContentDirectory_SystemUpdateID;
 
    
    struct sockaddr_in addr;
@@ -787,9 +754,9 @@ struct MediaServer_DataObject
    
    sem_t EventLock;
    struct SubscriberInfo *HeadSubscriberPtr_ConnectionManager;
-	int NumberOfSubscribers_ConnectionManager;
-	struct SubscriberInfo *HeadSubscriberPtr_ContentDirectory;
-	int NumberOfSubscribers_ContentDirectory;
+    int NumberOfSubscribers_ConnectionManager;
+    struct SubscriberInfo *HeadSubscriberPtr_ContentDirectory;
+    int NumberOfSubscribers_ContentDirectory;
 
 };
 
@@ -1023,7 +990,7 @@ void MediaServer_SSDPSink(ILibAsyncUDPSocket_SocketModule socketModule,char* buf
 }
 
 //
-//	Internal underlying Initialization, that shouldn't be called explicitely
+//    Internal underlying Initialization, that shouldn't be called explicitely
 // 
 // <param name="state">State object</param>
 // <param name="NotifyCycleSeconds">Cycle duration</param>
@@ -1153,37 +1120,37 @@ void MediaServer_PostMX_MSEARCH(void *object)
    else if(STLength==8 && memcmp(ST,"ssdp:all",8)==0)
    {
       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
-							rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-							MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"",upnp->UUID,"",upnp->NotifyCycleTime);
-							rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
-							rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                            rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                            MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"",upnp->UUID,"",upnp->NotifyCycleTime);
+                            rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
+                            rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
 
    }
    if(STLength==(int)strlen(upnp->UUID) && memcmp(ST,upnp->UUID,(int)strlen(upnp->UUID))==0)
-				{
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"",upnp->UUID,"",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-				}
-				if(STLength>=40 && memcmp(ST,"urn:schemas-upnp-org:device:MediaServer:",40)==0 && atoi(ST+40)<=1)
-				{
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1",ST,"",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-				}
-				if(STLength>=47 && memcmp(ST,"urn:schemas-upnp-org:service:ConnectionManager:",47)==0 && atoi(ST+47)<=1)
-				{
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1",ST,"",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-				}
-				if(STLength>=46 && memcmp(ST,"urn:schemas-upnp-org:service:ContentDirectory:",46)==0 && atoi(ST+46)<=1)
-				{
-						MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1",ST,"",upnp->NotifyCycleTime);
-						rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
-				}
+                {
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"",upnp->UUID,"",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                }
+                if(STLength>=40 && memcmp(ST,"urn:schemas-upnp-org:device:MediaServer:",40)==0 && atoi(ST+40)<=1)
+                {
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1",ST,"",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                }
+                if(STLength>=47 && memcmp(ST,"urn:schemas-upnp-org:service:ConnectionManager:",47)==0 && atoi(ST+47)<=1)
+                {
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1",ST,"",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                }
+                if(STLength>=46 && memcmp(ST,"urn:schemas-upnp-org:service:ContentDirectory:",46)==0 && atoi(ST+46)<=1)
+                {
+                        MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1",ST,"",upnp->NotifyCycleTime);
+                        rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+                }
 
    
    if(rcode==0)
@@ -1279,266 +1246,266 @@ void MediaServer_ProcessMSEARCH(struct MediaServer_DataObject *upnp, struct pack
 }
 #define MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionIDs(buffer,offset,bufferLength, session)\
 {\
-	if(MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs == NULL)\
-		MediaServer_Response_Error(session,501,"No Function Handler");\
-	else\
-		MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs((void*)session);\
+    if(MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs == NULL)\
+        MediaServer_Response_Error(session,501,"No Function Handler");\
+    else\
+        MediaServer_FP_ConnectionManager_GetCurrentConnectionIDs((void*)session);\
 }
 
 void MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionInfo(char *buffer, int offset, int bufferLength, struct ILibWebServer_Session *ReaderObject)
 {
-	long TempLong;
-	int OK = 0;
-	char *p_ConnectionID = NULL;
-	int p_ConnectionIDLength = 0;
-	int _ConnectionID = 0;
-	struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
-	struct ILibXMLNode *root = xnode;
-	if(ILibProcessXMLNodeList(root)!=0)
-	{
+    long TempLong;
+    int OK = 0;
+    char *p_ConnectionID = NULL;
+    int p_ConnectionIDLength = 0;
+    int _ConnectionID = 0;
+    struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
+    struct ILibXMLNode *root = xnode;
+    if(ILibProcessXMLNodeList(root)!=0)
+    {
 /* The XML is not well formed! */
       ILibDestructXMLNodeList(root);
-	MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
-	return;
-	}
-	while(xnode!=NULL)
-	{
-		if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
-		{
-			// Envelope
-			xnode = xnode->Next;
-			while(xnode!=NULL)
-			{
-				if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
-				{
-					// Body
-					xnode = xnode->Next;
-					while(xnode!=NULL)
-					{
-						if(xnode->StartTag!=0 && xnode->NameLength==24 && memcmp(xnode->Name,"GetCurrentConnectionInfo",24)==0)
-						{
-							// Inside the interesting part of the SOAP
-							xnode = xnode->Next;
-							while(xnode!=NULL)
-							{
-								if(xnode->NameLength==12 && memcmp(xnode->Name,"ConnectionID",12)==0)
-								{
-									p_ConnectionIDLength = ILibReadInnerXML(xnode,&p_ConnectionID);
-										OK |= 1;
-								}
-								if(xnode->Peer==NULL)
-								{
-									xnode = xnode->Parent;
-									break;
-								}
-								else
-								{
-									xnode = xnode->Peer;
-								}
-							}
-						}
-						if(xnode!=NULL)
-						{
-							if(xnode->Peer==NULL)
-							{
-								xnode = xnode->Parent;
-								break;
-							}
-							else
-							{
-								xnode = xnode->Peer;
-							}
-						}
-					}
-				}
-				if(xnode!=NULL)
-				{
-					if(xnode->Peer==NULL)
-					{
-						xnode = xnode->Parent;
-						break;
-					}
-					else
-					{
-						xnode = xnode->Peer;
-					}
-				}
-			}
-		}
-		if(xnode!=NULL){xnode = xnode->Peer;}
-	}
-	ILibDestructXMLNodeList(root);
-	if (OK != 1)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
+    MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
+    return;
+    }
+    while(xnode!=NULL)
+    {
+        if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
+        {
+            // Envelope
+            xnode = xnode->Next;
+            while(xnode!=NULL)
+            {
+                if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
+                {
+                    // Body
+                    xnode = xnode->Next;
+                    while(xnode!=NULL)
+                    {
+                        if(xnode->StartTag!=0 && xnode->NameLength==24 && memcmp(xnode->Name,"GetCurrentConnectionInfo",24)==0)
+                        {
+                            // Inside the interesting part of the SOAP
+                            xnode = xnode->Next;
+                            while(xnode!=NULL)
+                            {
+                                if(xnode->NameLength==12 && memcmp(xnode->Name,"ConnectionID",12)==0)
+                                {
+                                    p_ConnectionIDLength = ILibReadInnerXML(xnode,&p_ConnectionID);
+                                        OK |= 1;
+                                }
+                                if(xnode->Peer==NULL)
+                                {
+                                    xnode = xnode->Parent;
+                                    break;
+                                }
+                                else
+                                {
+                                    xnode = xnode->Peer;
+                                }
+                            }
+                        }
+                        if(xnode!=NULL)
+                        {
+                            if(xnode->Peer==NULL)
+                            {
+                                xnode = xnode->Parent;
+                                break;
+                            }
+                            else
+                            {
+                                xnode = xnode->Peer;
+                            }
+                        }
+                    }
+                }
+                if(xnode!=NULL)
+                {
+                    if(xnode->Peer==NULL)
+                    {
+                        xnode = xnode->Parent;
+                        break;
+                    }
+                    else
+                    {
+                        xnode = xnode->Peer;
+                    }
+                }
+            }
+        }
+        if(xnode!=NULL){xnode = xnode->Peer;}
+    }
+    ILibDestructXMLNodeList(root);
+    if (OK != 1)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
 
 /* Type Checking */
    OK = ILibGetLong(p_ConnectionID,p_ConnectionIDLength, &TempLong);
-	if(OK!=0)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_ConnectionID = (int)TempLong;
-	if(MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo == NULL)
-		MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
-	else
-		MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo((void*)ReaderObject,_ConnectionID);
+    if(OK!=0)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _ConnectionID = (int)TempLong;
+    if(MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo == NULL)
+        MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
+    else
+        MediaServer_FP_ConnectionManager_GetCurrentConnectionInfo((void*)ReaderObject,_ConnectionID);
 }
 
 #define MediaServer_Dispatch_ConnectionManager_GetProtocolInfo(buffer,offset,bufferLength, session)\
 {\
-	if(MediaServer_FP_ConnectionManager_GetProtocolInfo == NULL)\
-		MediaServer_Response_Error(session,501,"No Function Handler");\
-	else\
-		MediaServer_FP_ConnectionManager_GetProtocolInfo((void*)session);\
+    if(MediaServer_FP_ConnectionManager_GetProtocolInfo == NULL)\
+        MediaServer_Response_Error(session,501,"No Function Handler");\
+    else\
+        MediaServer_FP_ConnectionManager_GetProtocolInfo((void*)session);\
 }
 
 void MediaServer_Dispatch_ContentDirectory_Browse(char *buffer, int offset, int bufferLength, struct ILibWebServer_Session *ReaderObject)
 {
-	unsigned long TempULong;
-	int OK = 0;
-	char *p_ObjectID = NULL;
-	int p_ObjectIDLength = 0;
-	char* _ObjectID = "";
-	int _ObjectIDLength;
-	char *p_BrowseFlag = NULL;
-	int p_BrowseFlagLength = 0;
-	char* _BrowseFlag = "";
-	int _BrowseFlagLength;
-	char *p_Filter = NULL;
-	int p_FilterLength = 0;
-	char* _Filter = "";
-	int _FilterLength;
-	char *p_StartingIndex = NULL;
-	int p_StartingIndexLength = 0;
-	unsigned int _StartingIndex = 0;
-	char *p_RequestedCount = NULL;
-	int p_RequestedCountLength = 0;
-	unsigned int _RequestedCount = 0;
-	char *p_SortCriteria = NULL;
-	int p_SortCriteriaLength = 0;
-	char* _SortCriteria = "";
-	int _SortCriteriaLength;
-	struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
-	struct ILibXMLNode *root = xnode;
-	if(ILibProcessXMLNodeList(root)!=0)
-	{
+    unsigned long TempULong;
+    int OK = 0;
+    char *p_ObjectID = NULL;
+    int p_ObjectIDLength = 0;
+    char* _ObjectID = "";
+    int _ObjectIDLength;
+    char *p_BrowseFlag = NULL;
+    int p_BrowseFlagLength = 0;
+    char* _BrowseFlag = "";
+    int _BrowseFlagLength;
+    char *p_Filter = NULL;
+    int p_FilterLength = 0;
+    char* _Filter = "";
+    int _FilterLength;
+    char *p_StartingIndex = NULL;
+    int p_StartingIndexLength = 0;
+    unsigned int _StartingIndex = 0;
+    char *p_RequestedCount = NULL;
+    int p_RequestedCountLength = 0;
+    unsigned int _RequestedCount = 0;
+    char *p_SortCriteria = NULL;
+    int p_SortCriteriaLength = 0;
+    char* _SortCriteria = "";
+    int _SortCriteriaLength;
+    struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
+    struct ILibXMLNode *root = xnode;
+    if(ILibProcessXMLNodeList(root)!=0)
+    {
 /* The XML is not well formed! */
       ILibDestructXMLNodeList(root);
-	MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
-	return;
-	}
-	while(xnode!=NULL)
-	{
-		if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
-		{
-			// Envelope
-			xnode = xnode->Next;
-			while(xnode!=NULL)
-			{
-				if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
-				{
-					// Body
-					xnode = xnode->Next;
-					while(xnode!=NULL)
-					{
-						if(xnode->StartTag!=0 && xnode->NameLength==6 && memcmp(xnode->Name,"Browse",6)==0)
-						{
-							// Inside the interesting part of the SOAP
-							xnode = xnode->Next;
-							while(xnode!=NULL)
-							{
-								if(xnode->NameLength==8 && memcmp(xnode->Name,"ObjectID",8)==0)
-								{
-									p_ObjectIDLength = ILibReadInnerXML(xnode,&p_ObjectID);
-									p_ObjectID[p_ObjectIDLength]=0;
-										OK |= 1;
-								}
-								else if(xnode->NameLength==10 && memcmp(xnode->Name,"BrowseFlag",10)==0)
-								{
-									p_BrowseFlagLength = ILibReadInnerXML(xnode,&p_BrowseFlag);
-									p_BrowseFlag[p_BrowseFlagLength]=0;
-										OK |= 2;
-								}
-								else if(xnode->NameLength==6 && memcmp(xnode->Name,"Filter",6)==0)
-								{
-									p_FilterLength = ILibReadInnerXML(xnode,&p_Filter);
-									p_Filter[p_FilterLength]=0;
-										OK |= 4;
-								}
-								else if(xnode->NameLength==13 && memcmp(xnode->Name,"StartingIndex",13)==0)
-								{
-									p_StartingIndexLength = ILibReadInnerXML(xnode,&p_StartingIndex);
-										OK |= 8;
-								}
-								else if(xnode->NameLength==14 && memcmp(xnode->Name,"RequestedCount",14)==0)
-								{
-									p_RequestedCountLength = ILibReadInnerXML(xnode,&p_RequestedCount);
-										OK |= 16;
-								}
-								else if(xnode->NameLength==12 && memcmp(xnode->Name,"SortCriteria",12)==0)
-								{
-									p_SortCriteriaLength = ILibReadInnerXML(xnode,&p_SortCriteria);
-									p_SortCriteria[p_SortCriteriaLength]=0;
-										OK |= 32;
-								}
-								if(xnode->Peer==NULL)
-								{
-									xnode = xnode->Parent;
-									break;
-								}
-								else
-								{
-									xnode = xnode->Peer;
-								}
-							}
-						}
-						if(xnode!=NULL)
-						{
-							if(xnode->Peer==NULL)
-							{
-								xnode = xnode->Parent;
-								break;
-							}
-							else
-							{
-								xnode = xnode->Peer;
-							}
-						}
-					}
-				}
-				if(xnode!=NULL)
-				{
-					if(xnode->Peer==NULL)
-					{
-						xnode = xnode->Parent;
-						break;
-					}
-					else
-					{
-						xnode = xnode->Peer;
-					}
-				}
-			}
-		}
-		if(xnode!=NULL){xnode = xnode->Peer;}
-	}
-	ILibDestructXMLNodeList(root);
-	if (OK != 63)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
+    MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
+    return;
+    }
+    while(xnode!=NULL)
+    {
+        if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
+        {
+            // Envelope
+            xnode = xnode->Next;
+            while(xnode!=NULL)
+            {
+                if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
+                {
+                    // Body
+                    xnode = xnode->Next;
+                    while(xnode!=NULL)
+                    {
+                        if(xnode->StartTag!=0 && xnode->NameLength==6 && memcmp(xnode->Name,"Browse",6)==0)
+                        {
+                            // Inside the interesting part of the SOAP
+                            xnode = xnode->Next;
+                            while(xnode!=NULL)
+                            {
+                                if(xnode->NameLength==8 && memcmp(xnode->Name,"ObjectID",8)==0)
+                                {
+                                    p_ObjectIDLength = ILibReadInnerXML(xnode,&p_ObjectID);
+                                    p_ObjectID[p_ObjectIDLength]=0;
+                                        OK |= 1;
+                                }
+                                else if(xnode->NameLength==10 && memcmp(xnode->Name,"BrowseFlag",10)==0)
+                                {
+                                    p_BrowseFlagLength = ILibReadInnerXML(xnode,&p_BrowseFlag);
+                                    p_BrowseFlag[p_BrowseFlagLength]=0;
+                                        OK |= 2;
+                                }
+                                else if(xnode->NameLength==6 && memcmp(xnode->Name,"Filter",6)==0)
+                                {
+                                    p_FilterLength = ILibReadInnerXML(xnode,&p_Filter);
+                                    p_Filter[p_FilterLength]=0;
+                                        OK |= 4;
+                                }
+                                else if(xnode->NameLength==13 && memcmp(xnode->Name,"StartingIndex",13)==0)
+                                {
+                                    p_StartingIndexLength = ILibReadInnerXML(xnode,&p_StartingIndex);
+                                        OK |= 8;
+                                }
+                                else if(xnode->NameLength==14 && memcmp(xnode->Name,"RequestedCount",14)==0)
+                                {
+                                    p_RequestedCountLength = ILibReadInnerXML(xnode,&p_RequestedCount);
+                                        OK |= 16;
+                                }
+                                else if(xnode->NameLength==12 && memcmp(xnode->Name,"SortCriteria",12)==0)
+                                {
+                                    p_SortCriteriaLength = ILibReadInnerXML(xnode,&p_SortCriteria);
+                                    p_SortCriteria[p_SortCriteriaLength]=0;
+                                        OK |= 32;
+                                }
+                                if(xnode->Peer==NULL)
+                                {
+                                    xnode = xnode->Parent;
+                                    break;
+                                }
+                                else
+                                {
+                                    xnode = xnode->Peer;
+                                }
+                            }
+                        }
+                        if(xnode!=NULL)
+                        {
+                            if(xnode->Peer==NULL)
+                            {
+                                xnode = xnode->Parent;
+                                break;
+                            }
+                            else
+                            {
+                                xnode = xnode->Peer;
+                            }
+                        }
+                    }
+                }
+                if(xnode!=NULL)
+                {
+                    if(xnode->Peer==NULL)
+                    {
+                        xnode = xnode->Parent;
+                        break;
+                    }
+                    else
+                    {
+                        xnode = xnode->Peer;
+                    }
+                }
+            }
+        }
+        if(xnode!=NULL){xnode = xnode->Peer;}
+    }
+    ILibDestructXMLNodeList(root);
+    if (OK != 63)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
 
 /* Type Checking */
    _ObjectIDLength = ILibInPlaceXmlUnEscape(p_ObjectID);
-	_ObjectID = p_ObjectID;
-	_BrowseFlagLength = ILibInPlaceXmlUnEscape(p_BrowseFlag);
-	_BrowseFlag = p_BrowseFlag;
-	for(OK=0;OK<MediaServer__StateVariable_AllowedValues_MAX;++OK)
+    _ObjectID = p_ObjectID;
+    _BrowseFlagLength = ILibInPlaceXmlUnEscape(p_BrowseFlag);
+    _BrowseFlag = p_BrowseFlag;
+    for(OK=0;OK<MediaServer__StateVariable_AllowedValues_MAX;++OK)
    {
       if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[OK]!=NULL)
       {
@@ -1555,431 +1522,431 @@ void MediaServer_Dispatch_ContentDirectory_Browse(char *buffer, int offset, int 
    }
    if(OK!=0)
    {
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_FilterLength = ILibInPlaceXmlUnEscape(p_Filter);
-	_Filter = p_Filter;
-	OK = ILibGetULong(p_StartingIndex,p_StartingIndexLength, &TempULong);
-	if(OK!=0)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_StartingIndex = (unsigned int)TempULong;
-	OK = ILibGetULong(p_RequestedCount,p_RequestedCountLength, &TempULong);
-	if(OK!=0)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_RequestedCount = (unsigned int)TempULong;
-	_SortCriteriaLength = ILibInPlaceXmlUnEscape(p_SortCriteria);
-	_SortCriteria = p_SortCriteria;
-	if(MediaServer_FP_ContentDirectory_Browse == NULL)
-		MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
-	else
-		MediaServer_FP_ContentDirectory_Browse((void*)ReaderObject,_ObjectID,_BrowseFlag,_Filter,_StartingIndex,_RequestedCount,_SortCriteria);
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _FilterLength = ILibInPlaceXmlUnEscape(p_Filter);
+    _Filter = p_Filter;
+    OK = ILibGetULong(p_StartingIndex,p_StartingIndexLength, &TempULong);
+    if(OK!=0)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _StartingIndex = (unsigned int)TempULong;
+    OK = ILibGetULong(p_RequestedCount,p_RequestedCountLength, &TempULong);
+    if(OK!=0)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _RequestedCount = (unsigned int)TempULong;
+    _SortCriteriaLength = ILibInPlaceXmlUnEscape(p_SortCriteria);
+    _SortCriteria = p_SortCriteria;
+    if(MediaServer_FP_ContentDirectory_Browse == NULL)
+        MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
+    else
+        MediaServer_FP_ContentDirectory_Browse((void*)ReaderObject,_ObjectID,_BrowseFlag,_Filter,_StartingIndex,_RequestedCount,_SortCriteria);
 }
 
 void MediaServer_Dispatch_ContentDirectory_CreateObject(char *buffer, int offset, int bufferLength, struct ILibWebServer_Session *ReaderObject)
 {
-	int OK = 0;
-	char *p_ContainerID = NULL;
-	int p_ContainerIDLength = 0;
-	char* _ContainerID = "";
-	int _ContainerIDLength;
-	char *p_Elements = NULL;
-	int p_ElementsLength = 0;
-	char* _Elements = "";
-	int _ElementsLength;
-	struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
-	struct ILibXMLNode *root = xnode;
-	if(ILibProcessXMLNodeList(root)!=0)
-	{
+    int OK = 0;
+    char *p_ContainerID = NULL;
+    int p_ContainerIDLength = 0;
+    char* _ContainerID = "";
+    int _ContainerIDLength;
+    char *p_Elements = NULL;
+    int p_ElementsLength = 0;
+    char* _Elements = "";
+    int _ElementsLength;
+    struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
+    struct ILibXMLNode *root = xnode;
+    if(ILibProcessXMLNodeList(root)!=0)
+    {
 /* The XML is not well formed! */
       ILibDestructXMLNodeList(root);
-	MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
-	return;
-	}
-	while(xnode!=NULL)
-	{
-		if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
-		{
-			// Envelope
-			xnode = xnode->Next;
-			while(xnode!=NULL)
-			{
-				if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
-				{
-					// Body
-					xnode = xnode->Next;
-					while(xnode!=NULL)
-					{
-						if(xnode->StartTag!=0 && xnode->NameLength==12 && memcmp(xnode->Name,"CreateObject",12)==0)
-						{
-							// Inside the interesting part of the SOAP
-							xnode = xnode->Next;
-							while(xnode!=NULL)
-							{
-								if(xnode->NameLength==11 && memcmp(xnode->Name,"ContainerID",11)==0)
-								{
-									p_ContainerIDLength = ILibReadInnerXML(xnode,&p_ContainerID);
-									p_ContainerID[p_ContainerIDLength]=0;
-										OK |= 1;
-								}
-								else if(xnode->NameLength==8 && memcmp(xnode->Name,"Elements",8)==0)
-								{
-									p_ElementsLength = ILibReadInnerXML(xnode,&p_Elements);
-									p_Elements[p_ElementsLength]=0;
-										OK |= 2;
-								}
-								if(xnode->Peer==NULL)
-								{
-									xnode = xnode->Parent;
-									break;
-								}
-								else
-								{
-									xnode = xnode->Peer;
-								}
-							}
-						}
-						if(xnode!=NULL)
-						{
-							if(xnode->Peer==NULL)
-							{
-								xnode = xnode->Parent;
-								break;
-							}
-							else
-							{
-								xnode = xnode->Peer;
-							}
-						}
-					}
-				}
-				if(xnode!=NULL)
-				{
-					if(xnode->Peer==NULL)
-					{
-						xnode = xnode->Parent;
-						break;
-					}
-					else
-					{
-						xnode = xnode->Peer;
-					}
-				}
-			}
-		}
-		if(xnode!=NULL){xnode = xnode->Peer;}
-	}
-	ILibDestructXMLNodeList(root);
-	if (OK != 3)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
+    MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
+    return;
+    }
+    while(xnode!=NULL)
+    {
+        if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
+        {
+            // Envelope
+            xnode = xnode->Next;
+            while(xnode!=NULL)
+            {
+                if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
+                {
+                    // Body
+                    xnode = xnode->Next;
+                    while(xnode!=NULL)
+                    {
+                        if(xnode->StartTag!=0 && xnode->NameLength==12 && memcmp(xnode->Name,"CreateObject",12)==0)
+                        {
+                            // Inside the interesting part of the SOAP
+                            xnode = xnode->Next;
+                            while(xnode!=NULL)
+                            {
+                                if(xnode->NameLength==11 && memcmp(xnode->Name,"ContainerID",11)==0)
+                                {
+                                    p_ContainerIDLength = ILibReadInnerXML(xnode,&p_ContainerID);
+                                    p_ContainerID[p_ContainerIDLength]=0;
+                                        OK |= 1;
+                                }
+                                else if(xnode->NameLength==8 && memcmp(xnode->Name,"Elements",8)==0)
+                                {
+                                    p_ElementsLength = ILibReadInnerXML(xnode,&p_Elements);
+                                    p_Elements[p_ElementsLength]=0;
+                                        OK |= 2;
+                                }
+                                if(xnode->Peer==NULL)
+                                {
+                                    xnode = xnode->Parent;
+                                    break;
+                                }
+                                else
+                                {
+                                    xnode = xnode->Peer;
+                                }
+                            }
+                        }
+                        if(xnode!=NULL)
+                        {
+                            if(xnode->Peer==NULL)
+                            {
+                                xnode = xnode->Parent;
+                                break;
+                            }
+                            else
+                            {
+                                xnode = xnode->Peer;
+                            }
+                        }
+                    }
+                }
+                if(xnode!=NULL)
+                {
+                    if(xnode->Peer==NULL)
+                    {
+                        xnode = xnode->Parent;
+                        break;
+                    }
+                    else
+                    {
+                        xnode = xnode->Peer;
+                    }
+                }
+            }
+        }
+        if(xnode!=NULL){xnode = xnode->Peer;}
+    }
+    ILibDestructXMLNodeList(root);
+    if (OK != 3)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
 
 /* Type Checking */
    _ContainerIDLength = ILibInPlaceXmlUnEscape(p_ContainerID);
-	_ContainerID = p_ContainerID;
-	_ElementsLength = ILibInPlaceXmlUnEscape(p_Elements);
-	_Elements = p_Elements;
-	if(MediaServer_FP_ContentDirectory_CreateObject == NULL)
-		MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
-	else
-		MediaServer_FP_ContentDirectory_CreateObject((void*)ReaderObject,_ContainerID,_Elements);
+    _ContainerID = p_ContainerID;
+    _ElementsLength = ILibInPlaceXmlUnEscape(p_Elements);
+    _Elements = p_Elements;
+    if(MediaServer_FP_ContentDirectory_CreateObject == NULL)
+        MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
+    else
+        MediaServer_FP_ContentDirectory_CreateObject((void*)ReaderObject,_ContainerID,_Elements);
 }
 
 void MediaServer_Dispatch_ContentDirectory_DestroyObject(char *buffer, int offset, int bufferLength, struct ILibWebServer_Session *ReaderObject)
 {
-	int OK = 0;
-	char *p_ObjectID = NULL;
-	int p_ObjectIDLength = 0;
-	char* _ObjectID = "";
-	int _ObjectIDLength;
-	struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
-	struct ILibXMLNode *root = xnode;
-	if(ILibProcessXMLNodeList(root)!=0)
-	{
+    int OK = 0;
+    char *p_ObjectID = NULL;
+    int p_ObjectIDLength = 0;
+    char* _ObjectID = "";
+    int _ObjectIDLength;
+    struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
+    struct ILibXMLNode *root = xnode;
+    if(ILibProcessXMLNodeList(root)!=0)
+    {
 /* The XML is not well formed! */
       ILibDestructXMLNodeList(root);
-	MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
-	return;
-	}
-	while(xnode!=NULL)
-	{
-		if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
-		{
-			// Envelope
-			xnode = xnode->Next;
-			while(xnode!=NULL)
-			{
-				if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
-				{
-					// Body
-					xnode = xnode->Next;
-					while(xnode!=NULL)
-					{
-						if(xnode->StartTag!=0 && xnode->NameLength==13 && memcmp(xnode->Name,"DestroyObject",13)==0)
-						{
-							// Inside the interesting part of the SOAP
-							xnode = xnode->Next;
-							while(xnode!=NULL)
-							{
-								if(xnode->NameLength==8 && memcmp(xnode->Name,"ObjectID",8)==0)
-								{
-									p_ObjectIDLength = ILibReadInnerXML(xnode,&p_ObjectID);
-									p_ObjectID[p_ObjectIDLength]=0;
-										OK |= 1;
-								}
-								if(xnode->Peer==NULL)
-								{
-									xnode = xnode->Parent;
-									break;
-								}
-								else
-								{
-									xnode = xnode->Peer;
-								}
-							}
-						}
-						if(xnode!=NULL)
-						{
-							if(xnode->Peer==NULL)
-							{
-								xnode = xnode->Parent;
-								break;
-							}
-							else
-							{
-								xnode = xnode->Peer;
-							}
-						}
-					}
-				}
-				if(xnode!=NULL)
-				{
-					if(xnode->Peer==NULL)
-					{
-						xnode = xnode->Parent;
-						break;
-					}
-					else
-					{
-						xnode = xnode->Peer;
-					}
-				}
-			}
-		}
-		if(xnode!=NULL){xnode = xnode->Peer;}
-	}
-	ILibDestructXMLNodeList(root);
-	if (OK != 1)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
+    MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
+    return;
+    }
+    while(xnode!=NULL)
+    {
+        if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
+        {
+            // Envelope
+            xnode = xnode->Next;
+            while(xnode!=NULL)
+            {
+                if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
+                {
+                    // Body
+                    xnode = xnode->Next;
+                    while(xnode!=NULL)
+                    {
+                        if(xnode->StartTag!=0 && xnode->NameLength==13 && memcmp(xnode->Name,"DestroyObject",13)==0)
+                        {
+                            // Inside the interesting part of the SOAP
+                            xnode = xnode->Next;
+                            while(xnode!=NULL)
+                            {
+                                if(xnode->NameLength==8 && memcmp(xnode->Name,"ObjectID",8)==0)
+                                {
+                                    p_ObjectIDLength = ILibReadInnerXML(xnode,&p_ObjectID);
+                                    p_ObjectID[p_ObjectIDLength]=0;
+                                        OK |= 1;
+                                }
+                                if(xnode->Peer==NULL)
+                                {
+                                    xnode = xnode->Parent;
+                                    break;
+                                }
+                                else
+                                {
+                                    xnode = xnode->Peer;
+                                }
+                            }
+                        }
+                        if(xnode!=NULL)
+                        {
+                            if(xnode->Peer==NULL)
+                            {
+                                xnode = xnode->Parent;
+                                break;
+                            }
+                            else
+                            {
+                                xnode = xnode->Peer;
+                            }
+                        }
+                    }
+                }
+                if(xnode!=NULL)
+                {
+                    if(xnode->Peer==NULL)
+                    {
+                        xnode = xnode->Parent;
+                        break;
+                    }
+                    else
+                    {
+                        xnode = xnode->Peer;
+                    }
+                }
+            }
+        }
+        if(xnode!=NULL){xnode = xnode->Peer;}
+    }
+    ILibDestructXMLNodeList(root);
+    if (OK != 1)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
 
 /* Type Checking */
    _ObjectIDLength = ILibInPlaceXmlUnEscape(p_ObjectID);
-	_ObjectID = p_ObjectID;
-	if(MediaServer_FP_ContentDirectory_DestroyObject == NULL)
-		MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
-	else
-		MediaServer_FP_ContentDirectory_DestroyObject((void*)ReaderObject,_ObjectID);
+    _ObjectID = p_ObjectID;
+    if(MediaServer_FP_ContentDirectory_DestroyObject == NULL)
+        MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
+    else
+        MediaServer_FP_ContentDirectory_DestroyObject((void*)ReaderObject,_ObjectID);
 }
 
 #define MediaServer_Dispatch_ContentDirectory_GetSearchCapabilities(buffer,offset,bufferLength, session)\
 {\
-	if(MediaServer_FP_ContentDirectory_GetSearchCapabilities == NULL)\
-		MediaServer_Response_Error(session,501,"No Function Handler");\
-	else\
-		MediaServer_FP_ContentDirectory_GetSearchCapabilities((void*)session);\
+    if(MediaServer_FP_ContentDirectory_GetSearchCapabilities == NULL)\
+        MediaServer_Response_Error(session,501,"No Function Handler");\
+    else\
+        MediaServer_FP_ContentDirectory_GetSearchCapabilities((void*)session);\
 }
 
 #define MediaServer_Dispatch_ContentDirectory_GetSortCapabilities(buffer,offset,bufferLength, session)\
 {\
-	if(MediaServer_FP_ContentDirectory_GetSortCapabilities == NULL)\
-		MediaServer_Response_Error(session,501,"No Function Handler");\
-	else\
-		MediaServer_FP_ContentDirectory_GetSortCapabilities((void*)session);\
+    if(MediaServer_FP_ContentDirectory_GetSortCapabilities == NULL)\
+        MediaServer_Response_Error(session,501,"No Function Handler");\
+    else\
+        MediaServer_FP_ContentDirectory_GetSortCapabilities((void*)session);\
 }
 
 #define MediaServer_Dispatch_ContentDirectory_GetSystemUpdateID(buffer,offset,bufferLength, session)\
 {\
-	if(MediaServer_FP_ContentDirectory_GetSystemUpdateID == NULL)\
-		MediaServer_Response_Error(session,501,"No Function Handler");\
-	else\
-		MediaServer_FP_ContentDirectory_GetSystemUpdateID((void*)session);\
+    if(MediaServer_FP_ContentDirectory_GetSystemUpdateID == NULL)\
+        MediaServer_Response_Error(session,501,"No Function Handler");\
+    else\
+        MediaServer_FP_ContentDirectory_GetSystemUpdateID((void*)session);\
 }
 
 void MediaServer_Dispatch_ContentDirectory_Search(char *buffer, int offset, int bufferLength, struct ILibWebServer_Session *ReaderObject)
 {
-	unsigned long TempULong;
-	int OK = 0;
-	char *p_ContainerID = NULL;
-	int p_ContainerIDLength = 0;
-	char* _ContainerID = "";
-	int _ContainerIDLength;
-	char *p_SearchCriteria = NULL;
-	int p_SearchCriteriaLength = 0;
-	char* _SearchCriteria = "";
-	int _SearchCriteriaLength;
-	char *p_Filter = NULL;
-	int p_FilterLength = 0;
-	char* _Filter = "";
-	int _FilterLength;
-	char *p_StartingIndex = NULL;
-	int p_StartingIndexLength = 0;
-	unsigned int _StartingIndex = 0;
-	char *p_RequestedCount = NULL;
-	int p_RequestedCountLength = 0;
-	unsigned int _RequestedCount = 0;
-	char *p_SortCriteria = NULL;
-	int p_SortCriteriaLength = 0;
-	char* _SortCriteria = "";
-	int _SortCriteriaLength;
-	struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
-	struct ILibXMLNode *root = xnode;
-	if(ILibProcessXMLNodeList(root)!=0)
-	{
+    unsigned long TempULong;
+    int OK = 0;
+    char *p_ContainerID = NULL;
+    int p_ContainerIDLength = 0;
+    char* _ContainerID = "";
+    int _ContainerIDLength;
+    char *p_SearchCriteria = NULL;
+    int p_SearchCriteriaLength = 0;
+    char* _SearchCriteria = "";
+    int _SearchCriteriaLength;
+    char *p_Filter = NULL;
+    int p_FilterLength = 0;
+    char* _Filter = "";
+    int _FilterLength;
+    char *p_StartingIndex = NULL;
+    int p_StartingIndexLength = 0;
+    unsigned int _StartingIndex = 0;
+    char *p_RequestedCount = NULL;
+    int p_RequestedCountLength = 0;
+    unsigned int _RequestedCount = 0;
+    char *p_SortCriteria = NULL;
+    int p_SortCriteriaLength = 0;
+    char* _SortCriteria = "";
+    int _SortCriteriaLength;
+    struct ILibXMLNode *xnode = ILibParseXML(buffer,offset,bufferLength);
+    struct ILibXMLNode *root = xnode;
+    if(ILibProcessXMLNodeList(root)!=0)
+    {
 /* The XML is not well formed! */
       ILibDestructXMLNodeList(root);
-	MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
-	return;
-	}
-	while(xnode!=NULL)
-	{
-		if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
-		{
-			// Envelope
-			xnode = xnode->Next;
-			while(xnode!=NULL)
-			{
-				if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
-				{
-					// Body
-					xnode = xnode->Next;
-					while(xnode!=NULL)
-					{
-						if(xnode->StartTag!=0 && xnode->NameLength==6 && memcmp(xnode->Name,"Search",6)==0)
-						{
-							// Inside the interesting part of the SOAP
-							xnode = xnode->Next;
-							while(xnode!=NULL)
-							{
-								if(xnode->NameLength==11 && memcmp(xnode->Name,"ContainerID",11)==0)
-								{
-									p_ContainerIDLength = ILibReadInnerXML(xnode,&p_ContainerID);
-									p_ContainerID[p_ContainerIDLength]=0;
-										OK |= 1;
-								}
-								else if(xnode->NameLength==14 && memcmp(xnode->Name,"SearchCriteria",14)==0)
-								{
-									p_SearchCriteriaLength = ILibReadInnerXML(xnode,&p_SearchCriteria);
-									p_SearchCriteria[p_SearchCriteriaLength]=0;
-										OK |= 2;
-								}
-								else if(xnode->NameLength==6 && memcmp(xnode->Name,"Filter",6)==0)
-								{
-									p_FilterLength = ILibReadInnerXML(xnode,&p_Filter);
-									p_Filter[p_FilterLength]=0;
-										OK |= 4;
-								}
-								else if(xnode->NameLength==13 && memcmp(xnode->Name,"StartingIndex",13)==0)
-								{
-									p_StartingIndexLength = ILibReadInnerXML(xnode,&p_StartingIndex);
-										OK |= 8;
-								}
-								else if(xnode->NameLength==14 && memcmp(xnode->Name,"RequestedCount",14)==0)
-								{
-									p_RequestedCountLength = ILibReadInnerXML(xnode,&p_RequestedCount);
-										OK |= 16;
-								}
-								else if(xnode->NameLength==12 && memcmp(xnode->Name,"SortCriteria",12)==0)
-								{
-									p_SortCriteriaLength = ILibReadInnerXML(xnode,&p_SortCriteria);
-									p_SortCriteria[p_SortCriteriaLength]=0;
-										OK |= 32;
-								}
-								if(xnode->Peer==NULL)
-								{
-									xnode = xnode->Parent;
-									break;
-								}
-								else
-								{
-									xnode = xnode->Peer;
-								}
-							}
-						}
-						if(xnode!=NULL)
-						{
-							if(xnode->Peer==NULL)
-							{
-								xnode = xnode->Parent;
-								break;
-							}
-							else
-							{
-								xnode = xnode->Peer;
-							}
-						}
-					}
-				}
-				if(xnode!=NULL)
-				{
-					if(xnode->Peer==NULL)
-					{
-						xnode = xnode->Parent;
-						break;
-					}
-					else
-					{
-						xnode = xnode->Peer;
-					}
-				}
-			}
-		}
-		if(xnode!=NULL){xnode = xnode->Peer;}
-	}
-	ILibDestructXMLNodeList(root);
-	if (OK != 63)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
+    MediaServer_Response_Error(ReaderObject,501,"Invalid XML");
+    return;
+    }
+    while(xnode!=NULL)
+    {
+        if(xnode->StartTag!=0 && xnode->NameLength==8 && memcmp(xnode->Name,"Envelope",8)==0)
+        {
+            // Envelope
+            xnode = xnode->Next;
+            while(xnode!=NULL)
+            {
+                if(xnode->StartTag!=0 && xnode->NameLength==4 && memcmp(xnode->Name,"Body",4)==0)
+                {
+                    // Body
+                    xnode = xnode->Next;
+                    while(xnode!=NULL)
+                    {
+                        if(xnode->StartTag!=0 && xnode->NameLength==6 && memcmp(xnode->Name,"Search",6)==0)
+                        {
+                            // Inside the interesting part of the SOAP
+                            xnode = xnode->Next;
+                            while(xnode!=NULL)
+                            {
+                                if(xnode->NameLength==11 && memcmp(xnode->Name,"ContainerID",11)==0)
+                                {
+                                    p_ContainerIDLength = ILibReadInnerXML(xnode,&p_ContainerID);
+                                    p_ContainerID[p_ContainerIDLength]=0;
+                                        OK |= 1;
+                                }
+                                else if(xnode->NameLength==14 && memcmp(xnode->Name,"SearchCriteria",14)==0)
+                                {
+                                    p_SearchCriteriaLength = ILibReadInnerXML(xnode,&p_SearchCriteria);
+                                    p_SearchCriteria[p_SearchCriteriaLength]=0;
+                                        OK |= 2;
+                                }
+                                else if(xnode->NameLength==6 && memcmp(xnode->Name,"Filter",6)==0)
+                                {
+                                    p_FilterLength = ILibReadInnerXML(xnode,&p_Filter);
+                                    p_Filter[p_FilterLength]=0;
+                                        OK |= 4;
+                                }
+                                else if(xnode->NameLength==13 && memcmp(xnode->Name,"StartingIndex",13)==0)
+                                {
+                                    p_StartingIndexLength = ILibReadInnerXML(xnode,&p_StartingIndex);
+                                        OK |= 8;
+                                }
+                                else if(xnode->NameLength==14 && memcmp(xnode->Name,"RequestedCount",14)==0)
+                                {
+                                    p_RequestedCountLength = ILibReadInnerXML(xnode,&p_RequestedCount);
+                                        OK |= 16;
+                                }
+                                else if(xnode->NameLength==12 && memcmp(xnode->Name,"SortCriteria",12)==0)
+                                {
+                                    p_SortCriteriaLength = ILibReadInnerXML(xnode,&p_SortCriteria);
+                                    p_SortCriteria[p_SortCriteriaLength]=0;
+                                        OK |= 32;
+                                }
+                                if(xnode->Peer==NULL)
+                                {
+                                    xnode = xnode->Parent;
+                                    break;
+                                }
+                                else
+                                {
+                                    xnode = xnode->Peer;
+                                }
+                            }
+                        }
+                        if(xnode!=NULL)
+                        {
+                            if(xnode->Peer==NULL)
+                            {
+                                xnode = xnode->Parent;
+                                break;
+                            }
+                            else
+                            {
+                                xnode = xnode->Peer;
+                            }
+                        }
+                    }
+                }
+                if(xnode!=NULL)
+                {
+                    if(xnode->Peer==NULL)
+                    {
+                        xnode = xnode->Parent;
+                        break;
+                    }
+                    else
+                    {
+                        xnode = xnode->Peer;
+                    }
+                }
+            }
+        }
+        if(xnode!=NULL){xnode = xnode->Peer;}
+    }
+    ILibDestructXMLNodeList(root);
+    if (OK != 63)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
 
 /* Type Checking */
    _ContainerIDLength = ILibInPlaceXmlUnEscape(p_ContainerID);
-	_ContainerID = p_ContainerID;
-	_SearchCriteriaLength = ILibInPlaceXmlUnEscape(p_SearchCriteria);
-	_SearchCriteria = p_SearchCriteria;
-	_FilterLength = ILibInPlaceXmlUnEscape(p_Filter);
-	_Filter = p_Filter;
-	OK = ILibGetULong(p_StartingIndex,p_StartingIndexLength, &TempULong);
-	if(OK!=0)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_StartingIndex = (unsigned int)TempULong;
-	OK = ILibGetULong(p_RequestedCount,p_RequestedCountLength, &TempULong);
-	if(OK!=0)
-	{
-		MediaServer_Response_Error(ReaderObject,402,"Illegal value");
-		return;
-	}
-	_RequestedCount = (unsigned int)TempULong;
-	_SortCriteriaLength = ILibInPlaceXmlUnEscape(p_SortCriteria);
-	_SortCriteria = p_SortCriteria;
-	if(MediaServer_FP_ContentDirectory_Search == NULL)
-		MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
-	else
-		MediaServer_FP_ContentDirectory_Search((void*)ReaderObject,_ContainerID,_SearchCriteria,_Filter,_StartingIndex,_RequestedCount,_SortCriteria);
+    _ContainerID = p_ContainerID;
+    _SearchCriteriaLength = ILibInPlaceXmlUnEscape(p_SearchCriteria);
+    _SearchCriteria = p_SearchCriteria;
+    _FilterLength = ILibInPlaceXmlUnEscape(p_Filter);
+    _Filter = p_Filter;
+    OK = ILibGetULong(p_StartingIndex,p_StartingIndexLength, &TempULong);
+    if(OK!=0)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _StartingIndex = (unsigned int)TempULong;
+    OK = ILibGetULong(p_RequestedCount,p_RequestedCountLength, &TempULong);
+    if(OK!=0)
+    {
+        MediaServer_Response_Error(ReaderObject,402,"Illegal value");
+        return;
+    }
+    _RequestedCount = (unsigned int)TempULong;
+    _SortCriteriaLength = ILibInPlaceXmlUnEscape(p_SortCriteria);
+    _SortCriteria = p_SortCriteria;
+    if(MediaServer_FP_ContentDirectory_Search == NULL)
+        MediaServer_Response_Error(ReaderObject,501,"No Function Handler");
+    else
+        MediaServer_FP_ContentDirectory_Search((void*)ReaderObject,_ContainerID,_SearchCriteria,_Filter,_StartingIndex,_RequestedCount,_SortCriteria);
 }
 
 
@@ -2036,63 +2003,63 @@ int MediaServer_ProcessPOST(struct ILibWebServer_Session *session, struct packet
    }
    
    if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ConnectionManager/control",25)==0)
-	{
-		 if(SOAPACTIONLength==23 && memcmp(SOAPACTION,"GetCurrentConnectionIDs",23)==0)
-		{
-			MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionIDs(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==24 && memcmp(SOAPACTION,"GetCurrentConnectionInfo",24)==0)
-		{
-			MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionInfo(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==15 && memcmp(SOAPACTION,"GetProtocolInfo",15)==0)
-		{
-			MediaServer_Dispatch_ConnectionManager_GetProtocolInfo(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else
-		{
-			RetVal=1;
-		}
-	}
-	else if(header->DirectiveObjLength==25 && memcmp((header->DirectiveObj)+1,"ContentDirectory/control",24)==0)
-	{
-		 if(SOAPACTIONLength==6 && memcmp(SOAPACTION,"Browse",6)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_Browse(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==12 && memcmp(SOAPACTION,"CreateObject",12)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_CreateObject(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==13 && memcmp(SOAPACTION,"DestroyObject",13)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_DestroyObject(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==21 && memcmp(SOAPACTION,"GetSearchCapabilities",21)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_GetSearchCapabilities(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==19 && memcmp(SOAPACTION,"GetSortCapabilities",19)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_GetSortCapabilities(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==17 && memcmp(SOAPACTION,"GetSystemUpdateID",17)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_GetSystemUpdateID(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else if(SOAPACTIONLength==6 && memcmp(SOAPACTION,"Search",6)==0)
-		{
-			MediaServer_Dispatch_ContentDirectory_Search(bodyBuffer, offset, bodyBufferLength, session);
-		}
-		else
-		{
-			RetVal=1;
-		}
-	}
-	else
-	{
-		RetVal=1;
-	}
+    {
+         if(SOAPACTIONLength==23 && memcmp(SOAPACTION,"GetCurrentConnectionIDs",23)==0)
+        {
+            MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionIDs(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==24 && memcmp(SOAPACTION,"GetCurrentConnectionInfo",24)==0)
+        {
+            MediaServer_Dispatch_ConnectionManager_GetCurrentConnectionInfo(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==15 && memcmp(SOAPACTION,"GetProtocolInfo",15)==0)
+        {
+            MediaServer_Dispatch_ConnectionManager_GetProtocolInfo(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else
+        {
+            RetVal=1;
+        }
+    }
+    else if(header->DirectiveObjLength==25 && memcmp((header->DirectiveObj)+1,"ContentDirectory/control",24)==0)
+    {
+         if(SOAPACTIONLength==6 && memcmp(SOAPACTION,"Browse",6)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_Browse(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==12 && memcmp(SOAPACTION,"CreateObject",12)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_CreateObject(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==13 && memcmp(SOAPACTION,"DestroyObject",13)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_DestroyObject(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==21 && memcmp(SOAPACTION,"GetSearchCapabilities",21)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_GetSearchCapabilities(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==19 && memcmp(SOAPACTION,"GetSortCapabilities",19)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_GetSortCapabilities(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==17 && memcmp(SOAPACTION,"GetSystemUpdateID",17)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_GetSystemUpdateID(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else if(SOAPACTIONLength==6 && memcmp(SOAPACTION,"Search",6)==0)
+        {
+            MediaServer_Dispatch_ContentDirectory_Search(bodyBuffer, offset, bodyBufferLength, session);
+        }
+        else
+        {
+            RetVal=1;
+        }
+    }
+    else
+    {
+        RetVal=1;
+    }
 
    
    return(RetVal);
@@ -2150,13 +2117,13 @@ void MediaServer_ExpireSubscriberInfo(struct MediaServer_DataObject *d, struct S
       t = t->Previous;
    }
    if(d->HeadSubscriberPtr_ConnectionManager==t)
-	{
-		--(d->NumberOfSubscribers_ConnectionManager);
-	}
-	else if(d->HeadSubscriberPtr_ContentDirectory==t)
-	{
-		--(d->NumberOfSubscribers_ContentDirectory);
-	}
+    {
+        --(d->NumberOfSubscribers_ConnectionManager);
+    }
+    else if(d->HeadSubscriberPtr_ContentDirectory==t)
+    {
+        --(d->NumberOfSubscribers_ContentDirectory);
+    }
 
    
    if(info->Previous!=NULL)
@@ -2172,26 +2139,26 @@ void MediaServer_ExpireSubscriberInfo(struct MediaServer_DataObject *d, struct S
    {
       // This is the Head
       if(d->HeadSubscriberPtr_ConnectionManager==info)
-	{
-		d->HeadSubscriberPtr_ConnectionManager = info->Next;
-		if(info->Next!=NULL)
-		{
-			info->Next->Previous = NULL;
-		}
-	}
-	else if(d->HeadSubscriberPtr_ContentDirectory==info)
-	{
-		d->HeadSubscriberPtr_ContentDirectory = info->Next;
-		if(info->Next!=NULL)
-		{
-			info->Next->Previous = NULL;
-		}
-	}
-	else 
-	{
-		// Error
-		return;
-	}
+    {
+        d->HeadSubscriberPtr_ConnectionManager = info->Next;
+        if(info->Next!=NULL)
+        {
+            info->Next->Previous = NULL;
+        }
+    }
+    else if(d->HeadSubscriberPtr_ContentDirectory==info)
+    {
+        d->HeadSubscriberPtr_ContentDirectory = info->Next;
+        if(info->Next!=NULL)
+        {
+            info->Next->Previous = NULL;
+        }
+    }
+    else 
+    {
+        // Error
+        return;
+    }
 
    }
    --info->RefCount;
@@ -2214,17 +2181,17 @@ int MediaServer_SubscriptionExpired(struct SubscriberInfo *info)
 
 void MediaServer_GetInitialEventBody_ConnectionManager(struct MediaServer_DataObject *MediaServer_Object,char ** body, int *bodylength)
 {
-	int TempLength;
-	TempLength = (int)(177+(int)strlen(MediaServer_Object->ConnectionManager_SourceProtocolInfo)+(int)strlen(MediaServer_Object->ConnectionManager_SinkProtocolInfo)+(int)strlen(MediaServer_Object->ConnectionManager_CurrentConnectionIDs));
-	*body = (char*)malloc(sizeof(char)*TempLength);
-	*bodylength = sprintf(*body,"SourceProtocolInfo>%s</SourceProtocolInfo></e:property><e:property><SinkProtocolInfo>%s</SinkProtocolInfo></e:property><e:property><CurrentConnectionIDs>%s</CurrentConnectionIDs",MediaServer_Object->ConnectionManager_SourceProtocolInfo,MediaServer_Object->ConnectionManager_SinkProtocolInfo,MediaServer_Object->ConnectionManager_CurrentConnectionIDs);
+    int TempLength;
+    TempLength = (int)(177+(int)strlen(MediaServer_Object->ConnectionManager_SourceProtocolInfo)+(int)strlen(MediaServer_Object->ConnectionManager_SinkProtocolInfo)+(int)strlen(MediaServer_Object->ConnectionManager_CurrentConnectionIDs));
+    *body = (char*)malloc(sizeof(char)*TempLength);
+    *bodylength = sprintf(*body,"SourceProtocolInfo>%s</SourceProtocolInfo></e:property><e:property><SinkProtocolInfo>%s</SinkProtocolInfo></e:property><e:property><CurrentConnectionIDs>%s</CurrentConnectionIDs",MediaServer_Object->ConnectionManager_SourceProtocolInfo,MediaServer_Object->ConnectionManager_SinkProtocolInfo,MediaServer_Object->ConnectionManager_CurrentConnectionIDs);
 }
 void MediaServer_GetInitialEventBody_ContentDirectory(struct MediaServer_DataObject *MediaServer_Object,char ** body, int *bodylength)
 {
-	int TempLength;
-	TempLength = (int)(101+(int)strlen(MediaServer_Object->ContentDirectory_ContainerUpdateIDs)+(int)strlen(MediaServer_Object->ContentDirectory_SystemUpdateID));
-	*body = (char*)malloc(sizeof(char)*TempLength);
-	*bodylength = sprintf(*body,"ContainerUpdateIDs>%s</ContainerUpdateIDs></e:property><e:property><SystemUpdateID>%s</SystemUpdateID",MediaServer_Object->ContentDirectory_ContainerUpdateIDs,MediaServer_Object->ContentDirectory_SystemUpdateID);
+    int TempLength;
+    TempLength = (int)(101+(int)strlen(MediaServer_Object->ContentDirectory_ContainerUpdateIDs)+(int)strlen(MediaServer_Object->ContentDirectory_SystemUpdateID));
+    *body = (char*)malloc(sizeof(char)*TempLength);
+    *bodylength = sprintf(*body,"ContainerUpdateIDs>%s</ContainerUpdateIDs></e:property><e:property><SystemUpdateID>%s</SystemUpdateID",MediaServer_Object->ContentDirectory_ContainerUpdateIDs,MediaServer_Object->ContentDirectory_SystemUpdateID);
 }
 
 
@@ -2258,43 +2225,43 @@ void MediaServer_ProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebS
    }
    sem_wait(&(((struct MediaServer_DataObject*)session->User)->EventLock));
    if(header->DirectiveObjLength==24 && memcmp(header->DirectiveObj + 1,"ConnectionManager/event",23)==0)
-	{
-		Info = MediaServer_RemoveSubscriberInfo(&(((struct MediaServer_DataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),&(((struct MediaServer_DataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				MediaServer_DestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-	}
-	else if(header->DirectiveObjLength==23 && memcmp(header->DirectiveObj + 1,"ContentDirectory/event",22)==0)
-	{
-		Info = MediaServer_RemoveSubscriberInfo(&(((struct MediaServer_DataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),&(((struct MediaServer_DataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				MediaServer_DestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-	}
+    {
+        Info = MediaServer_RemoveSubscriberInfo(&(((struct MediaServer_DataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),&(((struct MediaServer_DataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
+        if(Info!=NULL)
+        {
+            --Info->RefCount;
+            if(Info->RefCount==0)
+            {
+                MediaServer_DestructSubscriberInfo(Info);
+            }
+            packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
+            ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
+        }
+        else
+        {
+            packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
+            ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
+        }
+    }
+    else if(header->DirectiveObjLength==23 && memcmp(header->DirectiveObj + 1,"ContentDirectory/event",22)==0)
+    {
+        Info = MediaServer_RemoveSubscriberInfo(&(((struct MediaServer_DataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),&(((struct MediaServer_DataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
+        if(Info!=NULL)
+        {
+            --Info->RefCount;
+            if(Info->RefCount==0)
+            {
+                MediaServer_DestructSubscriberInfo(Info);
+            }
+            packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
+            ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
+        }
+        else
+        {
+            packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
+            ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
+        }
+    }
 
    sem_post(&(((struct MediaServer_DataObject*)session->User)->EventLock));
 }
@@ -2325,15 +2292,15 @@ void MediaServer_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int 
    struct MediaServer_DataObject *dataObject = (struct MediaServer_DataObject*)session->User;
    
    if(strncmp(ServiceName,"ConnectionManager",17)==0)
-	{
-		TotalSubscribers = &(dataObject->NumberOfSubscribers_ConnectionManager);
-		HeadPtr = &(dataObject->HeadSubscriberPtr_ConnectionManager);
-	}
-	if(strncmp(ServiceName,"ContentDirectory",16)==0)
-	{
-		TotalSubscribers = &(dataObject->NumberOfSubscribers_ContentDirectory);
-		HeadPtr = &(dataObject->HeadSubscriberPtr_ContentDirectory);
-	}
+    {
+        TotalSubscribers = &(dataObject->NumberOfSubscribers_ConnectionManager);
+        HeadPtr = &(dataObject->HeadSubscriberPtr_ConnectionManager);
+    }
+    if(strncmp(ServiceName,"ContentDirectory",16)==0)
+    {
+        TotalSubscribers = &(dataObject->NumberOfSubscribers_ContentDirectory);
+        HeadPtr = &(dataObject->HeadSubscriberPtr_ContentDirectory);
+    }
 
    
    if(*HeadPtr!=NULL)
@@ -2484,15 +2451,15 @@ void MediaServer_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int 
       packet = (char*)malloc(134 + (int)strlen(SID) + (int)strlen(MediaServer_PLATFORM) + 4);
       packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: %s, UPnP/1.0, PPTV MicroStack/1.0.2777\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",MediaServer_PLATFORM,SID,Timeout);
       if(strcmp(ServiceName,"ConnectionManager")==0)
-	{
-		MediaServer_GetInitialEventBody_ConnectionManager(dataObject,&packetbody,&packetbodyLength);
-	}
-	else if(strcmp(ServiceName,"ContentDirectory")==0)
-	{
-		MediaServer_GetInitialEventBody_ContentDirectory(dataObject,&packetbody,&packetbodyLength);
-	}
+    {
+        MediaServer_GetInitialEventBody_ConnectionManager(dataObject,&packetbody,&packetbodyLength);
+    }
+    else if(strcmp(ServiceName,"ContentDirectory")==0)
+    {
+        MediaServer_GetInitialEventBody_ContentDirectory(dataObject,&packetbody,&packetbodyLength);
+    }
 
-      if (packetbody != NULL)	    {
+      if (packetbody != NULL)        {
          ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
          
          MediaServer_SendEvent_Body(dataObject,packetbody,packetbodyLength,NewSubscriber);
@@ -2518,17 +2485,17 @@ void MediaServer_SubscribeEvents(char* path,int pathlength,char* Timeout,int Tim
    if(TimeoutVal>MediaServer__MAX_SUBSCRIPTION_TIMEOUT) {TimeoutVal=MediaServer__MAX_SUBSCRIPTION_TIMEOUT;}
    
    if(pathlength==24 && memcmp(path+1,"ConnectionManager/event",23)==0)
-	{
-		MediaServer_TryToSubscribe("ConnectionManager",TimeoutVal,URL,URLLength,session);
-	}
+    {
+        MediaServer_TryToSubscribe("ConnectionManager",TimeoutVal,URL,URLLength,session);
+    }
 else if(pathlength==23 && memcmp(path+1,"ContentDirectory/event",22)==0)
-	{
-		MediaServer_TryToSubscribe("ContentDirectory",TimeoutVal,URL,URLLength,session);
-	}
-	else
-	{
-		ILibWebServer_Send_Raw(session,"HTTP/1.1 412 Invalid Service Name\r\nContent-Length: 0\r\n\r\n",56,1,1);
-	}
+    {
+        MediaServer_TryToSubscribe("ContentDirectory",TimeoutVal,URL,URLLength,session);
+    }
+    else
+    {
+        ILibWebServer_Send_Raw(session,"HTTP/1.1 412 Invalid Service Name\r\nContent-Length: 0\r\n\r\n",56,1,1);
+    }
 
 }
 
@@ -2551,13 +2518,13 @@ void MediaServer_RenewEvents(char* path,int pathlength,char *_SID,int SIDLength,
    LVL3DEBUG(printf("SUBSCRIBER [%s] attempting to Renew Events for %s Duration [",SID,Timeout);)
    
    if(pathlength==24 && memcmp(path+1,"ConnectionManager/event",23)==0)
-	{
-		info = ((struct MediaServer_DataObject*)ReaderObject->User)->HeadSubscriberPtr_ConnectionManager;
-	}
+    {
+        info = ((struct MediaServer_DataObject*)ReaderObject->User)->HeadSubscriberPtr_ConnectionManager;
+    }
 else if(pathlength==23 && memcmp(path+1,"ContentDirectory/event",22)==0)
-	{
-		info = ((struct MediaServer_DataObject*)ReaderObject->User)->HeadSubscriberPtr_ContentDirectory;
-	}
+    {
+        info = ((struct MediaServer_DataObject*)ReaderObject->User)->HeadSubscriberPtr_ContentDirectory;
+    }
 
    
    //
@@ -2727,7 +2694,7 @@ void MediaServer_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct
    
    LVL3DEBUG(errorPacketLength=ILibGetRawPacket(header,&errorPacket);)
    LVL3DEBUG(printf("%s\r\n",errorPacket);)
-   LVL3DEBUG(free(errorPacket);)			
+   LVL3DEBUG(free(errorPacket);)            
    
    
    if(header->DirectiveLength==4 && memcmp(header->Directive,"HEAD",4)==0)
@@ -2744,15 +2711,15 @@ void MediaServer_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct
       }
       
       else if(header->DirectiveObjLength==27 && memcmp((header->DirectiveObj)+1,"ConnectionManager/scpd.xml",26)==0)
-	{
-		ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
-		ILibWebServer_StreamBody(session,NULL,0,ILibAsyncSocket_MemoryOwnership_STATIC,1);
-	}
-	else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
-	{
-		ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
-		ILibWebServer_StreamBody(session,NULL,0,ILibAsyncSocket_MemoryOwnership_STATIC,1);
-	}
+    {
+        ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
+        ILibWebServer_StreamBody(session,NULL,0,ILibAsyncSocket_MemoryOwnership_STATIC,1);
+    }
+    else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
+    {
+        ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
+        ILibWebServer_StreamBody(session,NULL,0,ILibAsyncSocket_MemoryOwnership_STATIC,1);
+    }
 
       else
       {
@@ -2779,185 +2746,185 @@ void MediaServer_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct
       }
       
       else if(header->DirectiveObjLength==27 && memcmp((header->DirectiveObj)+1,"ConnectionManager/scpd.xml",26)==0)
-	{
-		ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
-		MediaServer_StreamDescriptionDocument_SCPD(session,1,NULL,0,0,0,0);
-		buffer = ILibDecompressString((unsigned char*)MediaServer__ActionTable_ConnectionManager_Impl.Reserved,MediaServer__ActionTable_ConnectionManager_Impl.ReservedXL,MediaServer__ActionTable_ConnectionManager_Impl.ReservedUXL);
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo->Reserved2,0,0);}
-		free(buffer);
-		MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
-		buffer = ILibDecompressString((unsigned char*)MediaServer__StateVariableTable_ConnectionManager_Impl.Reserved,MediaServer__StateVariableTable_ConnectionManager_Impl.ReservedXL,MediaServer__StateVariableTable_ConnectionManager_Impl.ReservedUXL);
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved2,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
-			{
-				if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i]!=NULL)
-				{
-					ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-					ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
-					ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-				}
-			}
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved3,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved2,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
-			{
-				if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i]!=NULL)
-				{
-					ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-					ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
-					ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-				}
-			}
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved3,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		free(buffer);
-		MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
-	}
-	else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
-	{
-		ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
-		MediaServer_StreamDescriptionDocument_SCPD(session,1,NULL,0,0,0,0);
-		buffer = ILibDecompressString((unsigned char*)MediaServer__ActionTable_ContentDirectory_Impl.Reserved,MediaServer__ActionTable_ContentDirectory_Impl.ReservedXL,MediaServer__ActionTable_ContentDirectory_Impl.ReservedUXL);
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID->Reserved2,0,0);}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->Search!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->Search->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->Search->Reserved2,0,0);}
-		free(buffer);
-		MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
-		buffer = ILibDecompressString((unsigned char*)MediaServer__StateVariableTable_ContentDirectory_Impl.Reserved,MediaServer__StateVariableTable_ContentDirectory_Impl.ReservedXL,MediaServer__StateVariableTable_ContentDirectory_Impl.ReservedUXL);
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved2,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
-			{
-				if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i]!=NULL)
-				{
-					ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-					ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
-					ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
-				}
-			}
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved3,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter!=NULL)
-		{
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
-			ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
-		}
-		free(buffer);
-		MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
-	}
+    {
+        ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
+        MediaServer_StreamDescriptionDocument_SCPD(session,1,NULL,0,0,0,0);
+        buffer = ILibDecompressString((unsigned char*)MediaServer__ActionTable_ConnectionManager_Impl.Reserved,MediaServer__ActionTable_ConnectionManager_Impl.ReservedXL,MediaServer__ActionTable_ConnectionManager_Impl.ReservedUXL);
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo->Reserved,MediaServer__Device_MediaServer_Impl.ConnectionManager->GetProtocolInfo->Reserved2,0,0);}
+        free(buffer);
+        MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
+        buffer = ILibDecompressString((unsigned char*)MediaServer__StateVariableTable_ConnectionManager_Impl.Reserved,MediaServer__StateVariableTable_ConnectionManager_Impl.ReservedXL,MediaServer__StateVariableTable_ConnectionManager_Impl.ReservedUXL);
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved2,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
+            {
+                if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i]!=NULL)
+                {
+                    ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                    ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
+                    ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                }
+            }
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved3,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionStatus->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_AVTransportID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_RcsID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ConnectionManager->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SourceProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_SinkProtocolInfo->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved2,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
+            {
+                if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i]!=NULL)
+                {
+                    ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                    ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
+                    ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                }
+            }
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved3,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_Direction->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8,MediaServer__Device_MediaServer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        free(buffer);
+        MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
+    }
+    else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
+    {
+        ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
+        MediaServer_StreamDescriptionDocument_SCPD(session,1,NULL,0,0,0,0);
+        buffer = ILibDecompressString((unsigned char*)MediaServer__ActionTable_ContentDirectory_Impl.Reserved,MediaServer__ActionTable_ContentDirectory_Impl.ReservedXL,MediaServer__ActionTable_ContentDirectory_Impl.ReservedUXL);
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->Browse->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->CreateObject->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->DestroyObject->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSearchCapabilities->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSortCapabilities->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->GetSystemUpdateID->Reserved2,0,0);}
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->Search!=NULL){MediaServer_StreamDescriptionDocument_SCPD(session,0,buffer,MediaServer__Device_MediaServer_Impl.ContentDirectory->Search->Reserved,MediaServer__Device_MediaServer_Impl.ContentDirectory->Search->Reserved2,0,0);}
+        free(buffer);
+        MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
+        buffer = ILibDecompressString((unsigned char*)MediaServer__StateVariableTable_ContentDirectory_Impl.Reserved,MediaServer__StateVariableTable_ContentDirectory_Impl.ReservedXL,MediaServer__StateVariableTable_ContentDirectory_Impl.ReservedUXL);
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved2,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved2L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            for(i=0;i<MediaServer__StateVariable_AllowedValues_MAX;++i)
+            {
+                if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i]!=NULL)
+                {
+                    ILibWebServer_StreamBody(session,"<allowedValue>",14,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                    ILibWebServer_StreamBody(session,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i],(int)strlen(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->AllowedValues[i]),ILibAsyncSocket_MemoryOwnership_USER,0);
+                    ILibWebServer_StreamBody(session,"</allowedValue>",15,ILibAsyncSocket_MemoryOwnership_STATIC,0);
+                }
+            }
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved3,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_BrowseFlag->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_ContainerUpdateIDs->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SystemUpdateID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Count->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SortCriteria->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SortCapabilities->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Index->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_ObjectID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_UpdateID->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Result->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_SearchCapabilities->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_SearchCriteria->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        if(MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter!=NULL)
+        {
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved1,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
+            ILibWebServer_StreamBody(session,buffer+MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved8,MediaServer__Device_MediaServer_Impl.ContentDirectory->StateVar_A_ARG_TYPE_Filter->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
+        }
+        free(buffer);
+        MediaServer_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
+    }
 
       else
       {
@@ -3011,7 +2978,7 @@ void MediaServer_FragmentedSendNotify_Destroy(void *data);
 void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, void *errorset, int* blocktime)
 {
    int i;
-   struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)object;	
+   struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)object;    
    struct MediaServer_FragmentNotifyStruct *f;
    int timeout;
    
@@ -3149,7 +3116,7 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
          timeout = (int)(0 + ((unsigned short)rand() % (500)));
          ILibLifeTime_AddEx(f->upnp->WebServerTimer,f,timeout,&MediaServer_FragmentedSendNotify,&MediaServer_FragmentedSendNotify_Destroy);
       }
-   }	
+   }    
 }
 
 void MediaServer_FragmentedSendNotify_Destroy(void *data)
@@ -3167,7 +3134,7 @@ void MediaServer_FragmentedSendNotify(void *data)
    struct MediaServer_FragmentNotifyStruct *f;
    
    if(FNS->packetNumber==0)
-   {				
+   {                
       subsetRange = 5000/5; // Make sure all our packets will get out within 5 seconds
       
       // Send the first "group"
@@ -3201,26 +3168,26 @@ void MediaServer_FragmentedSendNotify(void *data)
       switch(FNS->packetNumber)
       {
          case 1:
-						MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
-						ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-						break;
-					case 2:
-						MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
-						ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-						break;
-					case 3:
-						MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
-						ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-						break;
-					case 4:
-						MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
-						ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-						break;
-					case 5:
-						MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
-						ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-						break;
-					
+                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
+                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                        break;
+                    case 2:
+                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
+                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                        break;
+                    case 3:
+                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
+                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                        break;
+                    case 4:
+                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
+                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                        break;
+                    case 5:
+                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
+                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                        break;
+                    
          
       }
    }
@@ -3242,15 +3209,15 @@ void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
       for (i2=0;i2<2;i2++)
       {
          MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
-					ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-			MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"","uuid:",upnp->UDN,upnp->NotifyCycleTime);
-			ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-			MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
-			ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-			MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",upnp->NotifyCycleTime);
-			ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-			MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
-			ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                    ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"","uuid:",upnp->UDN,upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
 
       }
    }
@@ -3285,13 +3252,13 @@ void MediaServer_SendByeBye(const struct MediaServer_DataObject *upnp)
    int i, i2;
    
    for(i=0;i<upnp->AddressListLength;++i)
-   {	
+   {    
       ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
       
       for (i2=0;i2<2;i2++)
       {
          MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",0);
-					ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                    ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
       MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"","uuid:",upnp->UDN,0);
       ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
       MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",0);
@@ -3360,26 +3327,26 @@ void MediaServer_ResponseGeneric(const MediaServer_MicroStackToken MediaServer_T
 }
 
 /*! \fn MediaServer_Response_ConnectionManager_GetCurrentConnectionIDs(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_ConnectionIDs)
-	\brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionIDs
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionIDs
+    \param MediaServer_Token MicroStack token
  \param unescaped_ConnectionIDs Value of argument ConnectionIDs \b     Note: Automatically Escaped
 */
 void MediaServer_Response_ConnectionManager_GetCurrentConnectionIDs(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_ConnectionIDs)
 {
   char* body;
-	char *ConnectionIDs = (char*)malloc(1+ILibXmlEscapeLength(unescaped_ConnectionIDs));
+    char *ConnectionIDs = (char*)malloc(1+ILibXmlEscapeLength(unescaped_ConnectionIDs));
 
-	ILibXmlEscape(ConnectionIDs,unescaped_ConnectionIDs);
+    ILibXmlEscape(ConnectionIDs,unescaped_ConnectionIDs);
   body = (char*)malloc(32+strlen(ConnectionIDs));
   sprintf(body,"<ConnectionIDs>%s</ConnectionIDs>",ConnectionIDs);
   MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetCurrentConnectionIDs",body);
   free(body);
-	free(ConnectionIDs);
+    free(ConnectionIDs);
 }
 
 /*! \fn MediaServer_Response_ConnectionManager_GetCurrentConnectionInfo(const MediaServer_SessionToken MediaServer_Token, const int RcsID, const int AVTransportID, const char* unescaped_ProtocolInfo, const char* unescaped_PeerConnectionManager, const int PeerConnectionID, const char* unescaped_Direction, const char* unescaped_Status)
-	\brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionInfo
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetCurrentConnectionInfo
+    \param MediaServer_Token MicroStack token
  \param RcsID Value of argument RcsID
  \param AVTransportID Value of argument AVTransportID
  \param unescaped_ProtocolInfo Value of argument ProtocolInfo \b     Note: Automatically Escaped
@@ -3391,50 +3358,50 @@ void MediaServer_Response_ConnectionManager_GetCurrentConnectionIDs(const MediaS
 void MediaServer_Response_ConnectionManager_GetCurrentConnectionInfo(const MediaServer_SessionToken MediaServer_Token, const int RcsID, const int AVTransportID, const char* unescaped_ProtocolInfo, const char* unescaped_PeerConnectionManager, const int PeerConnectionID, const char* unescaped_Direction, const char* unescaped_Status)
 {
   char* body;
-	char *ProtocolInfo = (char*)malloc(1+ILibXmlEscapeLength(unescaped_ProtocolInfo));
-	char *PeerConnectionManager = (char*)malloc(1+ILibXmlEscapeLength(unescaped_PeerConnectionManager));
-	char *Direction = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Direction));
-	char *Status = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Status));
+    char *ProtocolInfo = (char*)malloc(1+ILibXmlEscapeLength(unescaped_ProtocolInfo));
+    char *PeerConnectionManager = (char*)malloc(1+ILibXmlEscapeLength(unescaped_PeerConnectionManager));
+    char *Direction = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Direction));
+    char *Status = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Status));
 
-	ILibXmlEscape(ProtocolInfo,unescaped_ProtocolInfo);
-	ILibXmlEscape(PeerConnectionManager,unescaped_PeerConnectionManager);
-	ILibXmlEscape(Direction,unescaped_Direction);
-	ILibXmlEscape(Status,unescaped_Status);
+    ILibXmlEscape(ProtocolInfo,unescaped_ProtocolInfo);
+    ILibXmlEscape(PeerConnectionManager,unescaped_PeerConnectionManager);
+    ILibXmlEscape(Direction,unescaped_Direction);
+    ILibXmlEscape(Status,unescaped_Status);
   body = (char*)malloc(233+strlen(ProtocolInfo)+strlen(PeerConnectionManager)+strlen(Direction)+strlen(Status));
   sprintf(body,"<RcsID>%d</RcsID><AVTransportID>%d</AVTransportID><ProtocolInfo>%s</ProtocolInfo><PeerConnectionManager>%s</PeerConnectionManager><PeerConnectionID>%d</PeerConnectionID><Direction>%s</Direction><Status>%s</Status>",RcsID,AVTransportID,ProtocolInfo,PeerConnectionManager,PeerConnectionID,Direction,Status);
   MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetCurrentConnectionInfo",body);
   free(body);
-	free(ProtocolInfo);
-	free(PeerConnectionManager);
-	free(Direction);
-	free(Status);
+    free(ProtocolInfo);
+    free(PeerConnectionManager);
+    free(Direction);
+    free(Status);
 }
 
 /*! \fn MediaServer_Response_ConnectionManager_GetProtocolInfo(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_Source, const char* unescaped_Sink)
-	\brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetProtocolInfo
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ConnectionManager >> urn:schemas-upnp-org:service:ConnectionManager:1 >> GetProtocolInfo
+    \param MediaServer_Token MicroStack token
  \param unescaped_Source Value of argument Source \b     Note: Automatically Escaped
  \param unescaped_Sink Value of argument Sink \b     Note: Automatically Escaped
 */
 void MediaServer_Response_ConnectionManager_GetProtocolInfo(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_Source, const char* unescaped_Sink)
 {
   char* body;
-	char *Source = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Source));
-	char *Sink = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Sink));
+    char *Source = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Source));
+    char *Sink = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Sink));
 
-	ILibXmlEscape(Source,unescaped_Source);
-	ILibXmlEscape(Sink,unescaped_Sink);
+    ILibXmlEscape(Source,unescaped_Source);
+    ILibXmlEscape(Sink,unescaped_Sink);
   body = (char*)malloc(31+strlen(Source)+strlen(Sink));
   sprintf(body,"<Source>%s</Source><Sink>%s</Sink>",Source,Sink);
   MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetProtocolInfo",body);
   free(body);
-	free(Source);
-	free(Sink);
+    free(Source);
+    free(Sink);
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_Browse(const MediaServer_SessionToken MediaServer_Token, const char* Result, const unsigned int NumberReturned, const unsigned int TotalMatches, const unsigned int UpdateID)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Browse
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Browse
+    \param MediaServer_Token MicroStack token
  \param Result Value of argument Result \b     Note: Must be escaped
  \param NumberReturned Value of argument NumberReturned
  \param TotalMatches Value of argument TotalMatches
@@ -3451,8 +3418,8 @@ void MediaServer_Response_ContentDirectory_Browse(const MediaServer_SessionToken
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_CreateObject(const MediaServer_SessionToken MediaServer_Token, const char* ObjectID, const char* Result)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> CreateObject
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> CreateObject
+    \param MediaServer_Token MicroStack token
  \param ObjectID Value of argument ObjectID \b     Note: Must be escaped
  \param Result Value of argument Result \b     Note: Must be escaped
 */
@@ -3467,8 +3434,8 @@ void MediaServer_Response_ContentDirectory_CreateObject(const MediaServer_Sessio
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_DestroyObject(const MediaServer_SessionToken MediaServer_Token)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> DestroyObject
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> DestroyObject
+    \param MediaServer_Token MicroStack token
 */
 void MediaServer_Response_ContentDirectory_DestroyObject(const MediaServer_SessionToken MediaServer_Token)
 {
@@ -3476,44 +3443,44 @@ MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:Cont
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_GetSearchCapabilities(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_SearchCaps)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSearchCapabilities
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSearchCapabilities
+    \param MediaServer_Token MicroStack token
  \param unescaped_SearchCaps Value of argument SearchCaps \b     Note: Automatically Escaped
 */
 void MediaServer_Response_ContentDirectory_GetSearchCapabilities(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_SearchCaps)
 {
   char* body;
-	char *SearchCaps = (char*)malloc(1+ILibXmlEscapeLength(unescaped_SearchCaps));
+    char *SearchCaps = (char*)malloc(1+ILibXmlEscapeLength(unescaped_SearchCaps));
 
-	ILibXmlEscape(SearchCaps,unescaped_SearchCaps);
+    ILibXmlEscape(SearchCaps,unescaped_SearchCaps);
   body = (char*)malloc(26+strlen(SearchCaps));
   sprintf(body,"<SearchCaps>%s</SearchCaps>",SearchCaps);
   MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:ContentDirectory:1","GetSearchCapabilities",body);
   free(body);
-	free(SearchCaps);
+    free(SearchCaps);
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_GetSortCapabilities(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_SortCaps)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSortCapabilities
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSortCapabilities
+    \param MediaServer_Token MicroStack token
  \param unescaped_SortCaps Value of argument SortCaps \b     Note: Automatically Escaped
 */
 void MediaServer_Response_ContentDirectory_GetSortCapabilities(const MediaServer_SessionToken MediaServer_Token, const char* unescaped_SortCaps)
 {
   char* body;
-	char *SortCaps = (char*)malloc(1+ILibXmlEscapeLength(unescaped_SortCaps));
+    char *SortCaps = (char*)malloc(1+ILibXmlEscapeLength(unescaped_SortCaps));
 
-	ILibXmlEscape(SortCaps,unescaped_SortCaps);
+    ILibXmlEscape(SortCaps,unescaped_SortCaps);
   body = (char*)malloc(22+strlen(SortCaps));
   sprintf(body,"<SortCaps>%s</SortCaps>",SortCaps);
   MediaServer_ResponseGeneric(MediaServer_Token,"urn:schemas-upnp-org:service:ContentDirectory:1","GetSortCapabilities",body);
   free(body);
-	free(SortCaps);
+    free(SortCaps);
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_GetSystemUpdateID(const MediaServer_SessionToken MediaServer_Token, const unsigned int Id)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSystemUpdateID
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> GetSystemUpdateID
+    \param MediaServer_Token MicroStack token
  \param Id Value of argument Id
 */
 void MediaServer_Response_ContentDirectory_GetSystemUpdateID(const MediaServer_SessionToken MediaServer_Token, const unsigned int Id)
@@ -3527,8 +3494,8 @@ void MediaServer_Response_ContentDirectory_GetSystemUpdateID(const MediaServer_S
 }
 
 /*! \fn MediaServer_Response_ContentDirectory_Search(const MediaServer_SessionToken MediaServer_Token, const char* Result, const unsigned int NumberReturned, const unsigned int TotalMatches, const unsigned int UpdateID)
-	\brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Search
-	\param MediaServer_Token MicroStack token
+    \brief Response Method for ContentDirectory >> urn:schemas-upnp-org:service:ContentDirectory:1 >> Search
+    \param MediaServer_Token MicroStack token
  \param Result Value of argument Result \b     Note: Must be escaped
  \param NumberReturned Value of argument NumberReturned
  \param TotalMatches Value of argument TotalMatches
@@ -3556,7 +3523,7 @@ int EndPointer,
 int done,
 void *subscriber,
 void *upnp,
-int *PAUSE)	
+int *PAUSE)    
 {
    if(done!=0 && ((struct SubscriberInfo*)subscriber)->Disposing==0)
    {
@@ -3612,13 +3579,13 @@ void MediaServer_SendEvent(void *upnptoken, char* body, const int bodylength, co
    }
    sem_wait(&(MediaServer_Object->EventLock));
    if(strncmp(eventname,"ConnectionManager",17)==0)
-	{
-		info = MediaServer_Object->HeadSubscriberPtr_ConnectionManager;
-	}
-	if(strncmp(eventname,"ContentDirectory",16)==0)
-	{
-		info = MediaServer_Object->HeadSubscriberPtr_ContentDirectory;
-	}
+    {
+        info = MediaServer_Object->HeadSubscriberPtr_ConnectionManager;
+    }
+    if(strncmp(eventname,"ContentDirectory",16)==0)
+    {
+        info = MediaServer_Object->HeadSubscriberPtr_ContentDirectory;
+    }
 
    memset(&dest,0,sizeof(dest));
    while(info!=NULL)
@@ -3642,14 +3609,14 @@ void MediaServer_SendEvent(void *upnptoken, char* body, const int bodylength, co
 }
 
 /*! \fn MediaServer_SetState_ConnectionManager_SourceProtocolInfo(MediaServer_MicroStackToken upnptoken, char* val)
-	\brief Sets the state of SourceProtocolInfo << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
-	\b Note: Must be called at least once prior to start
-	\param upnptoken The MicroStack token
-	\param val The new value of the state variable
+    \brief Sets the state of SourceProtocolInfo << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
+    \b Note: Must be called at least once prior to start
+    \param upnptoken The MicroStack token
+    \param val The new value of the state variable
 */
 void MediaServer_SetState_ConnectionManager_SourceProtocolInfo(MediaServer_MicroStackToken upnptoken, char* val)
 {
-	struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
+    struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
   char* body;
   int bodylength;
   char* valstr;
@@ -3664,14 +3631,14 @@ void MediaServer_SetState_ConnectionManager_SourceProtocolInfo(MediaServer_Micro
 }
 
 /*! \fn MediaServer_SetState_ConnectionManager_SinkProtocolInfo(MediaServer_MicroStackToken upnptoken, char* val)
-	\brief Sets the state of SinkProtocolInfo << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
-	\b Note: Must be called at least once prior to start
-	\param upnptoken The MicroStack token
-	\param val The new value of the state variable
+    \brief Sets the state of SinkProtocolInfo << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
+    \b Note: Must be called at least once prior to start
+    \param upnptoken The MicroStack token
+    \param val The new value of the state variable
 */
 void MediaServer_SetState_ConnectionManager_SinkProtocolInfo(MediaServer_MicroStackToken upnptoken, char* val)
 {
-	struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
+    struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
   char* body;
   int bodylength;
   char* valstr;
@@ -3686,14 +3653,14 @@ void MediaServer_SetState_ConnectionManager_SinkProtocolInfo(MediaServer_MicroSt
 }
 
 /*! \fn MediaServer_SetState_ConnectionManager_CurrentConnectionIDs(MediaServer_MicroStackToken upnptoken, char* val)
-	\brief Sets the state of CurrentConnectionIDs << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
-	\b Note: Must be called at least once prior to start
-	\param upnptoken The MicroStack token
-	\param val The new value of the state variable
+    \brief Sets the state of CurrentConnectionIDs << urn:schemas-upnp-org:service:ConnectionManager:1 << ConnectionManager \par
+    \b Note: Must be called at least once prior to start
+    \param upnptoken The MicroStack token
+    \param val The new value of the state variable
 */
 void MediaServer_SetState_ConnectionManager_CurrentConnectionIDs(MediaServer_MicroStackToken upnptoken, char* val)
 {
-	struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
+    struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
   char* body;
   int bodylength;
   char* valstr;
@@ -3708,14 +3675,14 @@ void MediaServer_SetState_ConnectionManager_CurrentConnectionIDs(MediaServer_Mic
 }
 
 /*! \fn MediaServer_SetState_ContentDirectory_ContainerUpdateIDs(MediaServer_MicroStackToken upnptoken, char* val)
-	\brief Sets the state of ContainerUpdateIDs << urn:schemas-upnp-org:service:ContentDirectory:1 << ContentDirectory \par
-	\b Note: Must be called at least once prior to start
-	\param upnptoken The MicroStack token
-	\param val The new value of the state variable
+    \brief Sets the state of ContainerUpdateIDs << urn:schemas-upnp-org:service:ContentDirectory:1 << ContentDirectory \par
+    \b Note: Must be called at least once prior to start
+    \param upnptoken The MicroStack token
+    \param val The new value of the state variable
 */
 void MediaServer_SetState_ContentDirectory_ContainerUpdateIDs(MediaServer_MicroStackToken upnptoken, char* val)
 {
-	struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
+    struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
   char* body;
   int bodylength;
   char* valstr;
@@ -3730,14 +3697,14 @@ void MediaServer_SetState_ContentDirectory_ContainerUpdateIDs(MediaServer_MicroS
 }
 
 /*! \fn MediaServer_SetState_ContentDirectory_SystemUpdateID(MediaServer_MicroStackToken upnptoken, unsigned int val)
-	\brief Sets the state of SystemUpdateID << urn:schemas-upnp-org:service:ContentDirectory:1 << ContentDirectory \par
-	\b Note: Must be called at least once prior to start
-	\param upnptoken The MicroStack token
-	\param val The new value of the state variable
+    \brief Sets the state of SystemUpdateID << urn:schemas-upnp-org:service:ContentDirectory:1 << ContentDirectory \par
+    \b Note: Must be called at least once prior to start
+    \param upnptoken The MicroStack token
+    \param val The new value of the state variable
 */
 void MediaServer_SetState_ContentDirectory_SystemUpdateID(MediaServer_MicroStackToken upnptoken, unsigned int val)
 {
-	struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
+    struct MediaServer_DataObject *MediaServer_Object = (struct MediaServer_DataObject*)upnptoken;
   char* body;
   int bodylength;
   char* valstr;
@@ -3762,10 +3729,10 @@ void MediaServer_DestroyMicroStack(void *object)
    sem_destroy(&(upnp->EventLock));
    
    free(upnp->ConnectionManager_SourceProtocolInfo);
-	free(upnp->ConnectionManager_SinkProtocolInfo);
-	free(upnp->ConnectionManager_CurrentConnectionIDs);
-	free(upnp->ContentDirectory_ContainerUpdateIDs);
-	free(upnp->ContentDirectory_SystemUpdateID);
+    free(upnp->ConnectionManager_SinkProtocolInfo);
+    free(upnp->ConnectionManager_CurrentConnectionIDs);
+    free(upnp->ContentDirectory_ContainerUpdateIDs);
+    free(upnp->ContentDirectory_SystemUpdateID);
 
    
    free(upnp->AddressList);
@@ -3776,19 +3743,19 @@ void MediaServer_DestroyMicroStack(void *object)
    
    
    sinfo = upnp->HeadSubscriberPtr_ConnectionManager;
-	while(sinfo!=NULL)
-	{
-		sinfo2 = sinfo->Next;
-		MediaServer_DestructSubscriberInfo(sinfo);
-		sinfo = sinfo2;
-	}
-	sinfo = upnp->HeadSubscriberPtr_ContentDirectory;
-	while(sinfo!=NULL)
-	{
-		sinfo2 = sinfo->Next;
-		MediaServer_DestructSubscriberInfo(sinfo);
-		sinfo = sinfo2;
-	}
+    while(sinfo!=NULL)
+    {
+        sinfo2 = sinfo->Next;
+        MediaServer_DestructSubscriberInfo(sinfo);
+        sinfo = sinfo2;
+    }
+    sinfo = upnp->HeadSubscriberPtr_ContentDirectory;
+    while(sinfo!=NULL)
+    {
+        sinfo2 = sinfo->Next;
+        MediaServer_DestructSubscriberInfo(sinfo);
+        sinfo = sinfo2;
+    }
 
    
 }
@@ -3866,9 +3833,9 @@ MediaServer_MicroStackToken MediaServer_CreateMicroStack(void *Chain, const char
    srand((int)tv.tv_sec);
    
    MediaServer__Device_MediaServer_Impl.FriendlyName = FriendlyName;
-	MediaServer__Device_MediaServer_Impl.UDN = UDN;
-	MediaServer__Device_MediaServer_Impl.Serial = SerialNumber;
-	if(MediaServer__Device_MediaServer_Impl.Manufacturer == NULL) {MediaServer__Device_MediaServer_Impl.Manufacturer = "PPTV MTBU SDK Dev";}
+    MediaServer__Device_MediaServer_Impl.UDN = UDN;
+    MediaServer__Device_MediaServer_Impl.Serial = SerialNumber;
+    if(MediaServer__Device_MediaServer_Impl.Manufacturer == NULL) {MediaServer__Device_MediaServer_Impl.Manufacturer = "PPTV MTBU SDK Dev";}
    if(MediaServer__Device_MediaServer_Impl.ManufacturerURL == NULL) {MediaServer__Device_MediaServer_Impl.ManufacturerURL = "http://www.pptv.com";}
    if(MediaServer__Device_MediaServer_Impl.ModelDescription == NULL) {MediaServer__Device_MediaServer_Impl.ModelDescription = "UPnP/AV 1.0 Compliant Media Server";}
    if(MediaServer__Device_MediaServer_Impl.ModelName == NULL) {MediaServer__Device_MediaServer_Impl.ModelName = "Digital Media Server";}
@@ -3990,7 +3957,7 @@ void MediaServer_StreamDescriptionDocument(struct ILibWebServer_Session *session
 }
 struct MediaServer__Device_MediaServer* MediaServer_GetConfiguration()
 {
-	return(&(MediaServer__Device_MediaServer_Impl));
+    return(&(MediaServer__Device_MediaServer_Impl));
 }
 
 
