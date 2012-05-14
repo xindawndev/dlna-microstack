@@ -1,5 +1,6 @@
 #ifndef _CDS_OBJECT_H
 #define _CDS_OBJECT_H
+
 #if defined(_WIN32_WCE)
 #include <winsock.h>
 #endif
