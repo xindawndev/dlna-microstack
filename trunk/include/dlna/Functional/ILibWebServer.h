@@ -13,10 +13,10 @@
 
 enum ILibWebServer_Status
 {
-    ILibWebServer_ALL_DATA_SENT                        = 0,    /*!< All of the data has already been sent */
-    ILibWebServer_NOT_ALL_DATA_SENT_YET                = 1,    /*!< Not all of the data could be sent, but is queued to be sent as soon as possible */
-    ILibWebServer_SEND_RESULTED_IN_DISCONNECT        = -2,    /*!< A send operation resulted in the socket being closed */
-    ILibWebServer_INVALID_SESSION                    = -3,    /*!< The specified ILibWebServer_Session was invalid */
+    ILibWebServer_ALL_DATA_SENT                     = 0,    /*!< All of the data has already been sent */
+    ILibWebServer_NOT_ALL_DATA_SENT_YET             = 1,    /*!< Not all of the data could be sent, but is queued to be sent as soon as possible */
+    ILibWebServer_SEND_RESULTED_IN_DISCONNECT       = -2,    /*!< A send operation resulted in the socket being closed */
+    ILibWebServer_INVALID_SESSION                   = -3,    /*!< The specified ILibWebServer_Session was invalid */
     ILibWebServer_TRIED_TO_SEND_ON_CLOSED_SOCKET    = -4,    /*!< A send operation was attmepted on a closed socket */
 };
 /*! \typedef ILibWebServer_ServerToken
@@ -106,7 +106,6 @@ struct ILibWebServer_Session
     int done;
     int SessionInterrupted;
 };
-
 
 void ILibWebServer_AddRef(struct ILibWebServer_Session *session);
 void ILibWebServer_Release(struct ILibWebServer_Session *session);

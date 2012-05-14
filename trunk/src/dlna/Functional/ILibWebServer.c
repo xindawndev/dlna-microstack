@@ -2,15 +2,15 @@
 
 
 #if defined(WIN32)
-    #define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
 #endif
 
 #if defined(WINSOCK2)
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-    #include <winsock.h>
-    #include <wininet.h>
+#include <winsock.h>
+#include <wininet.h>
 #endif
 
 #include "ILibParsers.h"
@@ -20,26 +20,26 @@
 #include "ILibWebClient.h"
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
-    #include <crtdbg.h>
+#include <crtdbg.h>
 #endif
 
 
 #define HTTP_SESSION_IDLE_TIMEOUT 3
 
 #ifdef ILibWebServer_SESSION_TRACKING
-    void ILibWebServer_SessionTrack(void *Session, char *msg)
-    {
-    #if defined(WIN32) || defined(_WIN32_WCE)
-        char tempMsg[4096];
-        sprintf(tempMsg,"Session: %x   %s\r\n",Session,msg);
-        OutputDebugString(tempMsg);
-    #else
-        printf("Session: %x   %s\r\n",Session,msg);
-    #endif
-    }
-    #define SESSION_TRACK(Session,msg) ILibWebServer_SessionTrack(Session,msg)
+void ILibWebServer_SessionTrack(void *Session, char *msg)
+{
+#if defined(WIN32) || defined(_WIN32_WCE)
+    char tempMsg[4096];
+    sprintf(tempMsg,"Session: %x   %s\r\n",Session,msg);
+    OutputDebugString(tempMsg);
 #else
-    #define SESSION_TRACK(Session,msg)
+    printf("Session: %x   %s\r\n",Session,msg);
+#endif
+}
+#define SESSION_TRACK(Session,msg) ILibWebServer_SessionTrack(Session,msg)
+#else
+#define SESSION_TRACK(Session,msg)
 #endif
 struct ILibWebServer_VirDir_Data
 {
@@ -66,9 +66,9 @@ struct ILibWebServer_StateModule
 };
 
 /*! \fn ILibWebServer_SetTag(ILibWebServer_ServerToken object, void *Tag)
-    \brief Sets the user tag associated with the server
-    \param object The ILibWebServer to associate the user tag with
-    \param Tag The user tag to associate
+\brief Sets the user tag associated with the server
+\param object The ILibWebServer to associate the user tag with
+\param Tag The user tag to associate
 */
 void ILibWebServer_SetTag(ILibWebServer_ServerToken object, void *Tag)
 {
@@ -77,9 +77,9 @@ void ILibWebServer_SetTag(ILibWebServer_ServerToken object, void *Tag)
 }
 
 /*! \fn ILibWebServer_GetTag(ILibWebServer_ServerToken object)
-    \brief Gets the user tag associated with the server
-    \param object The ILibWebServer to query
-    \returns The associated user tag
+\brief Gets the user tag associated with the server
+\param object The ILibWebServer to query
+\returns The associated user tag
 */
 void *ILibWebServer_GetTag(ILibWebServer_ServerToken object)
 {
@@ -145,19 +145,19 @@ void ILibWebServer_Destroy(void *object)
 // <param name="user2">The ILibWebServer uses this to pass the ILibWebServer_Session object</param>
 // <param name="PAUSE">Flag to pause data reads on the underlying WebClient engine</param>
 void ILibWebServer_OnResponse(void *WebReaderToken,
-                                int InterruptFlag,
-                                struct packetheader *header,
-                                char *bodyBuffer,
-                                int *beginPointer,
-                                int endPointer,
-                                int done,
-                                void *user1,
-                                void *user2,
-                                int *PAUSE)
+                              int InterruptFlag,
+struct packetheader *header,
+    char *bodyBuffer,
+    int *beginPointer,
+    int endPointer,
+    int done,
+    void *user1,
+    void *user2,
+    int *PAUSE)
 {
     struct ILibWebServer_Session *ws = (struct ILibWebServer_Session*)user2;
     struct ILibWebServer_StateModule *wsm = (struct ILibWebServer_StateModule*)ws->Parent;
-    
+
     char *tmp;
     int tmpLength;
     struct parser_result *pr;
@@ -352,7 +352,7 @@ void ILibWebServer_OnConnect(void *AsyncServerSocketModule, void *ConnectionToke
 {
     struct ILibWebServer_StateModule *wsm = (struct ILibWebServer_StateModule*)ILibAsyncServerSocket_GetTag(AsyncServerSocketModule);
     struct ILibWebServer_Session *ws = (struct ILibWebServer_Session*)malloc(sizeof(struct ILibWebServer_Session));
-    
+
     //
     // Create a new ILibWebServer_Session to represent this connection
     //
@@ -594,17 +594,17 @@ void ILibWebServer_OnSendOK(void *AsyncServerSocketModule,void *ConnectionToken,
 }
 
 /*! \fn ILibWebServer_Create(void *Chain, int MaxConnections, int PortNumber,ILibWebServer_Session_OnSession OnSession, void *User)
-    \brief Constructor for ILibWebServer
-    \param Chain The Chain to add this module to. (Chain must <B>not</B> be running)
-    \param MaxConnections The maximum number of simultaneous connections
-    \param PortNumber The Port number to listen to (0 = Random)
-    \param OnSession Function Pointer to dispatch on when new Sessions are established
-    \param User User state object to pass to OnSession
+\brief Constructor for ILibWebServer
+\param Chain The Chain to add this module to. (Chain must <B>not</B> be running)
+\param MaxConnections The maximum number of simultaneous connections
+\param PortNumber The Port number to listen to (0 = Random)
+\param OnSession Function Pointer to dispatch on when new Sessions are established
+\param User User state object to pass to OnSession
 */
 ILibWebServer_ServerToken ILibWebServer_Create(void *Chain, int MaxConnections, int PortNumber,ILibWebServer_Session_OnSession OnSession, void *User)
 {
     struct ILibWebServer_StateModule *RetVal = (struct ILibWebServer_StateModule*)malloc(sizeof(struct ILibWebServer_StateModule));
-    
+
     memset(RetVal,0,sizeof(struct ILibWebServer_StateModule));
 
     RetVal->Destroy = &ILibWebServer_Destroy;
@@ -638,9 +638,9 @@ ILibWebServer_ServerToken ILibWebServer_Create(void *Chain, int MaxConnections, 
 }
 
 /*! \fn ILibWebServer_GetPortNumber(ILibWebServer_ServerToken WebServerToken)
-    \brief Returns the port number that this module is listening to
-    \param WebServerToken The ILibWebServer to query
-    \returns The listening port number
+\brief Returns the port number that this module is listening to
+\param WebServerToken The ILibWebServer to query
+\returns The listening port number
 */
 unsigned short ILibWebServer_GetPortNumber(ILibWebServer_ServerToken WebServerToken)
 {
@@ -649,10 +649,10 @@ unsigned short ILibWebServer_GetPortNumber(ILibWebServer_ServerToken WebServerTo
 }
 
 /*! \fn ILibWebServer_Send(struct ILibWebServer_Session *session, struct packetheader *packet)
-    \brief Send a response on a Session
-    \param session The ILibWebServer_Session to send the response on
-    \param packet The packet to respond with
-    \returns Flag indicating send status.
+\brief Send a response on a Session
+\param session The ILibWebServer_Session to send the response on
+\param packet The packet to respond with
+\returns Flag indicating send status.
 */
 enum ILibWebServer_Status ILibWebServer_Send(struct ILibWebServer_Session *session, struct packetheader *packet)
 {
@@ -679,13 +679,13 @@ enum ILibWebServer_Status ILibWebServer_Send(struct ILibWebServer_Session *sessi
 }
 
 /*! \fn ILibWebServer_Send_Raw(struct ILibWebServer_Session *session, char *buffer, int bufferSize, int userFree, int done)
-    \brief Send a response on a Session, directly specifying the buffers to send
-    \param session The ILibWebServer_Session to send the response on
-    \param buffer The buffer to send
-    \param bufferSize The length of the buffer
-    \param userFree The ownership flag of the buffer
-    \param done Flag indicating if this is everything
-    \returns Send Status
+\brief Send a response on a Session, directly specifying the buffers to send
+\param session The ILibWebServer_Session to send the response on
+\param buffer The buffer to send
+\param bufferSize The length of the buffer
+\param userFree The ownership flag of the buffer
+\param done Flag indicating if this is everything
+\returns Send Status
 */
 enum ILibWebServer_Status ILibWebServer_Send_Raw(struct ILibWebServer_Session *session, char *buffer, int bufferSize, int userFree, int done)
 {
@@ -707,20 +707,20 @@ enum ILibWebServer_Status ILibWebServer_Send_Raw(struct ILibWebServer_Session *s
 }
 
 /*! \fn ILibWebServer_StreamHeader_Raw(struct ILibWebServer_Session *session, int StatusCode,char *StatusData,char *ResponseHeaders, int ResponseHeaders_FREE)
-    \brief Streams the HTTP header response on a session, directly specifying the buffer
-    \par
-    \b DO \b NOT specify Content-Length or Transfer-Encoding.
-    \param session The ILibWebServer_Session to send the response on
-    \param StatusCode The HTTP status code, eg: \b 200
-    \param StatusData The HTTP status data, eg: \b OK
-    \param ResponseHeaders Additional HTTP header fields
-    \param ResponseHeaders_FREE Ownership flag of the addition http header fields
-    \returns Send Status
+\brief Streams the HTTP header response on a session, directly specifying the buffer
+\par
+\b DO \b NOT specify Content-Length or Transfer-Encoding.
+\param session The ILibWebServer_Session to send the response on
+\param StatusCode The HTTP status code, eg: \b 200
+\param StatusData The HTTP status data, eg: \b OK
+\param ResponseHeaders Additional HTTP header fields
+\param ResponseHeaders_FREE Ownership flag of the addition http header fields
+\returns Send Status
 */
 enum ILibWebServer_Status ILibWebServer_StreamHeader_Raw(struct ILibWebServer_Session *session, int StatusCode,char *StatusData,char *ResponseHeaders, int ResponseHeaders_FREE)
 {
     struct packetheader *hdr;
-    
+
     char *buffer;
     int bufferLength;
     int RetVal;
@@ -765,12 +765,12 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader_Raw(struct ILibWebServer_Se
         }
         else
         {
-        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+            //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
             //
             // Since we are streaming over HTTP/1.0 , we are required to close the socket when done
             //
             session->Reserved6=1;
-        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+            //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
         }
         //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
         if(ResponseHeaders!=NULL && RetVal != ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR && RetVal != ILibWebServer_SEND_RESULTED_IN_DISCONNECT)
@@ -849,12 +849,12 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader_Raw(struct ILibWebServer_Se
 }
 
 /*! \fn ILibWebServer_StreamHeader(struct ILibWebServer_Session *session, struct packetheader *header)
-    \brief Streams the HTTP header response on a session
-    \par
-    \b DO \b NOT specify Transfer-Encoding.
-    \param session The ILibWebServer_Session to send the response on
-    \param header The headers to return
-    \returns Send Status
+\brief Streams the HTTP header response on a session
+\par
+\b DO \b NOT specify Transfer-Encoding.
+\param session The ILibWebServer_Session to send the response on
+\param header The headers to return
+\returns Send Status
 */
 enum ILibWebServer_Status ILibWebServer_StreamHeader(struct ILibWebServer_Session *session, struct packetheader *header)
 {
@@ -871,7 +871,7 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader(struct ILibWebServer_Sessio
 
     hdr = ILibWebClient_GetHeaderFromDataObject(session->Reserved3);
 
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     if(!(hdr->VersionLength==3 && memcmp(hdr->Version,"1.0",3)==0))
     {
         //
@@ -885,7 +885,7 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader(struct ILibWebServer_Sessio
     }
     else
     {
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
         // Check to see if they gave us a Content-Length
         if(ILibGetHeaderLine(hdr,"Content-Length",14)==NULL)
         {
@@ -895,9 +895,9 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader(struct ILibWebServer_Sessio
             //
             session->Reserved6=1;
         }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
     //
     // Grab the bytes and send it
     //
@@ -916,13 +916,13 @@ enum ILibWebServer_Status ILibWebServer_StreamHeader(struct ILibWebServer_Sessio
 }
 
 /*! \fn ILibWebServer_StreamBody(struct ILibWebServer_Session *session, char *buffer, int bufferSize, int userFree, int done)
-    \brief Streams the HTTP body on a session
-    \param session The ILibWebServer_Session to send the response on
-    \param buffer The buffer to send
-    \param bufferSize The size of the buffer
-    \param userFree The ownership flag of the buffer
-    \param done Flag indicating if this is everything
-    \returns Send Status
+\brief Streams the HTTP body on a session
+\param session The ILibWebServer_Session to send the response on
+\param buffer The buffer to send
+\param bufferSize The size of the buffer
+\param userFree The ownership flag of the buffer
+\param done Flag indicating if this is everything
+\returns Send Status
 */
 enum ILibWebServer_Status ILibWebServer_StreamBody(struct ILibWebServer_Session *session, char *buffer, int bufferSize, int userFree, int done)
 {
@@ -941,7 +941,7 @@ enum ILibWebServer_Status ILibWebServer_StreamBody(struct ILibWebServer_Session 
     //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     if(hdr->VersionLength==3 && memcmp(hdr->Version,"1.0",3)==0)
     {
-    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
         //
         // This is HTTP/1.0 , so we don't need to do anything special
         //
@@ -959,7 +959,7 @@ enum ILibWebServer_Status ILibWebServer_StreamBody(struct ILibWebServer_Session 
             //
             RetVal = ILibWebServer_RequestAnswered(session);
         }
-    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     }
     else
     {
@@ -1011,7 +1011,7 @@ enum ILibWebServer_Status ILibWebServer_StreamBody(struct ILibWebServer_Session 
             // These protections with the ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR check is
             // to prevent broken pipe errors
             //
-            
+
         }
         if(done!=0 && RetVal != ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR && RetVal != ILibWebServer_SEND_RESULTED_IN_DISCONNECT &&
             !(hdr->DirectiveLength==4 && strncasecmp(hdr->Directive,"HEAD",4)==0))
@@ -1037,9 +1037,9 @@ enum ILibWebServer_Status ILibWebServer_StreamBody(struct ILibWebServer_Session 
 
 
 /*! \fn ILibWebServer_GetRemoteInterface(struct ILibWebServer_Session *session)
-    \brief Returns the remote interface of an HTTP session
-    \param session The ILibWebServer_Session to query
-    \returns The remote interface
+\brief Returns the remote interface of an HTTP session
+\param session The ILibWebServer_Session to query
+\returns The remote interface
 */
 int ILibWebServer_GetRemoteInterface(struct ILibWebServer_Session *session)
 {
@@ -1047,9 +1047,9 @@ int ILibWebServer_GetRemoteInterface(struct ILibWebServer_Session *session)
 }
 
 /*! \fn ILibWebServer_GetLocalInterface(struct ILibWebServer_Session *session)
-    \brief Returns the local interface of an HTTP session
-    \param session The ILibWebServer_Session to query
-    \returns The local interface
+\brief Returns the local interface of an HTTP session
+\param session The ILibWebServer_Session to query
+\returns The local interface
 */
 int ILibWebServer_GetLocalInterface(struct ILibWebServer_Session *session)
 {
@@ -1057,13 +1057,13 @@ int ILibWebServer_GetLocalInterface(struct ILibWebServer_Session *session)
 }
 
 /*! \fn ILibWebServer_RegisterVirtualDirectory(ILibWebServer_ServerToken WebServerToken, char *vd, int vdLength, ILibWebServer_VirtualDirectory OnVirtualDirectory, void *user)
-    \brief Registers a Virtual Directory with the ILibWebServer
-    \param WebServerToken The ILibWebServer to register with
-    \param vd The virtual directory path
-    \param vdLength The length of the path
-    \param OnVirtualDirectory The Virtual Directory handler
-    \param user User state info to pass on
-    \returns 0 if successful, nonzero otherwise
+\brief Registers a Virtual Directory with the ILibWebServer
+\param WebServerToken The ILibWebServer to register with
+\param vd The virtual directory path
+\param vdLength The length of the path
+\param OnVirtualDirectory The Virtual Directory handler
+\param user User state info to pass on
+\returns 0 if successful, nonzero otherwise
 */
 int ILibWebServer_RegisterVirtualDirectory(ILibWebServer_ServerToken WebServerToken, char *vd, int vdLength, ILibWebServer_VirtualDirectory OnVirtualDirectory, void *user)
 {
@@ -1099,11 +1099,11 @@ int ILibWebServer_RegisterVirtualDirectory(ILibWebServer_ServerToken WebServerTo
 }
 
 /*! \fn ILibWebServer_UnRegisterVirtualDirectory(ILibWebServer_ServerToken WebServerToken, char *vd, int vdLength)
-    \brief UnRegisters a Virtual Directory from the ILibWebServer
-    \param WebServerToken The ILibWebServer to unregister from
-    \param vd The virtual directory path
-    \param vdLength The length of the path
-    \returns 0 if successful, nonzero otherwise
+\brief UnRegisters a Virtual Directory from the ILibWebServer
+\param WebServerToken The ILibWebServer to unregister from
+\param vd The virtual directory path
+\param vdLength The length of the path
+\returns 0 if successful, nonzero otherwise
 */
 int ILibWebServer_UnRegisterVirtualDirectory(ILibWebServer_ServerToken WebServerToken, char *vd, int vdLength)
 {
@@ -1127,8 +1127,8 @@ int ILibWebServer_UnRegisterVirtualDirectory(ILibWebServer_ServerToken WebServer
 }
 
 /*! \fn ILibWebServer_AddRef(struct ILibWebServer_Session *session)
-    \brief Reference Counter for an \a ILibWebServer_Session object
-    \param session The ILibWebServer_Session object
+\brief Reference Counter for an \a ILibWebServer_Session object
+\param session The ILibWebServer_Session object
 */
 void ILibWebServer_AddRef(struct ILibWebServer_Session *session)
 {
@@ -1139,10 +1139,10 @@ void ILibWebServer_AddRef(struct ILibWebServer_Session *session)
 }
 
 /*! \fn ILibWebServer_Release(struct ILibWebServer_Session *session)
-    \brief Decrements reference counter for \a ILibWebServer_Session object
-    \par
-    When the counter reaches 0, the object is freed
-    \param session The ILibWebServer_Session object
+\brief Decrements reference counter for \a ILibWebServer_Session object
+\par
+When the counter reaches 0, the object is freed
+\param session The ILibWebServer_Session object
 */
 void ILibWebServer_Release(struct ILibWebServer_Session *session)
 {
@@ -1176,39 +1176,39 @@ void ILibWebServer_Release(struct ILibWebServer_Session *session)
     }
 }
 /*! \fn void ILibWebServer_DisconnectSession(struct ILibWebServer_Session *session)
-    \brief Terminates an ILibWebServer_Session.
-    \par
-    <B>Note:</B> Normally this should never be called, as the session is automatically
-    managed by the system, such that it can take advantage of persistent connections and such.
-    \param session The ILibWebServer_Session object to disconnect
+\brief Terminates an ILibWebServer_Session.
+\par
+<B>Note:</B> Normally this should never be called, as the session is automatically
+managed by the system, such that it can take advantage of persistent connections and such.
+\param session The ILibWebServer_Session object to disconnect
 */
 void ILibWebServer_DisconnectSession(struct ILibWebServer_Session *session)
 {
     ILibWebClient_Disconnect(session->Reserved3);
 }
 /*! \fn void ILibWebServer_Pause(struct ILibWebServer_Session *session)
-    \brief Pauses the ILibWebServer_Session, such that reading of more data off the network is
-    temporarily suspended.
-    \par
-    <B>Note:</B> This method <B>MUST</B> only be called from either the \a ILibWebServer_Session_OnReceive or \a ILibWebServer_VirtualDirectory handlers.
-    \param session The ILibWebServer_Session object to pause.
+\brief Pauses the ILibWebServer_Session, such that reading of more data off the network is
+temporarily suspended.
+\par
+<B>Note:</B> This method <B>MUST</B> only be called from either the \a ILibWebServer_Session_OnReceive or \a ILibWebServer_VirtualDirectory handlers.
+\param session The ILibWebServer_Session object to pause.
 */
 void ILibWebServer_Pause(struct ILibWebServer_Session *session)
 {
     ILibWebClient_Pause(session->Reserved3);
 }
 /*! \fn void ILibWebServer_Resume(struct ILibWebServer_Session *session)
-    \brief Resumes a paused ILibWebServer_Session object.
-    \param session The ILibWebServer_Session object to resume.
+\brief Resumes a paused ILibWebServer_Session object.
+\param session The ILibWebServer_Session object to resume.
 */
 void ILibWebServer_Resume(struct ILibWebServer_Session *session)
 {
     ILibWebClient_Resume(session->Reserved3);
 }
 /*! \fn void ILibWebServer_OverrideReceiveHandler(struct ILibWebServer_Session *session, ILibWebServer_Session_OnReceive OnReceive)
-    \brief Overrides the Receive handler, so that the passed in handler will get called whenever data is received.
-    \param session The ILibWebServer_Session to hijack.
-    \param OnReceive The handler to handle the received data
+\brief Overrides the Receive handler, so that the passed in handler will get called whenever data is received.
+\param session The ILibWebServer_Session to hijack.
+\param OnReceive The handler to handle the received data
 */
 void ILibWebServer_OverrideReceiveHandler(struct ILibWebServer_Session *session, ILibWebServer_Session_OnReceive OnReceive)
 {
