@@ -1,35 +1,5 @@
-/*
- * INTEL CONFIDENTIAL
- * Copyright (c) 2002 - 2005 Intel Corporation.  All rights reserved.
- * 
- * The source code contained or described herein and all documents
- * related to the source code ("Material") are owned by Intel
- * Corporation or its suppliers or licensors.  Title to the
- * Material remains with Intel Corporation or its suppliers and
- * licensors.  The Material contains trade secrets and proprietary
- * and confidential information of Intel or its suppliers and
- * licensors. The Material is protected by worldwide copyright and
- * trade secret laws and treaty provisions.  No part of the Material
- * may be used, copied, reproduced, modified, published, uploaded,
- * posted, transmitted, distributed, or disclosed in any way without
- * Intel's prior express written permission.
- 
- * No license under any patent, copyright, trade secret or other
- * intellectual property right is granted to or conferred upon you
- * by disclosure or delivery of the Materials, either expressly, by
- * implication, inducement, estoppel or otherwise. Any license
- * under such intellectual property rights must be express and
- * approved by Intel in writing.
- * 
- * $Workfile: $
- * $Revision: 1.21 $
- * $Author: byroe $
- * $Date: 2007/03/16 21:00:31 $
- *
- */
-
 #if defined(WIN32)
-	#define _CRTDBG_MAP_ALLOC
+    #define _CRTDBG_MAP_ALLOC
 #endif
 
 /* DMR related includes */
@@ -98,7 +68,7 @@
 /* Internal State of an DMR Instance */
 typedef struct _internalState
 {
-	/* UPnP Internal State */
+    /* UPnP Internal State */
     void *DMR_microStackChain;
     void *DMR_microStack;
     void *DMR_Monitor;
@@ -108,7 +78,7 @@ typedef struct _internalState
     unsigned short seconds;
     unsigned short port;
 
-	/* Static for given instance of DMR. */
+    /* Static for given instance of DMR. */
     char* FriendlyName;
     char* SerialNumber;
     char* ProtocolInfo;
@@ -122,7 +92,7 @@ typedef struct _internalState
     DMR_EventContextSwitch  EventsOnThreadBitMask;
 
     /**********************************************************************/
-	/* Private State Variable Storage Fields for LastChange Eventing Only */
+    /* Private State Variable Storage Fields for LastChange Eventing Only */
     unsigned long LastChangeMask;
 #if defined(INCLUDE_FEATURE_DISPLAY)
     unsigned short Brightness;
@@ -213,7 +183,7 @@ ContextMethodCall _createMethod(DMR_EventContextSwitch methodID, DMR instance, D
 /* Convert a metadata string to a CdsObject. */
 struct CdsObject* _metadataToCDS(char* metadata)
 {
-	struct CdsObject* result = NULL;
+    struct CdsObject* result = NULL;
     struct ILibXMLNode* root = NULL;
     if(metadata == NULL)
     {
@@ -228,15 +198,15 @@ struct CdsObject* _metadataToCDS(char* metadata)
     {
         if(ILibProcessXMLNodeList(root) == 0)
         {
-			struct ILibXMLNode* item = root->Next;
+            struct ILibXMLNode* item = root->Next;
             if(item != NULL && strncmp(item->Name, "item", item->NameLength) == 0)
             {
                 struct CdsObject* CDS = NULL;
                 struct ILibXMLAttribute* attrs = ILibGetXMLAttributes(item);
 
-				// >>> Not sure why I need to do this???  Possible bug in the 'CDS_DeserializeDidlToObject'.
+                // >>> Not sure why I need to do this???  Possible bug in the 'CDS_DeserializeDidlToObject'.
                 //item->Name[item->NameLength] = '\0';
-				// <<< end block
+                // <<< end block
 
                 CDS = CDS_DeserializeDidlToObject(item, attrs, 1, metadata, metadata + strlen(metadata));
 
@@ -535,7 +505,7 @@ void DMR_Lock(DMR instance)
     if(CheckThis(instance) == DMR_ERROR_OK)
     {
         DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-		sem_wait(&state->resourceLock);
+        sem_wait(&state->resourceLock);
     }
 }
 
@@ -544,7 +514,7 @@ void DMR_Unlock(DMR instance)
     if(CheckThis(instance) == DMR_ERROR_OK)
     {
         DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-		sem_post(&state->resourceLock);
+        sem_post(&state->resourceLock);
     }
 }
 /****************************************************************************/
@@ -554,9 +524,9 @@ void DMR_Unlock(DMR instance)
 /* ConnectionManager SOAP Action Callbacks */
 void DMR_ConnectionManager_GetCurrentConnectionIDs(DMR_SessionToken upnptoken)
 {
-	ERROROUT1("Invoke: DMR_ConnectionManager_GetCurrentConnectionIDs();\r\n");
+    ERROROUT1("Invoke: DMR_ConnectionManager_GetCurrentConnectionIDs();\r\n");
 
-	DMR_Response_ConnectionManager_GetCurrentConnectionIDs(upnptoken, "0");
+    DMR_Response_ConnectionManager_GetCurrentConnectionIDs(upnptoken, "0");
 }
 
 void DMR_ConnectionManager_GetCurrentConnectionInfo(DMR_SessionToken upnptoken, int ConnectionID)
@@ -568,26 +538,26 @@ void DMR_ConnectionManager_GetCurrentConnectionInfo(DMR_SessionToken upnptoken, 
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
-	if(ConnectionID != 0)
-	{
-		DMR_Response_Error(upnptoken, 706, "Invalid connection reference");
+    if(ConnectionID != 0)
+    {
+        DMR_Response_Error(upnptoken, 706, "Invalid connection reference");
         return;
     }
 
-	if(state->AVTransportURI != NULL && state->CurrentTrackURI != NULL)
-	{
-	    ContextMethodCall method = NULL;
-	    method = _createMethod(DMR_ECS_GETAVPROTOCOLINFO, instance, upnptoken);
-	    CallMethodThroughThreadPool(instance, method);
-	}
-	else
-	{
-		DMR_Response_ConnectionManager_GetCurrentConnectionInfo(upnptoken, 0, 0, "", "", -1, "Input", "OK");
-	}
+    if(state->AVTransportURI != NULL && state->CurrentTrackURI != NULL)
+    {
+        ContextMethodCall method = NULL;
+        method = _createMethod(DMR_ECS_GETAVPROTOCOLINFO, instance, upnptoken);
+        CallMethodThroughThreadPool(instance, method);
+    }
+    else
+    {
+        DMR_Response_ConnectionManager_GetCurrentConnectionInfo(upnptoken, 0, 0, "", "", -1, "Input", "OK");
+    }
 }
 
 void DMR_ConnectionManager_GetProtocolInfo(DMR_SessionToken upnptoken)
@@ -599,7 +569,7 @@ void DMR_ConnectionManager_GetProtocolInfo(DMR_SessionToken upnptoken)
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -616,17 +586,17 @@ void DMR_AVTransport_GetCurrentTransportActions(DMR_SessionToken upnptoken,unsig
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT2("Invoke: DMR_AVTransport_GetCurrentTransportActions(%u);\r\n",InstanceID);
+    ERROROUT2("Invoke: DMR_AVTransport_GetCurrentTransportActions(%u);\r\n",InstanceID);
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -634,7 +604,7 @@ void DMR_AVTransport_GetCurrentTransportActions(DMR_SessionToken upnptoken,unsig
     actions = FromTransportActionsToString(state->CurrentTransportActions);
     DMR_Unlock(instance);
 
-	DMR_Response_AVTransport_GetCurrentTransportActions(upnptoken, (const char*)actions);
+    DMR_Response_AVTransport_GetCurrentTransportActions(upnptoken, (const char*)actions);
 
     String_Destroy(actions);
 }
@@ -645,238 +615,238 @@ void DMR_AVTransport_GetDeviceCapabilities(DMR_SessionToken upnptoken,unsigned i
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
     ERROROUT2("Invoke: DMR_AVTransport_GetDeviceCapabilities(%u);\r\n",InstanceID);
-	
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
-	DMR_Response_AVTransport_GetDeviceCapabilities(upnptoken, state->PlayMedia, state->RecMedia, state->RecQualityModes);
+    DMR_Response_AVTransport_GetDeviceCapabilities(upnptoken, state->PlayMedia, state->RecMedia, state->RecQualityModes);
 }
 
 int _MakeCdsObjectConformant(struct CdsObject* metadata)
 {
-	int result = 0;
-	struct CdsResource* res = metadata->Res;
-	int length = 0;
+    int result = 0;
+    struct CdsResource* res = metadata->Res;
+    int length = 0;
 
-	if(metadata->Creator != NULL)
-	{
-		length = ILibXmlEscapeLength(metadata->Creator);
-		if(length >= 1024)
-		{
-			int tmpLen = 0;
-			char* tmp = NULL;
-			tmpLen = ILibXmlEscape(tmp, metadata->Creator);
-			tmp[1024] = 0;
-			tmpLen = ILibInPlaceXmlUnEscape(tmp);
-			ILibString_Copy(metadata->Creator, tmpLen);
-			metadata->Creator[tmpLen] = 0;
-			free(tmp);
-		}
-	}
+    if(metadata->Creator != NULL)
+    {
+        length = ILibXmlEscapeLength(metadata->Creator);
+        if(length >= 1024)
+        {
+            int tmpLen = 0;
+            char* tmp = NULL;
+            tmpLen = ILibXmlEscape(tmp, metadata->Creator);
+            tmp[1024] = 0;
+            tmpLen = ILibInPlaceXmlUnEscape(tmp);
+            ILibString_Copy(metadata->Creator, tmpLen);
+            metadata->Creator[tmpLen] = 0;
+            free(tmp);
+        }
+    }
 
-	if(metadata->ParentID != NULL)
-	{
-		length = ILibXmlEscapeLength(metadata->ParentID);
-		if(length >= 1024)
-		{
-			int tmpLen = 0;
-			char* tmp = NULL;
-			tmpLen = ILibXmlEscape(tmp, metadata->ParentID);
-			tmp[1024] = 0;
-			tmpLen = ILibInPlaceXmlUnEscape(tmp);
-			ILibString_Copy(metadata->ParentID, tmpLen);
-			metadata->ParentID[tmpLen] = 0;
-			free(tmp);
-			result = 1;
-		}
-	}
+    if(metadata->ParentID != NULL)
+    {
+        length = ILibXmlEscapeLength(metadata->ParentID);
+        if(length >= 1024)
+        {
+            int tmpLen = 0;
+            char* tmp = NULL;
+            tmpLen = ILibXmlEscape(tmp, metadata->ParentID);
+            tmp[1024] = 0;
+            tmpLen = ILibInPlaceXmlUnEscape(tmp);
+            ILibString_Copy(metadata->ParentID, tmpLen);
+            metadata->ParentID[tmpLen] = 0;
+            free(tmp);
+            result = 1;
+        }
+    }
 
-	if(metadata->Title != NULL)
-	{
-		length = ILibXmlEscapeLength(metadata->Title);
-		if(length >= 256)
-		{
-			int tmpLen = 0;
-			char* tmp = NULL;
-			tmpLen = ILibXmlEscape(tmp, metadata->Title);
-			tmp[256] = 0;
-			tmpLen = ILibInPlaceXmlUnEscape(tmp);
-			ILibString_Copy(metadata->Title, tmpLen);
-			metadata->Title[tmpLen] = 0;
-			free(tmp);
-		}
-	}
+    if(metadata->Title != NULL)
+    {
+        length = ILibXmlEscapeLength(metadata->Title);
+        if(length >= 256)
+        {
+            int tmpLen = 0;
+            char* tmp = NULL;
+            tmpLen = ILibXmlEscape(tmp, metadata->Title);
+            tmp[256] = 0;
+            tmpLen = ILibInPlaceXmlUnEscape(tmp);
+            ILibString_Copy(metadata->Title, tmpLen);
+            metadata->Title[tmpLen] = 0;
+            free(tmp);
+        }
+    }
 
-	while(res != NULL)
-	{
-		if(res->IfoFileUri != NULL)
-		{
-			length = ILibXmlEscapeLength(res->IfoFileUri);
-			if(length >= 1024)
-			{
-				int tmpLen = 0;
-				char* tmp = NULL;
-				tmpLen = ILibXmlEscape(tmp, res->IfoFileUri);
-				tmp[1024] = 0;
-				tmpLen = ILibInPlaceXmlUnEscape(tmp);
-				ILibString_Copy(res->IfoFileUri, tmpLen);
-				res->IfoFileUri[tmpLen] = 0;
-				free(tmp);
-				result = 1;
-			}
-		}
-		if(res->ImportIfoFileUri != NULL)
-		{
-			length = ILibXmlEscapeLength(res->ImportIfoFileUri);
-			if(length >= 1024)
-			{
-				int tmpLen = 0;
-				char* tmp = NULL;
-				tmpLen = ILibXmlEscape(tmp, res->ImportIfoFileUri);
-				tmp[1024] = 0;
-				tmpLen = ILibInPlaceXmlUnEscape(tmp);
-				ILibString_Copy(res->ImportIfoFileUri, tmpLen);
-				res->ImportIfoFileUri[tmpLen] = 0;
-				free(tmp);
-				result = 1;
-			}
-		}
-		if(res->ImportUri != NULL)
-		{
-			length = ILibXmlEscapeLength(res->ImportUri);
-			if(length >= 1024)
-			{
-				int tmpLen = 0;
-				char* tmp = NULL;
-				tmpLen = ILibXmlEscape(tmp, res->ImportUri);
-				tmp[1024] = 0;
-				tmpLen = ILibInPlaceXmlUnEscape(tmp);
-				ILibString_Copy(res->ImportUri, tmpLen);
-				res->ImportUri[tmpLen] = 0;
-				free(tmp);
-				result = 1;
-			}
-		}
-		if(res->ProtocolInfo != NULL)
-		{
-			length = ILibXmlEscapeLength(res->ImportUri);
-			if(length >= 1024)
-			{
-				int tmpLen = 0;
-				char* tmp = NULL;
-				tmpLen = ILibXmlEscape(tmp, res->ImportUri);
-				tmp[1024] = 0;
-				tmpLen = ILibInPlaceXmlUnEscape(tmp);
-				ILibString_Copy(res->ImportUri, tmpLen);
-				res->ImportUri[tmpLen] = 0;
-				free(tmp);
-				result = 1;
-			}
-		}
-		if(res->Value != NULL)
-		{
-			length = ILibXmlEscapeLength(res->Value);
-			if(length >= 1024)
-			{
-				int tmpLen = 0;
-				char* tmp = NULL;
-				tmpLen = ILibXmlEscape(tmp, res->Value);
-				tmp[1024] = 0;
-				tmpLen = ILibInPlaceXmlUnEscape(tmp);
-				ILibString_Copy(res->Value, tmpLen);
-				res->Value[tmpLen] = 0;
-				free(tmp);
-				result = 1;
-			}
-		}
-		res = res->Next;
-	}
+    while(res != NULL)
+    {
+        if(res->IfoFileUri != NULL)
+        {
+            length = ILibXmlEscapeLength(res->IfoFileUri);
+            if(length >= 1024)
+            {
+                int tmpLen = 0;
+                char* tmp = NULL;
+                tmpLen = ILibXmlEscape(tmp, res->IfoFileUri);
+                tmp[1024] = 0;
+                tmpLen = ILibInPlaceXmlUnEscape(tmp);
+                ILibString_Copy(res->IfoFileUri, tmpLen);
+                res->IfoFileUri[tmpLen] = 0;
+                free(tmp);
+                result = 1;
+            }
+        }
+        if(res->ImportIfoFileUri != NULL)
+        {
+            length = ILibXmlEscapeLength(res->ImportIfoFileUri);
+            if(length >= 1024)
+            {
+                int tmpLen = 0;
+                char* tmp = NULL;
+                tmpLen = ILibXmlEscape(tmp, res->ImportIfoFileUri);
+                tmp[1024] = 0;
+                tmpLen = ILibInPlaceXmlUnEscape(tmp);
+                ILibString_Copy(res->ImportIfoFileUri, tmpLen);
+                res->ImportIfoFileUri[tmpLen] = 0;
+                free(tmp);
+                result = 1;
+            }
+        }
+        if(res->ImportUri != NULL)
+        {
+            length = ILibXmlEscapeLength(res->ImportUri);
+            if(length >= 1024)
+            {
+                int tmpLen = 0;
+                char* tmp = NULL;
+                tmpLen = ILibXmlEscape(tmp, res->ImportUri);
+                tmp[1024] = 0;
+                tmpLen = ILibInPlaceXmlUnEscape(tmp);
+                ILibString_Copy(res->ImportUri, tmpLen);
+                res->ImportUri[tmpLen] = 0;
+                free(tmp);
+                result = 1;
+            }
+        }
+        if(res->ProtocolInfo != NULL)
+        {
+            length = ILibXmlEscapeLength(res->ImportUri);
+            if(length >= 1024)
+            {
+                int tmpLen = 0;
+                char* tmp = NULL;
+                tmpLen = ILibXmlEscape(tmp, res->ImportUri);
+                tmp[1024] = 0;
+                tmpLen = ILibInPlaceXmlUnEscape(tmp);
+                ILibString_Copy(res->ImportUri, tmpLen);
+                res->ImportUri[tmpLen] = 0;
+                free(tmp);
+                result = 1;
+            }
+        }
+        if(res->Value != NULL)
+        {
+            length = ILibXmlEscapeLength(res->Value);
+            if(length >= 1024)
+            {
+                int tmpLen = 0;
+                char* tmp = NULL;
+                tmpLen = ILibXmlEscape(tmp, res->Value);
+                tmp[1024] = 0;
+                tmpLen = ILibInPlaceXmlUnEscape(tmp);
+                ILibString_Copy(res->Value, tmpLen);
+                res->Value[tmpLen] = 0;
+                free(tmp);
+                result = 1;
+            }
+        }
+        res = res->Next;
+    }
 
-	return result;
+    return result;
 }
 
 char* _MakeMetadataConformant(char* original)
 {
-	char* result = NULL; 
-	if(original != NULL)
-	{
-		int length = (int)strlen(original);
-		struct ILibXMLNode* root = NULL;
-		
-		root = ILibParseXML(original, 0, length);
-		if(root != NULL && ILibProcessXMLNodeList(root) == 0)
-		{
-			ILibXML_BuildNamespaceLookupTable(root);
-			if(root->Next != NULL)
-			{
-				struct ILibXMLAttribute* attrs = ILibGetXMLAttributes(root->Next);
-				int item = 0;
-				struct CdsObject* object = NULL;
-				if(root->Next->NameLength == 4 && strncmp(root->Next->Name, "item", root->Next->NameLength) == 0)
-				{
-					item = 1;
-				}
+    char* result = NULL; 
+    if(original != NULL)
+    {
+        int length = (int)strlen(original);
+        struct ILibXMLNode* root = NULL;
+        
+        root = ILibParseXML(original, 0, length);
+        if(root != NULL && ILibProcessXMLNodeList(root) == 0)
+        {
+            ILibXML_BuildNamespaceLookupTable(root);
+            if(root->Next != NULL)
+            {
+                struct ILibXMLAttribute* attrs = ILibGetXMLAttributes(root->Next);
+                int item = 0;
+                struct CdsObject* object = NULL;
+                if(root->Next->NameLength == 4 && strncmp(root->Next->Name, "item", root->Next->NameLength) == 0)
+                {
+                    item = 1;
+                }
 
-				object = CDS_DeserializeDidlToObject(root->Next, attrs, item, original, original + length);
+                object = CDS_DeserializeDidlToObject(root->Next, attrs, item, original, original + length);
 
-				if(attrs != NULL)
-				{
-					ILibDestructXMLAttributeList(attrs);
-				}
-				ILibDestructXMLNodeList(root);
+                if(attrs != NULL)
+                {
+                    ILibDestructXMLAttributeList(attrs);
+                }
+                ILibDestructXMLNodeList(root);
 
-				if(object != NULL)
-				{
-					int error = 0;
+                if(object != NULL)
+                {
+                    int error = 0;
 
-					if(_MakeCdsObjectConformant(object) == 0)
-					{
-						result = CDS_SerializeObjectToDidl(object, 0, CDS_ConvertCsvStringToBitString("*"), 1, &error); 
-						if(result == NULL)
-						{
-							result = String_Create("");
-						}
-					}
-					else
-					{
-						result = String_Create("");
-					}
-				}
-				else
-				{
-					result = String_Create("");
-				}
-			}
-			else
-			{
-				ILibDestructXMLNodeList(root);
-				result = String_Create("");
-			}
-		}
-		else
-		{
-			result = String_Create("");
-			if(root!=NULL)
-			{
-				ILibDestructXMLNodeList(root);
-			}
-		}
-	}
-	else
-	{
-		result = String_Create("");
-	}
+                    if(_MakeCdsObjectConformant(object) == 0)
+                    {
+                        result = CDS_SerializeObjectToDidl(object, 0, CDS_ConvertCsvStringToBitString("*"), 1, &error); 
+                        if(result == NULL)
+                        {
+                            result = String_Create("");
+                        }
+                    }
+                    else
+                    {
+                        result = String_Create("");
+                    }
+                }
+                else
+                {
+                    result = String_Create("");
+                }
+            }
+            else
+            {
+                ILibDestructXMLNodeList(root);
+                result = String_Create("");
+            }
+        }
+        else
+        {
+            result = String_Create("");
+            if(root!=NULL)
+            {
+                ILibDestructXMLNodeList(root);
+            }
+        }
+    }
+    else
+    {
+        result = String_Create("");
+    }
 
-	return result;
+    return result;
 }
 
 void DMR_AVTransport_GetMediaInfo(DMR_SessionToken upnptoken,unsigned int InstanceID)
@@ -888,17 +858,17 @@ void DMR_AVTransport_GetMediaInfo(DMR_SessionToken upnptoken,unsigned int Instan
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT2("Invoke: DMR_AVTransport_GetMediaInfo(%u);\r\n", InstanceID);
-	
+    ERROROUT2("Invoke: DMR_AVTransport_GetMediaInfo(%u);\r\n", InstanceID);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -912,13 +882,13 @@ void DMR_AVTransport_GetMediaInfo(DMR_SessionToken upnptoken,unsigned int Instan
     DMR_Response_AVTransport_GetMediaInfo(upnptoken,
         maxTracks,
         (const char*)mediaDuration,
-		(const char*)uri,
-		(const char*)metadata,
-		"NOT_IMPLEMENTED",
-		"NOT_IMPLEMENTED",
-		"NOT_IMPLEMENTED",
-		"NOT_IMPLEMENTED",
-		"NOT_IMPLEMENTED");
+        (const char*)uri,
+        (const char*)metadata,
+        "NOT_IMPLEMENTED",
+        "NOT_IMPLEMENTED",
+        "NOT_IMPLEMENTED",
+        "NOT_IMPLEMENTED",
+        "NOT_IMPLEMENTED");
 
     String_Destroy(mediaDuration);
     String_Destroy(uri);
@@ -936,17 +906,17 @@ void DMR_AVTransport_GetPositionInfo(DMR_SessionToken upnptoken,unsigned int Ins
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT2("Invoke: DMR_AVTransport_GetPositionInfo(%u);\r\n",InstanceID);
-	
+    ERROROUT2("Invoke: DMR_AVTransport_GetPositionInfo(%u);\r\n",InstanceID);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -955,25 +925,25 @@ void DMR_AVTransport_GetPositionInfo(DMR_SessionToken upnptoken,unsigned int Ins
     trackDuration = MillisecondsToTimeString(state->CurrentTrackDuration);
     trackMetaData = _MakeMetadataConformant(state->CurrentTrackMetaData); //String_Create((const char*)state->CurrentTrackMetaData);
     trackURI = String_Create((const char*)state->CurrentTrackURI);
-	if(state->RelativeTimePosition < 0)
-	{
-		relTime = String_Create("NOT_IMPLEMENTED");
-	}
-	else
-	{
-		relTime = MillisecondsToTimeString(state->RelativeTimePosition);
-	}
-	if(state->AbsoluteTimePosition < 0)
-	{
-		absTime = String_Create("NOT_IMPLEMENTED");
-	}
-	else
-	{
-		absTime = MillisecondsToTimeString(state->AbsoluteTimePosition);
-	}
+    if(state->RelativeTimePosition < 0)
+    {
+        relTime = String_Create("NOT_IMPLEMENTED");
+    }
+    else
+    {
+        relTime = MillisecondsToTimeString(state->RelativeTimePosition);
+    }
+    if(state->AbsoluteTimePosition < 0)
+    {
+        absTime = String_Create("NOT_IMPLEMENTED");
+    }
+    else
+    {
+        absTime = MillisecondsToTimeString(state->AbsoluteTimePosition);
+    }
     DMR_Unlock(instance);
 
-	DMR_Response_AVTransport_GetPositionInfo(upnptoken, track, (const char*)trackDuration, (const char*)trackMetaData, (const char*)trackURI, (const char*)relTime, (const char*)absTime, 0x7fffffff, 0x7fffffff);
+    DMR_Response_AVTransport_GetPositionInfo(upnptoken, track, (const char*)trackDuration, (const char*)trackMetaData, (const char*)trackURI, (const char*)relTime, (const char*)absTime, 0x7fffffff, 0x7fffffff);
 
     String_Destroy(trackDuration);
     String_Destroy(trackMetaData);
@@ -991,16 +961,16 @@ void DMR_AVTransport_GetTransportInfo(DMR_SessionToken upnptoken,unsigned int In
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
     ERROROUT2("Invoke: DMR_AVTransport_GetTransportInfo(%u);\r\n", InstanceID);
-	
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1024,16 +994,16 @@ void DMR_AVTransport_GetTransportSettings(DMR_SessionToken upnptoken,unsigned in
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
     ERROROUT2("Invoke: DMR_AVTransport_GetTransportSettings(%u);\r\n",InstanceID);
-	
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1041,7 +1011,7 @@ void DMR_AVTransport_GetTransportSettings(DMR_SessionToken upnptoken,unsigned in
     playMode = FromMediaPlayModeToString(state->CurrentPlayMode);
     DMR_Unlock(instance);
 
-	DMR_Response_AVTransport_GetTransportSettings(upnptoken, (const char*)playMode, "NOT_IMPLEMENTED");
+    DMR_Response_AVTransport_GetTransportSettings(upnptoken, (const char*)playMode, "NOT_IMPLEMENTED");
 
     String_Destroy(playMode);
 }
@@ -1052,17 +1022,17 @@ void DMR_AVTransport_Next(DMR_SessionToken upnptoken,unsigned int InstanceID)
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT2("Invoke: DMR_AVTransport_Next(%u);\r\n",InstanceID);
+    ERROROUT2("Invoke: DMR_AVTransport_Next(%u);\r\n",InstanceID);
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1077,17 +1047,17 @@ void DMR_AVTransport_Pause(DMR_SessionToken upnptoken,unsigned int InstanceID)
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT2("Invoke: DMR_AVTransport_Pause(%u);\r\n",InstanceID);
-	
+    ERROROUT2("Invoke: DMR_AVTransport_Pause(%u);\r\n",InstanceID);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1102,17 +1072,17 @@ void DMR_AVTransport_Play(DMR_SessionToken upnptoken,unsigned int InstanceID,cha
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT3("Invoke: DMR_AVTransport_Play(%u,%s);\r\n",InstanceID,Speed);
-	
+    ERROROUT3("Invoke: DMR_AVTransport_Play(%u,%s);\r\n",InstanceID,Speed);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1128,17 +1098,17 @@ void DMR_AVTransport_Previous(DMR_SessionToken upnptoken,unsigned int InstanceID
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT2("Invoke: DMR_AVTransport_Previous(%u);\r\n",InstanceID);
+    ERROROUT2("Invoke: DMR_AVTransport_Previous(%u);\r\n",InstanceID);
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1158,13 +1128,13 @@ void DMR_AVTransport_Seek(DMR_SessionToken upnptoken,unsigned int InstanceID,cha
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
     if(strcmp(Unit, "TRACK_NR") == 0)
@@ -1213,20 +1183,20 @@ void DMR_AVTransport_SetAVTransportURI(DMR_SessionToken upnptoken, unsigned int 
     struct CdsObject* CDS = NULL;
     ContextMethodCall method = NULL;
 
-	ERROROUT4("Invoke: DMR_AVTransport_SetAVTransportURI(%u,%s,%s);\r\n", InstanceID, CurrentURI, CurrentURIMetaData);
+    ERROROUT4("Invoke: DMR_AVTransport_SetAVTransportURI(%u,%s,%s);\r\n", InstanceID, CurrentURI, CurrentURIMetaData);
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-	
+    
     method = _createMethod(DMR_ECS_SETAVTRANSPORTURI, instance, upnptoken);
     _addMethodParameter(method, (METHOD_PARAM)CurrentURI);
     CDS = _metadataToCDS(CurrentURIMetaData);
@@ -1239,24 +1209,24 @@ void DMR_AVTransport_SetPlayMode(DMR_SessionToken upnptoken,unsigned int Instanc
 {
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-	DMR_MediaPlayMode mode = -1;
+    DMR_MediaPlayMode mode = -1;
     ContextMethodCall method = NULL;
 
-	ERROROUT3("Invoke: DMR_AVTransport_SetPlayMode(%u,%s);\r\n",InstanceID,NewPlayMode);
-	
+    ERROROUT3("Invoke: DMR_AVTransport_SetPlayMode(%u,%s);\r\n",InstanceID,NewPlayMode);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
 
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
-	mode = FromStringToMediaPlayMode(NewPlayMode);
+    mode = FromStringToMediaPlayMode(NewPlayMode);
 
     method = _createMethod(DMR_ECS_SETPLAYMODE, instance, upnptoken);
     _addMethodParameter(method, (METHOD_PARAM)mode);
@@ -1270,17 +1240,17 @@ void DMR_AVTransport_Stop(DMR_SessionToken upnptoken,unsigned int InstanceID)
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT2("Invoke: DMR_AVTransport_Stop(%u);\r\n",InstanceID);
+    ERROROUT2("Invoke: DMR_AVTransport_Stop(%u);\r\n",InstanceID);
 
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 718, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1301,17 +1271,17 @@ void DMR_RenderingControl_ListPresets(DMR_SessionToken upnptoken, unsigned int I
     int listLen = 0;
     int i;
 
-	ERROROUT2("Invoke: DMR_RenderingControl_ListPresets(%u);\r\n",InstanceID);
-	
+    ERROROUT2("Invoke: DMR_RenderingControl_ListPresets(%u);\r\n",InstanceID);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1334,7 +1304,7 @@ void DMR_RenderingControl_ListPresets(DMR_SessionToken upnptoken, unsigned int I
         }
     }
 
-	DMR_Response_RenderingControl_ListPresets(upnptoken, (const char*)list);
+    DMR_Response_RenderingControl_ListPresets(upnptoken, (const char*)list);
 
     String_Destroy(list);
 }
@@ -1345,17 +1315,17 @@ void DMR_RenderingControl_SelectPreset(DMR_SessionToken upnptoken, unsigned int 
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT3("Invoke: DMR_RenderingControl_SelectPreset(%u,%s);\r\n", InstanceID, PresetName);
-	
+    ERROROUT3("Invoke: DMR_RenderingControl_SelectPreset(%u,%s);\r\n", InstanceID, PresetName);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1372,19 +1342,19 @@ void DMR_RenderingControl_GetBrightness(DMR_SessionToken upnptoken, unsigned int
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
     ERROROUT2("Invoke: DMR_RenderingControl_GetBrightness(%u);\r\n", InstanceID);
-	
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-	
+    
     DMR_Response_RenderingControl_GetBrightness(upnptoken, state->Brightness);
 }
 
@@ -1393,20 +1363,20 @@ void DMR_RenderingControl_GetContrast(DMR_SessionToken upnptoken,unsigned int In
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT2("Invoke: DMR_RenderingControl_GetContrast(%u);\r\n", InstanceID);
-	
+    ERROROUT2("Invoke: DMR_RenderingControl_GetContrast(%u);\r\n", InstanceID);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-	
+    
     DMR_Response_RenderingControl_GetContrast(upnptoken, state->Contrast);
 }
 
@@ -1416,17 +1386,17 @@ void DMR_RenderingControl_SetBrightness(DMR_SessionToken upnptoken, unsigned int
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT3("Invoke: DMR_RenderingControl_SetBrightness(%u,%u);\r\n", InstanceID, DesiredBrightness);
-	
+    ERROROUT3("Invoke: DMR_RenderingControl_SetBrightness(%u,%u);\r\n", InstanceID, DesiredBrightness);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1442,17 +1412,17 @@ void DMR_RenderingControl_SetContrast(DMR_SessionToken upnptoken, unsigned int I
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT3("Invoke: DMR_RenderingControl_SetContrast(%u,%u);\r\n", InstanceID, DesiredContrast);
-	
+    ERROROUT3("Invoke: DMR_RenderingControl_SetContrast(%u,%u);\r\n", InstanceID, DesiredContrast);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
@@ -1469,26 +1439,26 @@ void DMR_RenderingControl_GetMute(DMR_SessionToken upnptoken, unsigned int Insta
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT3("Invoke: DMR_RenderingControl_GetMute(%u,%s);\r\n",InstanceID,Channel);
-	
+    ERROROUT3("Invoke: DMR_RenderingControl_GetMute(%u,%s);\r\n",InstanceID,Channel);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
     if(strcmp(Channel, "Master") != 0)
     {
-		DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
+        DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
         return;
     }
-	
+    
     DMR_Response_RenderingControl_GetMute(upnptoken, state->Mute?1:0);
 }
 
@@ -1497,26 +1467,26 @@ void DMR_RenderingControl_GetVolume(DMR_SessionToken upnptoken, unsigned int Ins
     DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
 
-	ERROROUT3("Invoke: DMR_RenderingControl_GetVolume(%u,%s);\r\n", InstanceID, Channel);
-	
+    ERROROUT3("Invoke: DMR_RenderingControl_GetVolume(%u,%s);\r\n", InstanceID, Channel);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
     if(strcmp(Channel, "Master") != 0)
     {
-		DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
+        DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
         return;
     }
-	
+    
     DMR_Response_RenderingControl_GetVolume(upnptoken, state->Volume);
 }
 
@@ -1527,22 +1497,22 @@ void DMR_RenderingControl_SetMute(DMR_SessionToken upnptoken,unsigned int Instan
     ContextMethodCall method = NULL;
 
     ERROROUT4("Invoke: DMR_RenderingControl_SetMute(%u,%s,%d);\r\n", InstanceID, Channel, DesiredMute);
-	
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
-	
+    
     if(CheckThis(instance) != DMR_ERROR_OK)
     {
-    	DMR_Response_Error(upnptoken, 501, "Action Failed");
+        DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
 
     if(strcmp(Channel, "Master") != 0)
     {
-		DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
+        DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
         return;
     }
 
@@ -1558,20 +1528,20 @@ void DMR_RenderingControl_SetVolume(DMR_SessionToken upnptoken,unsigned int Inst
     DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
-	ERROROUT4("Invoke: DMR_RenderingControl_SetVolume(%u,%s,%u);\r\n",InstanceID,Channel,DesiredVolume);
-	
+    ERROROUT4("Invoke: DMR_RenderingControl_SetVolume(%u,%s,%u);\r\n",InstanceID,Channel,DesiredVolume);
+    
     if(InstanceID != 0)
     {
-		DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
+        DMR_Response_Error(upnptoken, 702, "Invalid InstanceID");
         return;
     }
 
     if(strcmp(Channel, "Master") != 0)
     {
-		DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
+        DMR_Response_Error(upnptoken, 600, "Argument Value Invalid");
         return;
     }
-	
+    
     method = _createMethod(DMR_ECS_SETVOLUME, instance, upnptoken);
     _addMethodParameter(method, (METHOD_PARAM)DesiredVolume);
 
@@ -1633,22 +1603,22 @@ DMR DMR_Method_Create(void* chain, unsigned short port, char* friendlyName, char
 
     /* Allocate the DMR and internal state structures */
     dmr = (DMR)MALLOC(sizeof(struct _DMR));
-	if(dmr == NULL)
-	{
-		return NULL;
-	}
+    if(dmr == NULL)
+    {
+        return NULL;
+    }
     state = (DMR_InternalState)MALLOC(sizeof(struct _internalState));
-	if(state == NULL)
-	{
-		return NULL;
-	}
-	state->DMR_microStackChain = chain;
+    if(state == NULL)
+    {
+        return NULL;
+    }
+    state->DMR_microStackChain = chain;
     dmr->internal_state = (void*)state;
     dmr->ThreadPool = threadPool;
 
-	/* Let the chain destroy the object. */
-	dmr->ILib3 = DMRDestroyFromChain;
-	ILibAddToChain(chain, dmr);
+    /* Let the chain destroy the object. */
+    dmr->ILib3 = DMRDestroyFromChain;
+    ILibAddToChain(chain, dmr);
     
     /* Set the default values for the DMR_InternalState. */
     state->FriendlyName = String_Create(friendlyName);
@@ -1716,7 +1686,7 @@ DMR DMR_Method_Create(void* chain, unsigned short port, char* friendlyName, char
 #endif /* INCLUDE_FEATURE_VOLUME */
 
 #if !defined(INCLUDE_FEATURE_PLAYCONTAINERURI)
-	// TODO: FUTURE FEATURE for <dlna:X_DLNACAP>playcontainer-0-1</dlna:X_DLNACAP>
+    // TODO: FUTURE FEATURE for <dlna:X_DLNACAP>playcontainer-0-1</dlna:X_DLNACAP>
 #endif
 
     /* Setup internal funcation callbacks for SOAP actions optionally
@@ -1753,13 +1723,13 @@ DMR DMR_Method_Create(void* chain, unsigned short port, char* friendlyName, char
     DMR_FP_RenderingControl_SetVolume=(DMR__ActionHandler_RenderingControl_SetVolume)&DMR_RenderingControl_SetVolume;
 #endif /* INCLUDE_FEATURE_VOLUME */
     
-	/* All evented state variables MUST be initialized before UPnPStart is called. */
-	DMR_SetState_AVTransport_LastChange(state->DMR_microStack, "&lt;Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/AVT/\"/ &gt;");
-	DMR_SetState_ConnectionManager_SourceProtocolInfo(state->DMR_microStack, "");
+    /* All evented state variables MUST be initialized before UPnPStart is called. */
+    DMR_SetState_AVTransport_LastChange(state->DMR_microStack, "&lt;Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/AVT/\"/ &gt;");
+    DMR_SetState_ConnectionManager_SourceProtocolInfo(state->DMR_microStack, "");
     DMR_SetState_ConnectionManager_SinkProtocolInfo(state->DMR_microStack, state->ProtocolInfo);
-	DMR_SetState_ConnectionManager_CurrentConnectionIDs(state->DMR_microStack, "0");
-	DMR_SetState_RenderingControl_LastChange(state->DMR_microStack, "&lt;Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/RCS/\"/ &gt;");
-        	
+    DMR_SetState_ConnectionManager_CurrentConnectionIDs(state->DMR_microStack, "0");
+    DMR_SetState_RenderingControl_LastChange(state->DMR_microStack, "&lt;Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/RCS/\"/ &gt;");
+            
     /* Setup the microstack execution chain */
     state->DMR_Monitor = ILibCreateLifeTime(state->DMR_microStackChain);
     ILibLifeTime_AddEx(state->DMR_Monitor, dmr, 200, &DMR_LastChangeTimerEvent, NULL);
@@ -1770,18 +1740,18 @@ DMR DMR_Method_Create(void* chain, unsigned short port, char* friendlyName, char
 
 BOOL DMR_Method_IsRunning(DMR instance)
 {
-	if(instance != NULL)
-	{
-		DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-		if(state != NULL)
-		{
-			if(state->DMR_microStackChain != NULL)
-			{
-				return (ILibIsChainRunning(state->DMR_microStackChain))?TRUE:FALSE;
-			}
-		}
-	}
-	return FALSE;
+    if(instance != NULL)
+    {
+        DMR_InternalState state = (DMR_InternalState)instance->internal_state;
+        if(state != NULL)
+        {
+            if(state->DMR_microStackChain != NULL)
+            {
+                return (ILibIsChainRunning(state->DMR_microStackChain))?TRUE:FALSE;
+            }
+        }
+    }
+    return FALSE;
 }
 
 DMR_Error DMR_Method_SetEventContextMask(DMR instance, DMR_EventContextSwitch bitFlags)
@@ -1837,17 +1807,17 @@ DMR_Error DMR_Method_SetDeviceCapabilities(DMR instance, const char * PlayMedia,
 
 void DMR_Method_NotifyMicrostackOfIPAddressChange(DMR instance)
 {
-	if(instance != NULL)
-	{
-		DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-		if(state != NULL)
-		{
-			if(state->DMR_microStack != NULL)
-			{
-				DMR_IPAddressListChanged(state->DMR_microStack);
-			}
-		}
-	}
+    if(instance != NULL)
+    {
+        DMR_InternalState state = (DMR_InternalState)instance->internal_state;
+        if(state != NULL)
+        {
+            if(state->DMR_microStack != NULL)
+            {
+                DMR_IPAddressListChanged(state->DMR_microStack);
+            }
+        }
+    }
 }
 
 BOOL DMR_Method_AddPresetNameToList(DMR instance, const char* name)
@@ -1890,87 +1860,87 @@ void DMR_Method_ErrorEventResponse(void* session, int errorCode, char* errorMess
 /* Handles the LastChange Gena Eventing for both Services */
 int GetTransportActionsLength(unsigned short actions)
 {
-	unsigned long lActions = (unsigned long)actions;
-	int result = 1;
+    unsigned long lActions = (unsigned long)actions;
+    int result = 1;
 
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Play) == TRUE)
-	{
-		result += 5;
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Stop) == TRUE)
-	{
-		result += 5;
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Pause) == TRUE)
-	{
-		result += 6;
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Next) == TRUE)
-	{
-		result += 5;
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Previous) == TRUE)
-	{
-		result += 9;
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Seek) == TRUE)
-	{
-		result += 5;
-	}
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Play) == TRUE)
+    {
+        result += 5;
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Stop) == TRUE)
+    {
+        result += 5;
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Pause) == TRUE)
+    {
+        result += 6;
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Next) == TRUE)
+    {
+        result += 5;
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Previous) == TRUE)
+    {
+        result += 9;
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Seek) == TRUE)
+    {
+        result += 5;
+    }
 
-	return result;
+    return result;
 }
 
 char* GetTransportActions(unsigned short actions)
 {
-	unsigned long lActions = (unsigned long)actions;
-	char* result = String_CreateSize(GetTransportActionsLength(actions));
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Play) == TRUE)
-	{
-		strcat(result, "Play");
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Stop) == TRUE)
-	{
-		if(strlen(result) > 0)
-		{
-			strcat(result, ",");
-		}
-		strcat(result, "Stop");
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Pause) == TRUE)
-	{
-		if(strlen(result) > 0)
-		{
-			strcat(result, ",");
-		}
-		strcat(result, "Pause");
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Next) == TRUE)
-	{
-		if(strlen(result) > 0)
-		{
-			strcat(result, ",");
-		}
-		strcat(result, "Next");
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Previous) == TRUE)
-	{
-		if(strlen(result) > 0)
-		{
-			strcat(result, ",");
-		}
-		strcat(result, "Previous");
-	}
-	if(TESTBIT(lActions, (unsigned long)DMR_ATS_Seek) == TRUE)
-	{
-		if(strlen(result) > 0)
-		{
-			strcat(result, ",");
-		}
-		strcat(result, "Seek");
-	}
+    unsigned long lActions = (unsigned long)actions;
+    char* result = String_CreateSize(GetTransportActionsLength(actions));
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Play) == TRUE)
+    {
+        strcat(result, "Play");
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Stop) == TRUE)
+    {
+        if(strlen(result) > 0)
+        {
+            strcat(result, ",");
+        }
+        strcat(result, "Stop");
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Pause) == TRUE)
+    {
+        if(strlen(result) > 0)
+        {
+            strcat(result, ",");
+        }
+        strcat(result, "Pause");
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Next) == TRUE)
+    {
+        if(strlen(result) > 0)
+        {
+            strcat(result, ",");
+        }
+        strcat(result, "Next");
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Previous) == TRUE)
+    {
+        if(strlen(result) > 0)
+        {
+            strcat(result, ",");
+        }
+        strcat(result, "Previous");
+    }
+    if(TESTBIT(lActions, (unsigned long)DMR_ATS_Seek) == TRUE)
+    {
+        if(strlen(result) > 0)
+        {
+            strcat(result, ",");
+        }
+        strcat(result, "Seek");
+    }
 
-	return result;
+    return result;
 }
 
 void DMR_LastChangeTimerEvent(void* object)
@@ -2063,9 +2033,9 @@ void FireGenaLastChangeEvent(DMR instance)
         DMR_Unlock(instance);
         DMR_SetState_RenderingControl_LastChange(state->DMR_microStack, renderingData);
 #ifdef _POSIX
-		printf("RenderingControl: Gena Event Fired!\n");
+        printf("RenderingControl: Gena Event Fired!\n");
 #else
-		OutputDebugString("RenderingControl: Gena Event Fired!\n");
+        OutputDebugString("RenderingControl: Gena Event Fired!\n");
 #endif
         
         free(renderingData);
@@ -2083,18 +2053,18 @@ void FireGenaLastChangeEvent(DMR instance)
         if(TESTBIT(state->LastChangeMask, EVENT_ABSOLUTETIMEPOSITION) == TRUE)
         {
             char* t = MillisecondsToTimeString(state->AbsoluteTimePosition);
-			int length = (int)strlen(t);
-			String_Destroy(t);
+            int length = (int)strlen(t);
+            String_Destroy(t);
             AVTransportDataLen += 36;
-			AVTransportDataLen += (length < 15)?15:length;
+            AVTransportDataLen += (length < 15)?15:length;
         }
         if(TESTBIT(state->LastChangeMask, EVENT_RELATIVETIMEPOSITION) == TRUE)
         {
             char* t = MillisecondsToTimeString(state->RelativeTimePosition);
-			int length = (int)strlen(t);
-			String_Destroy(t);
+            int length = (int)strlen(t);
+            String_Destroy(t);
             AVTransportDataLen += 36;
-			AVTransportDataLen += (length < 15)?15:length;
+            AVTransportDataLen += (length < 15)?15:length;
         }
         if(TESTBIT(state->LastChangeMask, EVENT_TRANSPORTSTATE) == TRUE)
         {
@@ -2105,7 +2075,7 @@ void FireGenaLastChangeEvent(DMR instance)
         if(TESTBIT(state->LastChangeMask, EVENT_TRANSPORTSTATUS) == TRUE)
         {
             AVTransportDataLen += 31;
-			AVTransportDataLen += 14;
+            AVTransportDataLen += 14;
         }
 
         if(TESTBIT(state->LastChangeMask, EVENT_CURRENTPLAYMODE) == TRUE)
@@ -2126,96 +2096,96 @@ void FireGenaLastChangeEvent(DMR instance)
             AVTransportDataLen += 16;
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACK) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACK) == TRUE)
         {
             AVTransportDataLen += 28;
             AVTransportDataLen += 16;
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKDURATION) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKDURATION) == TRUE)
         {
             char* t = MillisecondsToTimeString(state->CurrentTrackDuration);
-			int length = (int)strlen(t);
-			String_Destroy(t);
+            int length = (int)strlen(t);
+            String_Destroy(t);
             AVTransportDataLen += 36;
-			AVTransportDataLen += (length < 15)?15:length;
+            AVTransportDataLen += (length < 15)?15:length;
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTMEDIADURATION) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTMEDIADURATION) == TRUE)
         {
             char* t = MillisecondsToTimeString(state->CurrentMediaDuration);
-			int length = (int)strlen(t);
-			String_Destroy(t);
+            int length = (int)strlen(t);
+            String_Destroy(t);
             AVTransportDataLen += 36;
-			AVTransportDataLen += (length < 15)?15:length;
+            AVTransportDataLen += (length < 15)?15:length;
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKMETADATA) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKMETADATA) == TRUE)
         {
             if(state->CurrentTrackMetaData != NULL)
-			{
-				char* l1metadata = _MakeMetadataConformant(state->CurrentTrackMetaData);
-    			AVTransportDataLen += 36;
-    			AVTransportDataLen += ILibXmlEscapeLength(l1metadata);
-				String_Destroy(l1metadata);
-			}
+            {
+                char* l1metadata = _MakeMetadataConformant(state->CurrentTrackMetaData);
+                AVTransportDataLen += 36;
+                AVTransportDataLen += ILibXmlEscapeLength(l1metadata);
+                String_Destroy(l1metadata);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKURI) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKURI) == TRUE)
         {
             if(state->CurrentTrackURI != NULL)
-			{
-				char* localUri = String_CreateSize(ILibXmlEscapeLength(state->CurrentTrackURI));
-				ILibXmlEscape(localUri, state->CurrentTrackURI);
-				AVTransportDataLen += 31;
-				AVTransportDataLen += ILibXmlEscapeLength(localUri);
-				String_Destroy(localUri);
-			}
+            {
+                char* localUri = String_CreateSize(ILibXmlEscapeLength(state->CurrentTrackURI));
+                ILibXmlEscape(localUri, state->CurrentTrackURI);
+                AVTransportDataLen += 31;
+                AVTransportDataLen += ILibXmlEscapeLength(localUri);
+                String_Destroy(localUri);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURI) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURI) == TRUE)
         {
             if(state->AVTransportURI)
-			{
-				char* localUri = String_CreateSize(ILibXmlEscapeLength(state->AVTransportURI));
-				ILibXmlEscape(localUri, state->AVTransportURI);
-				AVTransportDataLen += 30;
-				AVTransportDataLen += ILibXmlEscapeLength(localUri);
-				String_Destroy(localUri);
-			}
+            {
+                char* localUri = String_CreateSize(ILibXmlEscapeLength(state->AVTransportURI));
+                ILibXmlEscape(localUri, state->AVTransportURI);
+                AVTransportDataLen += 30;
+                AVTransportDataLen += ILibXmlEscapeLength(localUri);
+                String_Destroy(localUri);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURIMETADATA) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURIMETADATA) == TRUE)
         {
             if(state->AVTransportURIMetaData)
-			{
-				char* l2metadata = _MakeMetadataConformant(state->AVTransportURIMetaData);
-    			AVTransportDataLen += 38;
-    			AVTransportDataLen += ILibXmlEscapeLength(l2metadata);
-				String_Destroy(l2metadata);
-			}
+            {
+                char* l2metadata = _MakeMetadataConformant(state->AVTransportURIMetaData);
+                AVTransportDataLen += 38;
+                AVTransportDataLen += ILibXmlEscapeLength(l2metadata);
+                String_Destroy(l2metadata);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRANSPORTACTIONS) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRANSPORTACTIONS) == TRUE)
         {
             AVTransportDataLen += 39;
             AVTransportDataLen += GetTransportActionsLength(state->CurrentTransportActions);
         }
 
-		AVTransportData = (char*)String_CreateSize(AVTransportDataLen);
+        AVTransportData = (char*)String_CreateSize(AVTransportDataLen);
         strcpy(AVTransportData, "<Event xmlns=\"urn:schemas-upnp-org:metadata-1-0/AVT/\"><InstanceID val=\"0\">");
 
         if(TESTBIT(state->LastChangeMask, EVENT_ABSOLUTETIMEPOSITION) == TRUE)
         {
             char* atp = NULL;
-			if(state->AbsoluteTimePosition < 0)
-			{
-				atp = String_Create("NOT_IMPLEMENTED");
-			}
-			else
-			{
-	            atp = MillisecondsToTimeString(state->AbsoluteTimePosition);
-			}
+            if(state->AbsoluteTimePosition < 0)
+            {
+                atp = String_Create("NOT_IMPLEMENTED");
+            }
+            else
+            {
+                atp = MillisecondsToTimeString(state->AbsoluteTimePosition);
+            }
             strcat(AVTransportData, "<AbsoluteTimePosition val=\"");
             strcat(AVTransportData, (const char*)atp);
             strcat(AVTransportData, "\"/>");
@@ -2224,14 +2194,14 @@ void FireGenaLastChangeEvent(DMR instance)
         if(TESTBIT(state->LastChangeMask, EVENT_RELATIVETIMEPOSITION) == TRUE)
         {
             char* atp = NULL;
-			if(state->RelativeTimePosition < 0)
-			{
-				atp = String_Create("NOT_IMPLEMENTED");
-			}
-			else
-			{
-	            atp = MillisecondsToTimeString(state->RelativeTimePosition);
-			}
+            if(state->RelativeTimePosition < 0)
+            {
+                atp = String_Create("NOT_IMPLEMENTED");
+            }
+            else
+            {
+                atp = MillisecondsToTimeString(state->RelativeTimePosition);
+            }
             strcat(AVTransportData, "<RelativeTimePosition val=\"");
             strcat(AVTransportData, (const char*)atp);
             strcat(AVTransportData, "\"/>");
@@ -2321,133 +2291,133 @@ void FireGenaLastChangeEvent(DMR instance)
         if(TESTBIT(state->LastChangeMask, EVENT_NUMBEROFTRACKS) == TRUE)
         {
             sprintf(tmp, "%d", state->NumberOfTracks);
-			strcat(AVTransportData, "<NumberOfTracks val=\"");
-			strcat(AVTransportData, tmp);
-			strcat(AVTransportData, "\"/>");
+            strcat(AVTransportData, "<NumberOfTracks val=\"");
+            strcat(AVTransportData, tmp);
+            strcat(AVTransportData, "\"/>");
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACK) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACK) == TRUE)
         {
             sprintf(tmp, "%d", state->CurrentTrack);
-			strcat(AVTransportData, "<CurrentTrack val=\"");
-			strcat(AVTransportData, tmp);
-			strcat(AVTransportData, "\"/>");
+            strcat(AVTransportData, "<CurrentTrack val=\"");
+            strcat(AVTransportData, tmp);
+            strcat(AVTransportData, "\"/>");
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKDURATION) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKDURATION) == TRUE)
         {
             char* str = NULL;
-			if(state->CurrentTrackDuration < 0L)
-			{
-				str = String_Create("NOT_IMPLEMENTED");
-			}
-			else
-			{
-				str = MillisecondsToTimeString(state->CurrentTrackDuration);
-			}
-			strcat(AVTransportData, "<CurrentTrackDuration val=\"");
+            if(state->CurrentTrackDuration < 0L)
+            {
+                str = String_Create("NOT_IMPLEMENTED");
+            }
+            else
+            {
+                str = MillisecondsToTimeString(state->CurrentTrackDuration);
+            }
+            strcat(AVTransportData, "<CurrentTrackDuration val=\"");
             strcat(AVTransportData, str);
-			strcat(AVTransportData, "\"/>");
+            strcat(AVTransportData, "\"/>");
             String_Destroy(str);
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTMEDIADURATION) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTMEDIADURATION) == TRUE)
         {
             char* str = NULL;
-			if(state->CurrentMediaDuration < 0)
-			{
-				str = String_Create("NOT_IMPLEMENTED");
-			}
-			else
-			{
-				str = MillisecondsToTimeString(state->CurrentMediaDuration);
-			}
-			strcat(AVTransportData, "<CurrentMediaDuration val=\"");
+            if(state->CurrentMediaDuration < 0)
+            {
+                str = String_Create("NOT_IMPLEMENTED");
+            }
+            else
+            {
+                str = MillisecondsToTimeString(state->CurrentMediaDuration);
+            }
+            strcat(AVTransportData, "<CurrentMediaDuration val=\"");
             strcat(AVTransportData, str);
-			strcat(AVTransportData, "\"/>");
+            strcat(AVTransportData, "\"/>");
             String_Destroy(str);
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKMETADATA) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKMETADATA) == TRUE)
         {
             if(state->CurrentTrackMetaData != NULL)
-			{
-				char* l1metadata = _MakeMetadataConformant(state->CurrentTrackMetaData);
-				strcat(AVTransportData, "<CurrentTrackMetaData val=\"");
+            {
+                char* l1metadata = _MakeMetadataConformant(state->CurrentTrackMetaData);
+                strcat(AVTransportData, "<CurrentTrackMetaData val=\"");
                 strcat(AVTransportData, l1metadata);
-				strcat(AVTransportData, "\"/>");
-				String_Destroy(l1metadata);
-			}
+                strcat(AVTransportData, "\"/>");
+                String_Destroy(l1metadata);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKURI) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRACKURI) == TRUE)
         {
             if(state->CurrentTrackURI != NULL)
-			{
-				char* uri = NULL;
-				char* localUri = String_CreateSize(ILibXmlEscapeLength(state->CurrentTrackURI));
-				ILibXmlEscape(localUri, state->CurrentTrackURI);
-				strcat(AVTransportData, "<CurrentTrackURI val=\"");
-				strcat(AVTransportData, localUri);
-				strcat(AVTransportData, "\"/>");
-				String_Destroy(localUri);
-			}
+            {
+                char* uri = NULL;
+                char* localUri = String_CreateSize(ILibXmlEscapeLength(state->CurrentTrackURI));
+                ILibXmlEscape(localUri, state->CurrentTrackURI);
+                strcat(AVTransportData, "<CurrentTrackURI val=\"");
+                strcat(AVTransportData, localUri);
+                strcat(AVTransportData, "\"/>");
+                String_Destroy(localUri);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURI) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURI) == TRUE)
         {
             if(state->AVTransportURI != NULL)
-			{
-				char* uri = NULL;
-				char* localUri = String_CreateSize(ILibXmlEscapeLength(state->AVTransportURI));
-				ILibXmlEscape(localUri, state->AVTransportURI);
-				strcat(AVTransportData, "<AVTransportURI val=\"");
-				strcat(AVTransportData, localUri);
-				strcat(AVTransportData, "\"/>");
-				String_Destroy(localUri);
-			}
+            {
+                char* uri = NULL;
+                char* localUri = String_CreateSize(ILibXmlEscapeLength(state->AVTransportURI));
+                ILibXmlEscape(localUri, state->AVTransportURI);
+                strcat(AVTransportData, "<AVTransportURI val=\"");
+                strcat(AVTransportData, localUri);
+                strcat(AVTransportData, "\"/>");
+                String_Destroy(localUri);
+            }
         }
 
-		if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURIMETADATA) == TRUE)
+        if(TESTBIT(state->LastChangeMask, EVENT_AVTRANSPORTURIMETADATA) == TRUE)
         {
             if(state->AVTransportURIMetaData != NULL)
-			{
-				char* l2metadata = _MakeMetadataConformant(state->AVTransportURIMetaData);
-				strcat(AVTransportData, "<AVTransportURIMetaData val=\"");
+            {
+                char* l2metadata = _MakeMetadataConformant(state->AVTransportURIMetaData);
+                strcat(AVTransportData, "<AVTransportURIMetaData val=\"");
                 strcat(AVTransportData, l2metadata);
-				strcat(AVTransportData, "\"/>");
-				String_Destroy(l2metadata);
-			}
+                strcat(AVTransportData, "\"/>");
+                String_Destroy(l2metadata);
+            }
         }
 
         if(TESTBIT(state->LastChangeMask, EVENT_CURRENTTRANSPORTACTIONS) == TRUE)
         {
             char* tmp2 = GetTransportActions(state->CurrentTransportActions);
-			strcat(AVTransportData, "<CurrentTransportActions val=\"");
-			strcat(AVTransportData, tmp2);
-			strcat(AVTransportData, "\"/>");
-			String_Destroy(tmp2);
+            strcat(AVTransportData, "<CurrentTransportActions val=\"");
+            strcat(AVTransportData, tmp2);
+            strcat(AVTransportData, "\"/>");
+            String_Destroy(tmp2);
         }
 
         DMR_Unlock(instance);
         strcat(AVTransportData, "</InstanceID></Event>");
-		{
-			int actualLength = (int)strlen((const char*)AVTransportData);
-			int allocatedLength = AVTransportDataLen;
-			if(allocatedLength < actualLength)
-			{
+        {
+            int actualLength = (int)strlen((const char*)AVTransportData);
+            int allocatedLength = AVTransportDataLen;
+            if(allocatedLength < actualLength)
+            {
 #ifdef _POSIX
-				printf("FATAL MEMORY ERROR!");
+                printf("FATAL MEMORY ERROR!");
 #else
-				OutputDebugString("FATAL MEMORY ERROR!");
+                OutputDebugString("FATAL MEMORY ERROR!");
 #endif
-			}
-		}
+            }
+        }
         DMR_SetState_AVTransport_LastChange(state->DMR_microStack, AVTransportData);
 #ifdef _POSIX
-		printf("AVTransport: Gena Event Fired!\n");
+        printf("AVTransport: Gena Event Fired!\n");
 #else
-		OutputDebugString("AVTransport: Gena Event Fired!\n");
+        OutputDebugString("AVTransport: Gena Event Fired!\n");
 #endif
         
         String_Destroy(AVTransportData);
@@ -2747,7 +2717,7 @@ DMR_Error DMR_StateChange_CurrentTrackDuration(DMR instance, long duration)
 
 #if defined(INCLUDE_FEATURE_VOLUME)
 
-	DMR_Error DMR_StateChange_Volume(DMR instance, unsigned char volume)
+    DMR_Error DMR_StateChange_Volume(DMR instance, unsigned char volume)
     {
         DMR_InternalState istate = (DMR_InternalState)instance->internal_state;
         DMR_Error err = CheckThis(instance);
@@ -2770,7 +2740,7 @@ DMR_Error DMR_StateChange_CurrentTrackDuration(DMR instance, long duration)
         return DMR_ERROR_OK;
     }
 
-	DMR_Error DMR_StateChange_Mute(DMR instance, BOOL mute)
+    DMR_Error DMR_StateChange_Mute(DMR instance, BOOL mute)
     {
         DMR_InternalState istate = (DMR_InternalState)instance->internal_state;
         DMR_Error err = CheckThis(instance);
@@ -2797,7 +2767,7 @@ DMR_Error DMR_StateChange_CurrentTrackDuration(DMR instance, long duration)
 
 #if defined(INCLUDE_FEATURE_DISPLAY)
 
-	DMR_Error DMR_StateChange_Contrast(DMR instance, unsigned char contrast)
+    DMR_Error DMR_StateChange_Contrast(DMR instance, unsigned char contrast)
     {
         DMR_InternalState istate = (DMR_InternalState)instance->internal_state;
         DMR_Error err = CheckThis(instance);
@@ -2820,7 +2790,7 @@ DMR_Error DMR_StateChange_CurrentTrackDuration(DMR instance, long duration)
         return DMR_ERROR_OK;
     }
 
-	DMR_Error DMR_StateChange_Brightness(DMR instance, unsigned char brightness)
+    DMR_Error DMR_StateChange_Brightness(DMR instance, unsigned char brightness)
     {
         DMR_InternalState istate = (DMR_InternalState)instance->internal_state;
         DMR_Error err = CheckThis(instance);
@@ -3100,23 +3070,23 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
     instance = method->dmr;
     switch(method->method)
     {
-		case DMR_ECS_GETAVPROTOCOLINFO:
-			{
+        case DMR_ECS_GETAVPROTOCOLINFO:
+            {
                 if(instance->Event_GetAVProtocolInfo != NULL && method->parameterCount == 0)
                 {
-					char* protocolInfo = NULL;
+                    char* protocolInfo = NULL;
                     int result = instance->Event_GetAVProtocolInfo(instance, method->session, &protocolInfo);
                     if(result == 0)
                     {
-						if(protocolInfo == NULL)
-						{
-							DMR_Response_ConnectionManager_GetCurrentConnectionInfo(method->session, 0, 0, "", "", -1, "Input", "OK");
-						}
-						else
-						{
-							DMR_Response_ConnectionManager_GetCurrentConnectionInfo(method->session, 0, 0, protocolInfo, "", -1, "Input", "OK");
-							free(protocolInfo);
-						}
+                        if(protocolInfo == NULL)
+                        {
+                            DMR_Response_ConnectionManager_GetCurrentConnectionInfo(method->session, 0, 0, "", "", -1, "Input", "OK");
+                        }
+                        else
+                        {
+                            DMR_Response_ConnectionManager_GetCurrentConnectionInfo(method->session, 0, 0, protocolInfo, "", -1, "Input", "OK");
+                            free(protocolInfo);
+                        }
                     }
                     else if(result > 0)
                     {
@@ -3124,7 +3094,7 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
                         DMR_Response_Error((const DMR_SessionToken)method->session, (const int)result, (const char*)msg);
                         String_Destroy(msg);
                     }
-				}
+                }
                 else if(instance->Event_GetAVProtocolInfo == NULL)
                 {
                     DMR_Response_Error((const DMR_SessionToken)method->session, 501, "Action Failed: Action Not Implemented");
@@ -3133,8 +3103,8 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
                 {
                     DMR_Response_Error((const DMR_SessionToken)method->session, 501, "Action Failed: Program Error");
                 }
-			}
-			break;
+            }
+            break;
         case DMR_ECS_SETAVTRANSPORTURI:
             {
                 if(instance->Event_SetAVTransportURI != NULL && method->parameterCount == 2)
@@ -3143,7 +3113,7 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
                     char* uri = (char*)method->parameters[0];
                     struct CdsObject* metadata = (struct CdsObject*)method->parameters[1];
                     result = instance->Event_SetAVTransportURI(instance, method->session, uri, metadata);
-					String_Destroy(uri);
+                    String_Destroy(uri);
                     if(result == 0)
                     {
                         DMR_Response_AVTransport_SetAVTransportURI((const DMR_SessionToken)method->session);
@@ -3198,7 +3168,7 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
                     int result;
                     char* playSpeed = (char*)method->parameters[0];
                     result = instance->Event_Play(instance, method->session, playSpeed);
-					String_Destroy(playSpeed);
+                    String_Destroy(playSpeed);
                     if(result == 0)
                     {
                         DMR_Response_AVTransport_Play((const DMR_SessionToken)method->session);
@@ -3417,7 +3387,7 @@ void CallbackFromThreadPool(ILibThreadPool threadPool, void* oMethod)
                     int result;
                     char* preset = (char*)method->parameters[0];
                     result = instance->Event_SelectPreset(instance, method->session, preset);
-					String_Destroy(preset);
+                    String_Destroy(preset);
                     if(result == 0)
                     {
                         DMR_Response_RenderingControl_SelectPreset((const DMR_SessionToken)method->session);
@@ -3580,9 +3550,9 @@ DMR_Error CallMethodThroughThreadPool(DMR instance, ContextMethodCall method)
     contextSwitch = TESTBIT(state->EventsOnThreadBitMask, method->method);
     switch(method->method)
     {
-		case DMR_ECS_GETAVPROTOCOLINFO:
-			break;
-		case DMR_ECS_SETAVTRANSPORTURI:
+        case DMR_ECS_GETAVPROTOCOLINFO:
+            break;
+        case DMR_ECS_SETAVTRANSPORTURI:
             if(instance->Event_SetAVTransportURI != NULL && method->parameterCount == 2)
             {
                 method->parameters[0] = (void*)String_Create((const char*)method->parameters[0]);
