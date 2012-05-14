@@ -5,7 +5,6 @@ void *MicroStackChain;
 void *ILib_Pool;
 DMR testdmr;
 
-#if defined(_POSIX)
 int WaitForExit = 0;
 
 void *ILib_Monitor;
@@ -102,6 +101,8 @@ const char* ProtocolInfoList[] = {
 };
 
 void Common__CP_IPAddressListChanged();
+
+#if defined(_POSIX)
 
 void ILib_IPAddressMonitor(void *data)
 {

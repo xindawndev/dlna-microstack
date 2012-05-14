@@ -11,14 +11,9 @@
     \{
 */
 
-
 /* Complex Type Parsers */
 
-
 /* Complex Type Serializers */
-
-
-
 
 /*! \defgroup CPReferenceCounter Reference Counter Methods
     \ingroup ControlPoint
@@ -33,14 +28,10 @@ void DMRCP_AddRef(struct UPnPDevice *device);
 void DMRCP_Release(struct UPnPDevice *device);
 /*! \} */   
 
-
-
 struct UPnPDevice* DMRCP_GetDevice1(struct UPnPDevice *device,int index);
 int DMRCP_GetDeviceCount(struct UPnPDevice *device);
 struct UPnPDevice* DMRCP_GetDeviceEx(struct UPnPDevice *device, char* DeviceType, int start,int number);
 void PrintUPnPDevice(int indents, struct UPnPDevice *device);
-
-
 
 /*! \defgroup CustomXMLTags Custom XML Tags
     \ingroup ControlPoint
@@ -70,8 +61,6 @@ char *DMRCP_GetCustomXML_X_DLNADOC(struct UPnPDevice *d);
 
 /*! \} */
 
-
-
 /*! \defgroup CPAdministration Administrative Methods
     \ingroup ControlPoint
     \brief Basic administrative functions, used to setup/configure the control point application
@@ -94,7 +83,6 @@ struct UPnPService *DMRCP_GetService_ConnectionManager(struct UPnPDevice *device
 struct UPnPService *DMRCP_GetService_RenderingControl(struct UPnPDevice *device);
 
 /*! \} */
-
 
 /*! \defgroup InvocationEventingMethods Invocation/Eventing Methods
     \ingroup ControlPoint
@@ -163,7 +151,6 @@ void DMRCP_Invoke_RenderingControl_SetVolume(struct UPnPService *service, void (
 void DMRCP_Invoke_RenderingControl_SetVolumeDB(struct UPnPService *service, void (*CallbackPtr)(struct UPnPService *sender,int ErrorCode,void *user),void* _user, unsigned int InstanceID, char* unescaped_Channel, short DesiredVolume);
 
 /*! \} */
-
 
 /*! \} */
 #endif
