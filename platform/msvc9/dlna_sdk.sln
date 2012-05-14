@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dlna_sdk", "inteldlna.vcproj", "{856E3377-8CCD-40CE-9CE9-EFE563B9271C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dlna_sdk", "dlna_sdk.vcproj", "{856E3377-8CCD-40CE-9CE9-EFE563B9271C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mswDMR", "DMRSample\IntelSampleDMR.vcproj", "{532F5F90-992F-4B32-898D-8FF5878CEA58}"
 	ProjectSection(ProjectDependencies) = postProject
