@@ -125,7 +125,7 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
             // Choose a random port from 50000 to 65500, which is what IANA says to use
             // for non standard ports
             //
-            if (++count >= 10) break;
+            if (++count >= 20) break;
             local.sin_port =  htons((unsigned short)(localPortStartRange + ((unsigned short)rand() % (localPortEndRange-localPortStartRange))));
         }
         #if !defined(__SYMBIAN32__)
@@ -133,10 +133,15 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
         #else
         while(ILibSocketWrapper_bind(newSocket, (struct sockaddr *) &(local))!=0);
         #endif
-        if (count >= 10)
+        if (count >= 20)
         {
             // 超出绑定次数
-            free(data);
+#if defined(WIN32)
+            closesocket(newSocket);
+#else
+            close(newSocket);
+#endif
+            Safefree(data);
             return NULL;
         }
     }
@@ -149,7 +154,12 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
         //
         // Could not bind to this port
         //
-        free(data);
+#if defined(WIN32)
+        closesocket(newSocket);
+#else
+        close(newSocket);
+#endif
+        Safefree(data);
         return(NULL);
     }
 

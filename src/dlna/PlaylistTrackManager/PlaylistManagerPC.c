@@ -237,7 +237,7 @@ BOOL ParsePlayContainerUri(PlayListManager_PC state, char* uri)
 #ifdef _POSIX
         printf(out);
 #else
-        OutputDebugString(out);
+        OutputDebugStringA(out);
 #endif
     }
     tmp = MyStrChr(pos, 0x003f);
@@ -247,7 +247,7 @@ BOOL ParsePlayContainerUri(PlayListManager_PC state, char* uri)
 #ifdef _POSIX
         printf(out);
 #else
-        OutputDebugString(out);
+        OutputDebugStringA(out);
 #endif
     }
     if(tmp == NULL)

@@ -74,7 +74,6 @@
 #include <string.h>
 #include <math.h>
 
-
 #if defined(WIN32) || defined(_WIN32_WCE)
     #include <windows.h>
     #include <winioctl.h>
@@ -82,17 +81,17 @@
 #endif
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
-#include <time.h>
-#include <sys/timeb.h>
+    #include <time.h>
+    #include <sys/timeb.h>
 #endif
 #if defined(__SYMBIAN32__)
-#include "ILibSymbianSemaphore.h"
-#define sem_t void*
-#define sem_init(x,pShared,InitValue) ILibSymbian_CreateSemaphore(x,InitValue)
-#define sem_destroy(x) ILibSymbian_DestroySemaphore(x)
-#define sem_wait(x) ILibSymbian_WaitSemaphore(x)
-#define sem_trywait(x) ILibSymbian_TryWaitSemaphore(x)
-#define sem_post(x) ILibSymbian_SignalSemaphore(x)
+    #include "ILibSymbianSemaphore.h"
+    #define sem_t void*
+    #define sem_init(x,pShared,InitValue) ILibSymbian_CreateSemaphore(x,InitValue)
+    #define sem_destroy(x) ILibSymbian_DestroySemaphore(x)
+    #define sem_wait(x) ILibSymbian_WaitSemaphore(x)
+    #define sem_trywait(x) ILibSymbian_TryWaitSemaphore(x)
+    #define sem_post(x) ILibSymbian_SignalSemaphore(x)
 #endif
 
 
@@ -180,7 +179,6 @@ typedef void (*ILibOnChainStopped)(void *user);
     \{
     \}
 */
-
 
 /*! \struct parser_result_field ILibParsers.h
     \brief Data Elements of \a parser_result
@@ -481,7 +479,6 @@ void ILibWriteStringToDisk(char *FileName, char *data);
 void ILibWriteStringToDiskEx(char *FileName, char *data, int dataLen);
 void ILibDeleteFileFromDisk(char *FileName);
 
-
 /*! \defgroup StackGroup Stack
     \ingroup DataStructures
     Stack Methods
@@ -509,7 +506,6 @@ void ILibQueue_Lock(void *q);
 void ILibQueue_UnLock(void *q);
 long ILibQueue_GetCount(void *q);
 /* \} */
-
 
 /*! \defgroup XML XML Parsing Methods
     \ingroup ILibParsers
@@ -600,8 +596,6 @@ void ILibChain_SetOnStoppedHandler(void *chain, void *user, ILibOnChainStopped H
 void ILibForceUnBlockChain(void *Chain);
 /* \} */
 
-
-
 /*! \defgroup LinkedListGroup Linked List
     \ingroup DataStructures
     \{
@@ -684,8 +678,6 @@ void ILibLinkedList_Lock(void *LinkedList);
 void ILibLinkedList_UnLock(void *LinkedList);
 void ILibLinkedList_Destroy(void *LinkedList);
 /*! \} */
-
-
 
 /*! \defgroup HashTreeGroup Hash Table
     \ingroup DataStructures
@@ -771,7 +763,6 @@ void *ILibCreateLifeTime(void *Chain);
 
 /* \} */
 
-
 /*! \defgroup StringParsing String Parsing
     \ingroup ILibParsers
     \{
@@ -842,7 +833,6 @@ int ILibBase64Decode(unsigned char* input, const int inputlen, unsigned char** o
 char* ILibDecompressString(unsigned char* CurrentCompressed, const int bufferLength, const int DecompressedLength);
 
 /* \} */
-
 
 /*! \defgroup PacketParsing Packet Parsing
     \ingroup ILibParsers
@@ -953,5 +943,6 @@ void* dbg_malloc(int sz);
 void dbg_free(void* ptr);
 int dbg_GetCount();
 
+void Safefree(void * p);
 /* \} */   // End of ILibParser Group
 #endif
