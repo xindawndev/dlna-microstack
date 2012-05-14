@@ -45,26 +45,25 @@
     static sem_t ILibChainLock;
 #endif
 
-
 static int ILibChainLock_RefCounter = 0;
-
 static int malloc_counter = 0;
+
 void* dbg_malloc(int sz)
 {
     ++malloc_counter;
     return((void*)malloc(sz));
 }
+
 void dbg_free(void* ptr)
 {
     --malloc_counter;
     free(ptr);    
 }
+
 int dbg_GetCount()
 {
     return(malloc_counter);
 }
-
-
 
 //
 // All of the following structures are meant to be private internal structures
@@ -131,9 +130,6 @@ struct ILibReaderWriterLock_Data
     int Exit;
 };
 
-
-
-
 #ifdef WINSOCK2
 int ILibGetLocalIPAddressNetMask(int address)
 {
@@ -143,7 +139,6 @@ int ILibGetLocalIPAddressNetMask(int address)
     INTERFACE_INFO localAddr[10];  // Assume there will be no more than 10 IP interfaces 
     int numLocalAddr; 
     int i;
-
 
     if((s = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, 0)) == INVALID_SOCKET)
     {
@@ -200,18 +195,24 @@ int ILibGetLocalIPAddressList(int** pp_int)
     //
 #if defined(WINSOCK2)
     int i;
+    int errorcode = 0;
+    int ip_count = 0;
     char buffer[16*sizeof(SOCKET_ADDRESS_LIST)];
     DWORD bufferSize;
     SOCKET TempSocket = socket(AF_INET,SOCK_DGRAM,0);
-    WSAIoctl(TempSocket,SIO_ADDRESS_LIST_QUERY,NULL,0,buffer,16*sizeof(SOCKET_ADDRESS_LIST),&bufferSize,NULL,NULL);
-    *pp_int = (int*)malloc(sizeof(int)*(1+((SOCKET_ADDRESS_LIST*)buffer)->iAddressCount));
-    for (i = 0;i < ((SOCKET_ADDRESS_LIST*)buffer)->iAddressCount;++i)
+    errorcode = WSAIoctl(TempSocket,SIO_ADDRESS_LIST_QUERY,NULL,0,buffer,16*sizeof(SOCKET_ADDRESS_LIST),&bufferSize,NULL,NULL);
+    if (errorcode == 0)
     {
-        (*pp_int)[i] = ((struct sockaddr_in*)(((SOCKET_ADDRESS_LIST*)buffer)->Address[i].lpSockaddr))->sin_addr.s_addr;
+        ip_count = 1+((SOCKET_ADDRESS_LIST*)buffer)->iAddressCount;
+        *pp_int = (int*)malloc(sizeof(int)*ip_count);
+        for (i = 0;i < (ip_count-1);++i)
+        {
+            (*pp_int)[i] = ((struct sockaddr_in*)(((SOCKET_ADDRESS_LIST*)buffer)->Address[i].lpSockaddr))->sin_addr.s_addr;
+        }
+        (*pp_int)[i] = inet_addr("127.0.0.1");
     }
-    (*pp_int)[i] = inet_addr("127.0.0.1");
     closesocket(TempSocket);
-    return(1+((SOCKET_ADDRESS_LIST*)buffer)->iAddressCount);
+    return ip_count;
 #elif defined(WINSOCK1)
     //
     // Winsock1 will use gethostbyname to fetch the IPAddress List
@@ -309,7 +310,6 @@ int ILibGetLocalIPAddressList(int** pp_int)
     return(ctr);
 #endif
 }
-
 
 struct ILibChain
 {
@@ -1056,7 +1056,7 @@ void ILibStartChain(void *Chain)
         //
         // After calling the Destroy, we free the link
         //
-        free(c->Object);
+        Safefree(c->Object);
         c = c->Next;
     }
     
@@ -2388,7 +2388,8 @@ void ILibAddEntry(void* hashtree, char* key, int keylength, void *value)
     // This can be duplicated by calling FindEntry, and setting create to true
     //
     struct HashNode* n = ILibFindEntry(hashtree,key,keylength,1);
-    n->Data = value;
+    if (n)
+        n->Data = value;
 }
 /*! \fn ILibAddEntryEx(void* hashtree, char* key, int keylength, void *value, int valueLength)
     \brief Adds an extended item to the HashTree
@@ -2404,8 +2405,11 @@ void ILibAddEntryEx(void* hashtree, char* key, int keylength, void *value, int v
     // This can be duplicated by calling FindEntry, and setting create to true
     //
     struct HashNode* n = ILibFindEntry(hashtree,key,keylength,1);
-    n->Data = value;
-    n->DataEx = valueEx;
+    if (n)
+    {
+        n->Data = value;
+        n->DataEx = valueEx;
+    }
 }
 
 
@@ -3502,6 +3506,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
     unsigned short ILibGetDGramSocket(int local, int *TheSocket)
 #endif
 {
+    int count = 0;
     unsigned short PortNum = -1;
     struct sockaddr_in addr;    
     memset((char *)&(addr), 0, sizeof(addr));
@@ -3525,6 +3530,11 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
         // Choose a random port from 50000 to 65500, which is what IANA says to use
         // for non standard ports
         //
+        if (++count >= 20) 
+        {
+            PortNum = 0;
+            break;
+        }
         PortNum = (unsigned short)(50000 + ((unsigned short)rand() % 15000));
         addr.sin_port = htons(PortNum);
     }
@@ -3557,6 +3567,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
     unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *TheSocket)
 #endif
 {
+    int count = 0;
     int ra=1;
     unsigned short PortNum = -1;
     struct sockaddr_in addr;
@@ -3580,6 +3591,11 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
         //
         do
         {
+            if (++count >= 20)
+            {
+                PortNum=0;
+                break;
+            }
             PortNum = (unsigned short)(MINPORTNUMBER + ((unsigned short)rand() % PORTNUMBERRANGE));
             addr.sin_port = htons(PortNum);
         }
@@ -4195,7 +4211,7 @@ int ILibXmlEscape(char* outdata, const char* indata)
 void ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, ILibLifeTime_OnCallback Callback, ILibLifeTime_OnCallback Destroy)
 {
     struct timeval tv;
-    struct LifeTimeMonitorData *temp;
+    //struct LifeTimeMonitorData *temp;
     struct LifeTimeMonitorData *ltms = (struct LifeTimeMonitorData*)malloc(sizeof(struct LifeTimeMonitorData));
     struct ILibLifeTime *UPnPLifeTime = (struct ILibLifeTime*)LifetimeMonitorObject;
 
@@ -5780,6 +5796,7 @@ int ILibTime_ValidateTimePortion(char *timeString)
     }
     return(RetVal);
 }
+
 char* ILibTime_ValidateDatePortion(char *timeString)
 {
     struct parser_result *pr;
@@ -5829,6 +5846,7 @@ char* ILibTime_ValidateDatePortion(char *timeString)
         return(NULL);
     }
 }
+
 int ILibTime_ParseEx(char *timeString, time_t *val)
 {
     int errCode = 0;
@@ -5922,32 +5940,32 @@ int ILibTime_ParseEx(char *timeString, time_t *val)
             t.tm_year = atoi(year)-1900;
             t.tm_mon = atoi(month)-1;
             t.tm_mday  = atoi(day);
-        
+
             ILibDestructParserResults(pr2);
         }
     }
     pr2 = ILibParseString(pr->LastResult->data,0,pr->LastResult->datalength,":",1);
     switch(pr2->NumResults)
     {
-        case 4:
-            //    yyyy-mm-ddThh:mm:ss+hh:mm
-            //    yyyy-mm-ddThh:mm:ss-hh:mm
-            hour = pr2->FirstResult->data;
-            hour[pr2->FirstResult->datalength]=0;
-            minute = pr2->FirstResult->NextResult->data;
-            minute[pr2->FirstResult->NextResult->datalength]=0;
-            second = pr2->FirstResult->NextResult->NextResult->data;
-            second[2]=0;
-            break;
-        case 3:
-            //    yyyy-mm-ddThh:mm:ssZ
-            hour = pr2->FirstResult->data;
-            hour[pr2->FirstResult->datalength]=0;
-            minute = pr2->FirstResult->NextResult->data;
-            minute[pr2->FirstResult->NextResult->datalength]=0;
-            second = pr2->FirstResult->NextResult->NextResult->data;
-            second[2]=0;
-            break;
+    case 4:
+        //    yyyy-mm-ddThh:mm:ss+hh:mm
+        //    yyyy-mm-ddThh:mm:ss-hh:mm
+        hour = pr2->FirstResult->data;
+        hour[pr2->FirstResult->datalength]=0;
+        minute = pr2->FirstResult->NextResult->data;
+        minute[pr2->FirstResult->NextResult->datalength]=0;
+        second = pr2->FirstResult->NextResult->NextResult->data;
+        second[2]=0;
+        break;
+    case 3:
+        //    yyyy-mm-ddThh:mm:ssZ
+        hour = pr2->FirstResult->data;
+        hour[pr2->FirstResult->datalength]=0;
+        minute = pr2->FirstResult->NextResult->data;
+        minute[pr2->FirstResult->NextResult->datalength]=0;
+        second = pr2->FirstResult->NextResult->NextResult->data;
+        second[2]=0;
+        break;
     }
     if(hour!=NULL && minute!=NULL && second!=NULL)
     {
@@ -5957,16 +5975,26 @@ int ILibTime_ParseEx(char *timeString, time_t *val)
 
         RetVal = mktime(&t);
     }
-        
+
     ILibDestructParserResults(pr2);
     ILibDestructParserResults(pr);
     free(startTime);
     *val = RetVal;
     return(errCode);
 }
+
 time_t ILibTime_Parse(char *timeString)
 {
     time_t retval;
     ILibTime_ParseEx(timeString, &retval);
     return(retval);
+}
+
+void Safefree(void *p)
+{
+    if (p != NULL)
+    {
+        free(p);
+        p = NULL;
+    }
 }

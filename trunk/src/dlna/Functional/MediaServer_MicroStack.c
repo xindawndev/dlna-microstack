@@ -1034,6 +1034,8 @@ void MediaServer_Init(struct MediaServer_DataObject *state, void *chain, const i
       NULL,
       NULL,
       state);
+      if (state->NOTIFY_SEND_socks[i] == NULL)
+          continue;
       ILibAsyncUDPSocket_JoinMulticastGroup(
       state->NOTIFY_SEND_socks[i],
       state->AddressList[i],
@@ -1050,7 +1052,8 @@ void MediaServer_Init(struct MediaServer_DataObject *state, void *chain, const i
       &MediaServer_SSDPSink,
       NULL,
       state);
-      if ( !state->NOTIFY_RECEIVE_socks[i] ) continue; // leochen
+      if ( !state->NOTIFY_RECEIVE_socks[i] ) 
+          continue; // leochen
       ILibAsyncUDPSocket_JoinMulticastGroup(
       state->NOTIFY_RECEIVE_socks[i],
       state->AddressList[i],
@@ -3037,15 +3040,19 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
       //
       for(i=0;i<MediaServer_Object->AddressListLength;++i)
       {
+          if (MediaServer_Object->NOTIFY_SEND_socks[i] == NULL)
+              continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_SEND_socks[i]);
       }
-      free(MediaServer_Object->NOTIFY_SEND_socks);
+      Safefree(MediaServer_Object->NOTIFY_SEND_socks);
       
       for(i=0;i<MediaServer_Object->AddressListLength;++i)
       {
+          if (MediaServer_Object->NOTIFY_RECEIVE_socks[i] == NULL)
+              continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_RECEIVE_socks[i]);
       }
-      free(MediaServer_Object->NOTIFY_RECEIVE_socks);
+      Safefree(MediaServer_Object->NOTIFY_RECEIVE_socks);
       
       
       //
@@ -3075,6 +3082,8 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
          NULL,
          NULL,
          MediaServer_Object);
+         if (MediaServer_Object->NOTIFY_SEND_socks[i] == NULL)
+             continue;
          ILibAsyncUDPSocket_JoinMulticastGroup(
          MediaServer_Object->NOTIFY_SEND_socks[i],
          MediaServer_Object->AddressList[i],
@@ -3091,7 +3100,8 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
          &MediaServer_SSDPSink,
          NULL,
          MediaServer_Object);
-         
+         if (MediaServer_Object->NOTIFY_RECEIVE_socks[i] == NULL)
+             continue;
          ILibAsyncUDPSocket_JoinMulticastGroup(
          MediaServer_Object->NOTIFY_RECEIVE_socks[i],
          MediaServer_Object->AddressList[i],
@@ -3164,52 +3174,54 @@ void MediaServer_FragmentedSendNotify(void *data)
    
    for(i=0;i<FNS->upnp->AddressListLength;++i)
    {
-      ILibAsyncUDPSocket_SetMulticastInterface(FNS->upnp->NOTIFY_SEND_socks[i],FNS->upnp->AddressList[i]);
-      switch(FNS->packetNumber)
-      {
-         case 1:
-                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
-                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-                        break;
-                    case 2:
-                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
-                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-                        break;
-                    case 3:
-                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
-                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-                        break;
-                    case 4:
-                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
-                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-                        break;
-                    case 5:
-                        MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
-                        ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-                        break;
-                    
-         
-      }
+       if (FNS->upnp->NOTIFY_SEND_socks[i] == NULL)
+           continue;
+       ILibAsyncUDPSocket_SetMulticastInterface(FNS->upnp->NOTIFY_SEND_socks[i],FNS->upnp->AddressList[i]);
+       switch(FNS->packetNumber)
+       {
+       case 1:
+           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
+           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+           break;
+       case 2:
+           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
+           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+           break;
+       case 3:
+           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
+           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+           break;
+       case 4:
+           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
+           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+           break;
+       case 5:
+           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
+           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+           break;
+       }
    }
    free(packet);
    if(FNS->packetNumber!=0)
    {
-      free(FNS);
+       free(FNS);
    }
 }
 void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
 {
-   int packetlength;
-   char* packet = (char*)malloc(5000);
-   int i,i2;
-   
-   for(i=0;i<upnp->AddressListLength;++i)
-   {
-      ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
-      for (i2=0;i2<2;i2++)
-      {
-         MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
-                    ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+    int packetlength;
+    char* packet = (char*)malloc(5000);
+    int i,i2;
+
+    for(i=0;i<upnp->AddressListLength;++i)
+    {
+        if (upnp->NOTIFY_SEND_socks[i] == NULL)
+            continue;
+        ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
+        for (i2=0;i2<2;i2++)
+        {
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
             MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"","uuid:",upnp->UDN,upnp->NotifyCycleTime);
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
             MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
@@ -3218,7 +3230,6 @@ void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
             MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-
       }
    }
    free(packet);
@@ -3246,31 +3257,31 @@ void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
 
 void MediaServer_SendByeBye(const struct MediaServer_DataObject *upnp)
 {
-   
-   int packetlength;
-   char* packet = (char*)malloc(5000);
-   int i, i2;
-   
-   for(i=0;i<upnp->AddressListLength;++i)
-   {    
-      ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
-      
-      for (i2=0;i2<2;i2++)
-      {
-         MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",0);
-                    ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-      MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"","uuid:",upnp->UDN,0);
-      ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-      MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",0);
-      ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-      MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",0);
-      ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-      MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",0);
-      ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+    int packetlength;
+    char* packet = (char*)malloc(5000);
+    int i, i2;
 
-      }
-   }
-   free(packet);
+    for(i=0;i<upnp->AddressListLength;++i)
+    {
+        if (upnp->NOTIFY_SEND_socks[i] == NULL)
+            continue;
+        ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
+
+        for (i2=0;i2<2;i2++)
+        {
+            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",0);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"","uuid:",upnp->UDN,0);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",0);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",0);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",0);
+            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+        }
+    }
+    free(packet);
 }
 
 /*! \fn MediaServer_Response_Error(const MediaServer_SessionToken MediaServer_Token, const int ErrorCode, const char* ErrorMsg)
