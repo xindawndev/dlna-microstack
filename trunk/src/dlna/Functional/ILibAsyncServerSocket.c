@@ -1,13 +1,13 @@
 #if defined(WIN32)
-    #define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
 #endif
 
 #if defined(WINSOCK2)
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-    #include <winsock.h>
-    #include <wininet.h>
+#include <winsock.h>
+#include <wininet.h>
 #endif
 #include "ILibParsers.h"
 #include "ILibAsyncServerSocket.h"
@@ -20,7 +20,7 @@
 #define DEBUGSTATEMENT(x)
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
-    #include <crtdbg.h>
+#include <crtdbg.h>
 #endif
 
 struct ILibAsyncServerSocketModule
@@ -33,14 +33,14 @@ struct ILibAsyncServerSocketModule
     int MaxConnection;
     void **AsyncSockets;
     ILibServerScope scope;
-    
-    #ifdef _WIN32_WCE
-        SOCKET ListenSocket;
-    #elif WIN32
-        SOCKET ListenSocket;
-    #elif defined(_POSIX) || defined(__SYMBIAN32__)
-        int ListenSocket;
-    #endif
+
+#ifdef _WIN32_WCE
+    SOCKET ListenSocket;
+#elif WIN32
+    SOCKET ListenSocket;
+#elif defined(_POSIX) || defined(__SYMBIAN32__)
+    int ListenSocket;
+#endif
     unsigned short portNumber;
     int listening;
 
@@ -61,9 +61,9 @@ struct ILibAsyncServerSocket_Data
 
 
 /*! \fn ILibAsyncServerSocket_GetTag(ILibAsyncServerSocket_ServerModule ILibAsyncSocketModule)
-    \brief Returns the user Tag associated with the AsyncServer
-    \param ILibAsyncSocketModule The ILibAsyncServerSocket to query
-    \returns The user Tag
+\brief Returns the user Tag associated with the AsyncServer
+\param ILibAsyncSocketModule The ILibAsyncServerSocket to query
+\returns The user Tag
 */
 void *ILibAsyncServerSocket_GetTag(ILibAsyncServerSocket_ServerModule ILibAsyncSocketModule)
 {
@@ -71,9 +71,9 @@ void *ILibAsyncServerSocket_GetTag(ILibAsyncServerSocket_ServerModule ILibAsyncS
     return(module->Tag);
 }
 /*! \fn ILibAsyncServerSocket_SetTag(ILibAsyncServerSocket_ServerModule ILibAsyncSocketModule, void *tag)
-    \brief Sets the user Tag associated with the AsyncServer
-    \param ILibAsyncSocketModule The ILibAsyncServerSocket to save the tag to
-    \param tag The value to save
+\brief Sets the user Tag associated with the AsyncServer
+\param ILibAsyncSocketModule The ILibAsyncServerSocket to save the tag to
+\param tag The value to save
 */
 void ILibAsyncServerSocket_SetTag(ILibAsyncServerSocket_ServerModule ILibAsyncSocketModule, void *tag)
 {
@@ -95,43 +95,38 @@ void ILibAsyncServerSocket_OnInterruptSink(ILibAsyncSocket_SocketModule socketMo
     }
     free(user);
 }
-//
+
 // Chain PreSelect handler
-//
 // <param name="socketModule"></param>
 // <param name="readset"></param>
 // <param name="writeset"></param>
 // <param name="errorset"></param>
 // <param name="blocktime"></param>
-void ILibAsyncServerSocket_PreSelect(void* socketModule,void *readset, void *writeset, void *errorset, int* blocktime)
+void ILibAsyncServerSocket_PreSelect(void * socketModule, void *readset, void *writeset, void *errorset, int* blocktime)
 {
     struct ILibAsyncServerSocketModule *module = (struct ILibAsyncServerSocketModule*)socketModule;
-    int flags,i;
+    int flags, i;
 
-    //
     // The socket isn't put in listening mode, until the chain is started.
     // If this variable==0, that means we need to do that.
-    //
-    if(module->listening==0)
+    if(module->listening == 0)
     {
-        //
         // Set the socket to non-block mode, so we can play nice and share the thread
-        //
-        #ifdef _WIN32_WCE
-            flags = 1;
-            ioctlsocket(module->ListenSocket,FIONBIO,&flags);
-        #elif WIN32
-            flags = 1;
-            ioctlsocket(module->ListenSocket,FIONBIO,&flags);
-        #elif _POSIX
-            flags = fcntl(module->ListenSocket,F_GETFL,0);
-            fcntl(module->ListenSocket,F_SETFL,O_NONBLOCK|flags);
-        #endif
-        
+#ifdef _WIN32_WCE
+        flags = 1;
+        ioctlsocket(module->ListenSocket,FIONBIO,&flags);
+#elif WIN32
+        flags = 1;
+        ioctlsocket(module->ListenSocket,FIONBIO,&flags);
+#elif _POSIX
+        flags = fcntl(module->ListenSocket,F_GETFL,0);
+        fcntl(module->ListenSocket,F_SETFL,O_NONBLOCK|flags);
+#endif
+
         //
         // Put the socket in Listen, and add it to the fdset for the Select loop
         //
-        module->listening=1;
+        module->listening = 1;
 #if defined(__SYMBIAN32__)
         ILibSocketWrapper_listen(module->ListenSocket,4);
         ILibSocketWrapper_FDSET(module->ListenSocket, readset);
@@ -143,34 +138,34 @@ void ILibAsyncServerSocket_PreSelect(void* socketModule,void *readset, void *wri
     else
     {
         // Only put the ListenSocket in the readset, if we are able to handle a new socket
-        for(i=0;i<module->MaxConnection;++i)
+        for(i = 0; i < module->MaxConnection; ++i)
         {
-            if(ILibAsyncSocket_IsFree(module->AsyncSockets[i])!=0)
+            if(ILibAsyncSocket_IsFree(module->AsyncSockets[i]) != 0)
             {
 #if defined(__SYMBIAN32__)
                 ILibSocketWrapper_FDSET(module->ListenSocket, readset);
 #else
-                FD_SET(module->ListenSocket,(fd_set*)readset);
+                FD_SET(module->ListenSocket, (fd_set*)readset);
 #endif
                 break;
             }
         }
     }
 }
+
 /*! \fn ILibAsyncServerSocket_SetReAllocateNotificationCallback(ILibAsyncServerSocket_ServerModule AsyncServerSocketToken, ILibAsyncServerSocket_ConnectionToken ConnectionToken, ILibAsyncServerSocket_BufferReAllocated Callback)
-    \brief Set the callback handler for when the internal data buffer has been resized
-    \param AsyncServerSocketToken The ILibAsyncServerSocket to query
-    \param ConnectionToken The specific connection to set the callback with
-    \param Callback The callback handler to set
+\brief Set the callback handler for when the internal data buffer has been resized
+\param AsyncServerSocketToken The ILibAsyncServerSocket to query
+\param ConnectionToken The specific connection to set the callback with
+\param Callback The callback handler to set
 */
 void ILibAsyncServerSocket_SetReAllocateNotificationCallback(ILibAsyncServerSocket_ServerModule AsyncServerSocketToken, ILibAsyncServerSocket_ConnectionToken ConnectionToken, ILibAsyncServerSocket_BufferReAllocated Callback)
 {
     struct ILibAsyncServerSocket_Data *data = (struct ILibAsyncServerSocket_Data*)ILibAsyncSocket_GetUser(ConnectionToken);
     data->Callback = Callback;
 }
-//
+
 // Chain PostSelect handler
-//
 // <param name="socketModule"></param>
 // <param name="slct"></param>
 // <param name="readset"></param>
@@ -185,13 +180,13 @@ void ILibAsyncServerSocket_PostSelect(void* socketModule,int slct, void *readset
     int i,flags;
     struct sockaddr_in receivingAddress;
     int receivingAddressLength = sizeof(struct sockaddr_in);
-    #ifdef _WIN32_WCE
-        SOCKET NewSocket;
-    #elif WIN32
-        SOCKET NewSocket;
-    #elif defined( _POSIX) || defined(__SYMBIAN32__)
-        int NewSocket;
-    #endif
+#ifdef _WIN32_WCE
+    SOCKET NewSocket;
+#elif WIN32
+    SOCKET NewSocket;
+#elif defined( _POSIX) || defined(__SYMBIAN32__)
+    int NewSocket;
+#endif
 
 #if defined(__SYMBIAN32__)
     if(ILibSocketWrapper_FDISSET(module->ListenSocket, readset)!=0)
@@ -199,45 +194,41 @@ void ILibAsyncServerSocket_PostSelect(void* socketModule,int slct, void *readset
     if(FD_ISSET(module->ListenSocket,(fd_set*)readset)!=0)
 #endif
     {
-        //
         // There are pending TCP connection requests
-        //
-        for(i=0;i<module->MaxConnection;++i)
+        for(i = 0; i < module->MaxConnection; ++i)
         {
-            //
             // Check to see if we have available resources to handle this connection request
-            //
             if(ILibAsyncSocket_IsFree(module->AsyncSockets[i])!=0)
             {
                 addrlen = sizeof(addr);
 #if defined(__SYMBIAN32__)
                 NewSocket = ILibSocketWrapper_accept(module->ListenSocket);
 #else
-                NewSocket = accept(module->ListenSocket,(struct sockaddr*)&addr,&addrlen);
+                NewSocket = accept(module->ListenSocket, (struct sockaddr*)&addr ,&addrlen);
 #endif
 
 #if !defined(__SYMBIAN32__)
-                if(NewSocket!= ~0)
+                if(NewSocket != ~0)
                 {
-                switch(module->scope)
-                {
+                    switch(module->scope)
+                    {
                     case ILibServerScope_LocalLoopback:
                         // Check that the caller ip address is the same as the receive IP address
-                        getsockname(NewSocket,(struct sockaddr*)&receivingAddress,&receivingAddressLength);
-                        if(receivingAddress.sin_addr.s_addr!=addr.sin_addr.s_addr)
+                        getsockname(NewSocket, (struct sockaddr*)&receivingAddress, &receivingAddressLength);
+                        if(receivingAddress.sin_addr.s_addr != addr.sin_addr.s_addr)
                         {
-                            #if defined(WIN32) || defined(_WIN32_WCE)
-                                closesocket(NewSocket);
-                            #elif !defined(__SYMBIAN32__)
-                                close(NewSocket);
-                            #else
-                                ILibSocketWrapper_close(NewSocket);
-                            #endif
-                                NewSocket=~0;
+#if defined(WIN32) || defined(_WIN32_WCE)
+                            closesocket(NewSocket);
+#elif !defined(__SYMBIAN32__)
+                            close(NewSocket);
+#else
+                            ILibSocketWrapper_close(NewSocket);
+#endif
+                            NewSocket = ~0;
                         }
                         break;
                     case ILibServerScope_LocalSegment:
-                        getsockname(NewSocket,(struct sockaddr*)&receivingAddress,&receivingAddressLength);
+                        getsockname(NewSocket, (struct sockaddr*)&receivingAddress, &receivingAddressLength);
                         break;
                     default:
                         break;
@@ -246,19 +237,17 @@ void ILibAsyncServerSocket_PostSelect(void* socketModule,int slct, void *readset
 #endif
                 if (NewSocket != ~0)
                 {
-                    //
                     // Set this new socket to non-blocking mode, so we can play nice and share thread
-                    //
-                    #ifdef _WIN32_WCE
-                        flags = 1;
-                        ioctlsocket(NewSocket,FIONBIO,&flags);
-                    #elif WIN32
-                        flags = 1;
-                        ioctlsocket(NewSocket,FIONBIO,&flags);
-                    #elif _POSIX
-                        flags = fcntl(NewSocket,F_GETFL,0);
-                        fcntl(NewSocket,F_SETFL,O_NONBLOCK|flags);
-                    #endif
+#ifdef _WIN32_WCE
+                    flags = 1;
+                    ioctlsocket(NewSocket,FIONBIO,&flags);
+#elif WIN32
+                    flags = 1;
+                    ioctlsocket(NewSocket,FIONBIO,&flags);
+#elif _POSIX
+                    flags = fcntl(NewSocket,F_GETFL,0);
+                    fcntl(NewSocket,F_SETFL,O_NONBLOCK|flags);
+#endif
                     //
                     // Instantiate a module to contain all the data about this connection
                     //
@@ -278,9 +267,9 @@ void ILibAsyncServerSocket_PostSelect(void* socketModule,int slct, void *readset
                     }
                 }
                 else {break;}
-                #if defined(__SYMBIAN32__)
+#if defined(__SYMBIAN32__)
                 break; // SYMBIAN logic can't do async accepts in the fashion that Linux/Win32 does
-                #endif
+#endif
             }
         }
     }
@@ -294,15 +283,15 @@ void ILibAsyncServerSocket_Destroy(void *socketModule)
     struct ILibAsyncServerSocketModule *module =(struct ILibAsyncServerSocketModule*)socketModule;
 
     free(module->AsyncSockets);
-    #ifdef _WIN32_WCE
-        closesocket(module->ListenSocket);
-    #elif WIN32
-        closesocket(module->ListenSocket);
-    #elif _POSIX
-        close(module->ListenSocket);
-    #elif defined(__SYMBIAN32__)
-        ILibSocketWrapper_close(module->ListenSocket);
-    #endif    
+#ifdef _WIN32_WCE
+    closesocket(module->ListenSocket);
+#elif WIN32
+    closesocket(module->ListenSocket);
+#elif _POSIX
+    close(module->ListenSocket);
+#elif defined(__SYMBIAN32__)
+    ILibSocketWrapper_close(module->ListenSocket);
+#endif    
 }
 
 //
@@ -398,70 +387,63 @@ void ILibAsyncServerSocket_OnBufferReAllocated(ILibAsyncSocket_SocketModule Conn
 }
 
 /*! \fn ILibCreateAsyncServerSocketModule(void *Chain, int MaxConnections, int PortNumber, int initialBufferSize, ILibAsyncServerSocket_OnConnect OnConnect,ILibAsyncServerSocket_OnDisconnect OnDisconnect,ILibAsyncServerSocket_OnReceive OnReceive,ILibAsyncServerSocket_OnInterrupt OnInterrupt, ILibAsyncServerSocket_OnSendOK OnSendOK)
-    \brief Instantiates a new ILibAsyncServerSocket
-    \param Chain The chain to add this module to. (Chain must <B>not</B> be running)
-    \param MaxConnections The max number of simultaneous connections that will be allowed
-    \param PortNumber The port number to bind to. 0 will select a random port
-    \param initialBufferSize The initial size of the receive buffer
-    \param OnConnect Function Pointer that triggers when a connection is established
-    \param OnDisconnect Function Pointer that triggers when a connection is closed
-    \param OnReceive Function Pointer that triggers when data is received
-    \param OnInterrupt Function Pointer that triggers when connection interrupted
-    \param OnSendOK Function Pointer that triggers when pending sends are complete
-    \returns An ILibAsyncServerSocket module
+\brief Instantiates a new ILibAsyncServerSocket
+\param Chain The chain to add this module to. (Chain must <B>not</B> be running)
+\param MaxConnections The max number of simultaneous connections that will be allowed
+\param PortNumber The port number to bind to. 0 will select a random port
+\param initialBufferSize The initial size of the receive buffer
+\param OnConnect Function Pointer that triggers when a connection is established
+\param OnDisconnect Function Pointer that triggers when a connection is closed
+\param OnReceive Function Pointer that triggers when data is received
+\param OnInterrupt Function Pointer that triggers when connection interrupted
+\param OnSendOK Function Pointer that triggers when pending sends are complete
+\returns An ILibAsyncServerSocket module
 */
 ILibAsyncServerSocket_ServerModule ILibCreateAsyncServerSocketModule(void *Chain, int MaxConnections, int PortNumber, int initialBufferSize, ILibAsyncServerSocket_OnConnect OnConnect,ILibAsyncServerSocket_OnDisconnect OnDisconnect,ILibAsyncServerSocket_OnReceive OnReceive,ILibAsyncServerSocket_OnInterrupt OnInterrupt, ILibAsyncServerSocket_OnSendOK OnSendOK)
 {
-    struct ILibAsyncServerSocketModule *RetVal;
+    struct ILibAsyncServerSocketModule * RetVal;
     int i;
 
-    //
     // Instantiate a new AsyncServer module
-    //
     RetVal = (struct ILibAsyncServerSocketModule*)malloc(sizeof(struct ILibAsyncServerSocketModule));
     memset(RetVal,0,sizeof(struct ILibAsyncServerSocketModule));
-    RetVal->PreSelect = &ILibAsyncServerSocket_PreSelect;
-    RetVal->PostSelect = &ILibAsyncServerSocket_PostSelect;
-    RetVal->Destroy = &ILibAsyncServerSocket_Destroy;
-    RetVal->Chain = Chain;
-    RetVal->OnConnect = OnConnect;
-    RetVal->OnDisconnect = OnDisconnect;
-    RetVal->OnInterrupt = OnInterrupt;
-    RetVal->OnSendOK = OnSendOK;
-    RetVal->OnReceive = OnReceive;
-    RetVal->MaxConnection = MaxConnections;
-    RetVal->AsyncSockets = (void**)malloc(MaxConnections*sizeof(void*));
-    RetVal->portNumber = PortNumber;
-    
-    //
+    RetVal->PreSelect       = &ILibAsyncServerSocket_PreSelect;
+    RetVal->PostSelect      = &ILibAsyncServerSocket_PostSelect;
+    RetVal->Destroy         = &ILibAsyncServerSocket_Destroy;
+    RetVal->Chain           = Chain;
+    RetVal->OnConnect       = OnConnect;
+    RetVal->OnDisconnect    = OnDisconnect;
+    RetVal->OnInterrupt     = OnInterrupt;
+    RetVal->OnSendOK        = OnSendOK;
+    RetVal->OnReceive       = OnReceive;
+    RetVal->MaxConnection   = MaxConnections;
+    RetVal->AsyncSockets    = (void**)malloc(MaxConnections * sizeof(void*));
+    RetVal->portNumber      = PortNumber;
+
     // Create our socket pool
-    //
-    for(i=0;i<MaxConnections;++i)
+    for(i=0; i < MaxConnections; ++i)
     {
-        RetVal->AsyncSockets[i] = ILibCreateAsyncSocketModule(Chain,initialBufferSize,&ILibAsyncServerSocket_OnData,NULL,&ILibAsyncServerSocket_OnDisconnectSink, &ILibAsyncServerSocket_OnSendOKSink);
-        //
+        RetVal->AsyncSockets[i] = ILibCreateAsyncSocketModule(Chain, initialBufferSize, &ILibAsyncServerSocket_OnData, NULL, &ILibAsyncServerSocket_OnDisconnectSink, &ILibAsyncServerSocket_OnSendOKSink);
+
         // We want to know about any buffer reallocations, because anything above us may want to know
-        //
-        ILibAsyncSocket_SetReAllocateNotificationCallback(RetVal->AsyncSockets[i],&ILibAsyncServerSocket_OnBufferReAllocated);
+        ILibAsyncSocket_SetReAllocateNotificationCallback(RetVal->AsyncSockets[i], &ILibAsyncServerSocket_OnBufferReAllocated);
     }
     ILibAddToChain(Chain,RetVal);
 
-    //
     // Get our listening socket
-    //
-    #if defined(WIN32) || defined(_WIN32_WCE)
-        RetVal->portNumber = ILibGetStreamSocket(htonl(INADDR_ANY),RetVal->portNumber,(HANDLE*)&(RetVal->ListenSocket));
-    #else
-        RetVal->portNumber = ILibGetStreamSocket(htonl(INADDR_ANY),RetVal->portNumber,&(RetVal->ListenSocket));
-    #endif
+#if defined(WIN32) || defined(_WIN32_WCE)
+    RetVal->portNumber = ILibGetStreamSocket(htonl(INADDR_ANY),RetVal->portNumber,(HANDLE*)&(RetVal->ListenSocket));
+#else
+    RetVal->portNumber = ILibGetStreamSocket(htonl(INADDR_ANY),RetVal->portNumber,&(RetVal->ListenSocket));
+#endif
 
     return(RetVal);
 }
 
 /*! \fn ILibAsyncServerSocket_GetPortNumber(ILibAsyncServerSocket_ServerModule ServerSocketModule)
-    \brief Returns the port number the server is bound to
-    \param ServerSocketModule The ILibAsyncServer to query
-    \returns The listening port number
+\brief Returns the port number the server is bound to
+\param ServerSocketModule The ILibAsyncServer to query
+\returns The listening port number
 */
 unsigned short ILibAsyncServerSocket_GetPortNumber(ILibAsyncServerSocket_ServerModule ServerSocketModule)
 {

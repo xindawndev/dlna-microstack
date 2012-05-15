@@ -144,9 +144,9 @@
 
 typedef enum
 {
-    ILibServerScope_All=0,
-    ILibServerScope_LocalLoopback=1,
-    ILibServerScope_LocalSegment=2
+    ILibServerScope_All             = 0,
+    ILibServerScope_LocalLoopback   = 1,
+    ILibServerScope_LocalSegment    = 2
 }ILibServerScope;
 
 

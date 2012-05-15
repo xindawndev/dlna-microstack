@@ -110,21 +110,19 @@ void ILibWebServer_IdleSink(void *object)
 void ILibWebServer_Destroy(void *object)
 {
     struct ILibWebServer_StateModule *s = (struct ILibWebServer_StateModule*)object;
-    void *en;
-    void *data;
-    char *key;
-    int keyLength;
+    void *en        = NULL;
+    void *data      = NULL;
+    char *key       = NULL;
+    int keyLength   = 0;
 
     if(s->VirtualDirectoryTable!=NULL)
     {
-        //
         // If there are registered Virtual Directories, we need to free the resources
         // associated with them
-        //
         en = ILibHashTree_GetEnumerator(s->VirtualDirectoryTable);
-        while(ILibHashTree_MoveNext(en)==0)
+        while(ILibHashTree_MoveNext(en) == 0)
         {
-            ILibHashTree_GetValue(en,&key,&keyLength,&data);
+            ILibHashTree_GetValue(en, &key, &keyLength, &data);
             free(data);
         }
         ILibHashTree_DestroyEnumerator(en);
@@ -607,32 +605,28 @@ ILibWebServer_ServerToken ILibWebServer_Create(void *Chain, int MaxConnections, 
 
     memset(RetVal,0,sizeof(struct ILibWebServer_StateModule));
 
-    RetVal->Destroy = &ILibWebServer_Destroy;
-    RetVal->Chain = Chain;
-    RetVal->OnSession = OnSession;
+    RetVal->Destroy     = &ILibWebServer_Destroy;
+    RetVal->Chain       = Chain;
+    RetVal->OnSession   = OnSession;
 
-    //
     // Create the underling ILibAsyncServerSocket
-    //
     RetVal->ServerSocket = ILibCreateAsyncServerSocketModule(
         Chain,
         MaxConnections,
         PortNumber,
         INITIAL_BUFFER_SIZE,
-        &ILibWebServer_OnConnect,            // OnConnect
+        &ILibWebServer_OnConnect,           // OnConnect
         &ILibWebServer_OnDisconnect,        // OnDisconnect
-        &ILibWebServer_OnReceive,            // OnReceive
-        &ILibWebServer_OnInterrupt,            // OnInterrupt
-        &ILibWebServer_OnSendOK                // OnSendOK
+        &ILibWebServer_OnReceive,           // OnReceive
+        &ILibWebServer_OnInterrupt,         // OnInterrupt
+        &ILibWebServer_OnSendOK             // OnSendOK
         );
 
-    //
     // Set ourselves in the User tag of the underlying ILibAsyncServerSocket
-    //
-    ILibAsyncServerSocket_SetTag(RetVal->ServerSocket,RetVal);
-    RetVal->LifeTime = ILibCreateLifeTime(Chain);
-    RetVal->User = User;
-    ILibAddToChain(Chain,RetVal);
+    ILibAsyncServerSocket_SetTag(RetVal->ServerSocket, RetVal);
+    RetVal->LifeTime    = ILibCreateLifeTime(Chain);
+    RetVal->User        = User;
+    ILibAddToChain(Chain, RetVal);
 
     return(RetVal);
 }
