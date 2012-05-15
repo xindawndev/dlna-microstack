@@ -12,25 +12,25 @@
 #define NULL 0
 #endif
 #ifdef MEMORY_CHECK
-    #include <assert.h>
-    #define MEMCHECK(x) x
+#include <assert.h>
+#define MEMCHECK(x) x
 #else
-    #define MEMCHECK(x)
+#define MEMCHECK(x)
 #endif
 
 #if defined(__APPLE__)
 #define SOL_IP IPPROTO_IP
 #endif
 #if defined(WIN32)
-    #define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
 #endif
 
 #if defined(WINSOCK2)
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-    #include <winsock.h>
-    #include <wininet.h>
+#include <winsock.h>
+#include <wininet.h>
 #endif
 #include "ILibParsers.h"
 #include "ILibAsyncSocket.h"
@@ -38,7 +38,7 @@
 #include "ILibSocketWrapper.h"
 #endif
 #if defined(WIN32) && !defined(_WIN32_WCE)
-    #include <crtdbg.h>
+#include <crtdbg.h>
 #endif
 
 
@@ -100,11 +100,11 @@ struct ILibAsyncSocketModule
     unsigned int PendingBytesToSend;
     unsigned int TotalBytesSent;
 
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        SOCKET internalSocket;
-    #elif defined(_POSIX) || defined(__SYMBIAN32__)
-        int internalSocket;
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+    SOCKET internalSocket;
+#elif defined(_POSIX) || defined(__SYMBIAN32__)
+    int internalSocket;
+#endif
 
     int RemoteIPAddress;
     int RemotePort;
@@ -127,11 +127,11 @@ struct ILibAsyncSocketModule
 
     void *user;
     int PAUSE;
-    
+
     int FinConnect;
     int BeginPointer;
     int EndPointer;
-    
+
     char* buffer;
     int MallocSize;
     int InitialSize;
@@ -162,19 +162,14 @@ struct ILibAsyncSocket_ReplaceSocketData
 void ILibAsyncSocket_PostSelect(void* object,int slct, void *readset, void *writeset, void *errorset);
 void ILibAsyncSocket_PreSelect(void* object,void *readset, void *writeset, void *errorset, int* blocktime);
 
-//
 // An internal method called by Chain as Destroy, to cleanup AsyncSocket
-//
 // <param name="socketModule">The AsyncSocketModule</param>
 void ILibAsyncSocket_Destroy(void *socketModule)
 {
     struct ILibAsyncSocketModule* module = (struct ILibAsyncSocketModule*)socketModule;
     struct ILibAsyncSocket_SendData *temp,*current;
 
-
-    //
     // Call the interrupt event if necessary
-    //
     if(!ILibAsyncSocket_IsFree(module))
     {
         if(module->OnInterrupt!=NULL)
@@ -183,61 +178,54 @@ void ILibAsyncSocket_Destroy(void *socketModule)
         }
     }
 
-    //
     // Close socket if necessary
-    //
     if(module->internalSocket!=~0)
     {
         if(module->CurrentQOSPriorty!=ILibAsyncSocket_QOS_NONE)
         {
             ILibAsyncSocket_UnitializeQOS(module);
         }
-        #if defined(_WIN32_WCE) || defined(WIN32)
-            #if defined(WINSOCK2)
-                shutdown(module->internalSocket,SD_BOTH);
-            #endif
-            closesocket(module->internalSocket);
-        #elif defined(_POSIX)
-            shutdown(module->internalSocket,SHUT_RDWR);
-            close(module->internalSocket);
-        #elif defined(__SYMBIAN32__)
-            ILibSocketWrapper_close(module->internalSocket);
-        #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)
+        shutdown(module->internalSocket,SD_BOTH);
+#endif
+        closesocket(module->internalSocket);
+#elif defined(_POSIX)
+        shutdown(module->internalSocket,SHUT_RDWR);
+        close(module->internalSocket);
+#elif defined(__SYMBIAN32__)
+        ILibSocketWrapper_close(module->internalSocket);
+#endif
     }
-    
 
-
-    //
     // Free the buffer if necessary
-    //
-    if(module->buffer!=NULL)
+    if(module->buffer != NULL)
     {
         free(module->buffer);
         module->buffer = NULL;
         module->MallocSize = 0;
     }
-    
-    //
+
     // Clear all the data that is pending to be sent
-    //
     temp=current=module->PendingSend_Head;
-    while(current!=NULL)
+    while(current != NULL)
     {
         temp = current->Next;
-        if(current->UserFree==0)
+        if(current->UserFree == 0)
         {
             free(current->buffer);
         }
         free(current);
         current = temp;
     }
-    
+
     sem_destroy(&(module->SendLock));
 }
+
 /*! \fn ILibAsyncSocket_SetReAllocateNotificationCallback(ILibAsyncSocket_SocketModule AsyncSocketToken, ILibAsyncSocket_OnBufferReAllocated Callback)
-    \brief Set the callback handler for when the internal data buffer has been resized
-    \param AsyncSocketToken The specific connection to set the callback with
-    \param Callback The callback handler to set
+\brief Set the callback handler for when the internal data buffer has been resized
+\param AsyncSocketToken The specific connection to set the callback with
+\param Callback The callback handler to set
 */
 void ILibAsyncSocket_SetReAllocateNotificationCallback(ILibAsyncSocket_SocketModule AsyncSocketToken, ILibAsyncSocket_OnBufferReAllocated Callback)
 {
@@ -248,53 +236,53 @@ void ILibAsyncSocket_SetReAllocateNotificationCallback(ILibAsyncSocket_SocketMod
 }
 
 /*! \fn ILibCreateAsyncSocketModule(void *Chain, int initialBufferSize, ILibAsyncSocket_OnData OnData, ILibAsyncSocket_OnConnect OnConnect, ILibAsyncSocket_OnDisconnect OnDisconnect,ILibAsyncSocket_OnSendOK OnSendOK)
-    \brief Creates a new AsyncSocketModule
-    \param Chain The chain to add this module to. (Chain must <B>not</B> be running)
-    \param initialBufferSize The initial size of the receive buffer
-    \param OnData Function Pointer that triggers when Data is received
-    \param OnConnect Function Pointer that triggers upon successfull connection establishment
-    \param OnDisconnect Function Pointer that triggers upon disconnect
-    \param OnSendOK Function Pointer that triggers when pending sends are complete
-    \returns An ILibAsyncSocket token
+\brief Creates a new AsyncSocketModule
+\param Chain The chain to add this module to. (Chain must <B>not</B> be running)
+\param initialBufferSize The initial size of the receive buffer
+\param OnData Function Pointer that triggers when Data is received
+\param OnConnect Function Pointer that triggers upon successfull connection establishment
+\param OnDisconnect Function Pointer that triggers upon disconnect
+\param OnSendOK Function Pointer that triggers when pending sends are complete
+\returns An ILibAsyncSocket token
 */
 ILibAsyncSocket_SocketModule ILibCreateAsyncSocketModule(void *Chain, int initialBufferSize, ILibAsyncSocket_OnData OnData, ILibAsyncSocket_OnConnect OnConnect, ILibAsyncSocket_OnDisconnect OnDisconnect,ILibAsyncSocket_OnSendOK OnSendOK)
 {
-    struct ILibAsyncSocketModule *RetVal = (struct ILibAsyncSocketModule*)malloc(sizeof(struct ILibAsyncSocketModule));
+    struct ILibAsyncSocketModule *RetVal    = (struct ILibAsyncSocketModule*)malloc(sizeof(struct ILibAsyncSocketModule));
     memset(RetVal,0,sizeof(struct ILibAsyncSocketModule));
-    RetVal->PreSelect = &ILibAsyncSocket_PreSelect;
-    RetVal->PostSelect = &ILibAsyncSocket_PostSelect;
-    RetVal->Destroy = &ILibAsyncSocket_Destroy;
-    
-    RetVal->internalSocket = -1;
-    RetVal->OnData = OnData;
-    RetVal->OnConnect = OnConnect;
-    RetVal->OnDisconnect = OnDisconnect;
-    RetVal->OnSendOK = OnSendOK;
-    RetVal->buffer = (char*)malloc(initialBufferSize);
-    RetVal->InitialSize = initialBufferSize;
-    RetVal->MallocSize = initialBufferSize;
+    RetVal->PreSelect                       = &ILibAsyncSocket_PreSelect;
+    RetVal->PostSelect                      = &ILibAsyncSocket_PostSelect;
+    RetVal->Destroy                         = &ILibAsyncSocket_Destroy;
 
-    RetVal->LifeTime = ILibCreateLifeTime(Chain);
-    RetVal->TimeoutTimer = ILibCreateLifeTime(Chain);
-    RetVal->ReplaceSocketTimer = ILibCreateLifeTime(Chain);
+    RetVal->internalSocket                  = -1;
+    RetVal->OnData                          = OnData;
+    RetVal->OnConnect                       = OnConnect;
+    RetVal->OnDisconnect                    = OnDisconnect;
+    RetVal->OnSendOK                        = OnSendOK;
+    RetVal->buffer                          = (char*)malloc(initialBufferSize);
+    RetVal->InitialSize                     = initialBufferSize;
+    RetVal->MallocSize                      = initialBufferSize;
+
+    RetVal->LifeTime                        = ILibCreateLifeTime(Chain);
+    RetVal->TimeoutTimer                    = ILibCreateLifeTime(Chain);
+    RetVal->ReplaceSocketTimer              = ILibCreateLifeTime(Chain);
 
     sem_init(&(RetVal->SendLock),0,1);
-    
+
     RetVal->Chain = Chain;
-    ILibAddToChain(Chain,RetVal);
+    ILibAddToChain(Chain, RetVal);
 
     return((void*)RetVal);
 }
 
 /*! \fn ILibAsyncSocket_ClearPendingSend(ILibAsyncSocket_SocketModule socketModule)
-    \brief Clears all the pending data to be sent for an AsyncSocket
-    \param socketModule The ILibAsyncSocket to clear
+\brief Clears all the pending data to be sent for an AsyncSocket
+\param socketModule The ILibAsyncSocket to clear
 */
 void ILibAsyncSocket_ClearPendingSend(ILibAsyncSocket_SocketModule socketModule)
 {
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
     struct ILibAsyncSocket_SendData *data,*temp;
-    
+
     data = module->PendingSend_Head;
     module->PendingSend_Tail = NULL;
     while(data!=NULL)
@@ -315,14 +303,14 @@ void ILibAsyncSocket_ClearPendingSend(ILibAsyncSocket_SocketModule socketModule)
 }
 
 /*! \fn ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketModule socketModule, char* buffer, int length, int remoteAddress, unsigned short remotePort, enum ILibAsyncSocket_MemoryOwnership UserFree)
-    \brief Sends data on an AsyncSocket module to a specific destination. (Valid only for <B>UDP</B>)
-    \param socketModule The ILibAsyncSocket module to send data on
-    \param buffer The buffer to send
-    \param length The length of the buffer to send
-    \param remoteAddress The IPAddress of the destination 
-    \param remotePort The Port number of the destination
-    \param UserFree Flag indicating memory ownership. 
-    \returns \a ILibAsyncSocket_SendStatus indicating the send status
+\brief Sends data on an AsyncSocket module to a specific destination. (Valid only for <B>UDP</B>)
+\param socketModule The ILibAsyncSocket module to send data on
+\param buffer The buffer to send
+\param length The length of the buffer to send
+\param remoteAddress The IPAddress of the destination 
+\param remotePort The Port number of the destination
+\param UserFree Flag indicating memory ownership. 
+\returns \a ILibAsyncSocket_SendStatus indicating the send status
 */
 enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketModule socketModule, char* buffer, int length, int remoteAddress, unsigned short remotePort, enum ILibAsyncSocket_MemoryOwnership UserFree)
 {
@@ -351,14 +339,14 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
     data->Next = NULL;
 
     SEM_TRACK(AsyncSocket_TrackLock("ILibAsyncSocket_Send",1,module);)
-    sem_wait(&(module->SendLock));
+        sem_wait(&(module->SendLock));
     if(module->internalSocket==~0)
     {
         // Too Bad, the socket closed
         if(UserFree==0){free(buffer);}
         free(data);
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_Send",2,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
         return(ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR);
     }
 
@@ -382,7 +370,7 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
             memcpy(data->buffer,buffer,length);
             MEMCHECK(assert(length <= data->bufferSize);)
 
-            data->UserFree = ILibAsyncSocket_MemoryOwnership_CHAIN;
+                data->UserFree = ILibAsyncSocket_MemoryOwnership_CHAIN;
         }
     }
     else
@@ -392,33 +380,33 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
         //
         module->PendingSend_Tail = data;
         module->PendingSend_Head = data;
-        
+
         if(module->PendingSend_Head->remoteAddress==0 && module->PendingSend_Head->remotePort==0)
         {
-            #if defined(__SYMBIAN32__)
-                bytesSent = ILibSocketWrapper_send(module->internalSocket, module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent);
-            #else
-                #if defined(MSG_NOSIGNAL)
-                    bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL);
-                #else
-                    bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
-                #endif
-            #endif
+#if defined(__SYMBIAN32__)
+            bytesSent = ILibSocketWrapper_send(module->internalSocket, module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent);
+#else
+#if defined(MSG_NOSIGNAL)
+            bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL);
+#else
+            bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
+#endif
+#endif
         }
         else
         {
             dest.sin_addr.s_addr = module->PendingSend_Head->remoteAddress;
             dest.sin_port = htons(module->PendingSend_Head->remotePort);
             dest.sin_family = AF_INET;
-            #if defined(__SYMBIAN32__)
-                bytesSent = ILibSocketWrapper_sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,(struct sockaddr*)&dest);
-            #else
-                #if defined(MSG_NOSIGNAL)
-                    bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL,(struct sockaddr*)&dest,destlen);
-                #else
-                    bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
-                #endif
-            #endif
+#if defined(__SYMBIAN32__)
+            bytesSent = ILibSocketWrapper_sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,(struct sockaddr*)&dest);
+#else
+#if defined(MSG_NOSIGNAL)
+            bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL,(struct sockaddr*)&dest,destlen);
+#else
+            bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
+#endif
+#endif
         }
         if(bytesSent>0)
         {
@@ -451,13 +439,13 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
                 module->PendingSend_Head = module->PendingSend_Tail = NULL;
                 free(data);
                 SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_Send",3,module);)
-                sem_post(&(module->SendLock));
-                
+                    sem_post(&(module->SendLock));
+
                 //
                 //Ensure Calling On_Disconnect with MicroStackThread
                 //
                 ILibLifeTime_Add(module->LifeTime,socketModule,0,&ILibAsyncSocket_Disconnect,NULL);
-                
+
                 return(ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR);
             }
         }
@@ -484,29 +472,29 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
                 memcpy(data->buffer,buffer,length);
                 MEMCHECK(assert(length <= data->bufferSize);)
 
-                data->UserFree = ILibAsyncSocket_MemoryOwnership_CHAIN;
+                    data->UserFree = ILibAsyncSocket_MemoryOwnership_CHAIN;
             }
             unblock = 1;
         }
 
     }
     SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_Send",4,module);)
-    sem_post(&(module->SendLock));
+        sem_post(&(module->SendLock));
     if(unblock!=0) {ILibForceUnBlockChain(module->Chain);}
     return(unblock);
 }
 
 /*! \fn ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
-    \brief Disconnects an ILibAsyncSocket
-    \param socketModule The ILibAsyncSocket to disconnect
+\brief Disconnects an ILibAsyncSocket
+\param socketModule The ILibAsyncSocket to disconnect
 */
 void ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
 {
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        SOCKET s;
-    #elif defined(_POSIX) || defined(__SYMBIAN32__)
-        int s;
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+    SOCKET s;
+#elif defined(_POSIX) || defined(__SYMBIAN32__)
+    int s;
+#endif
 
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
     if(module==NULL){return;}
@@ -518,8 +506,8 @@ void ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
     }
 
     SEM_TRACK(AsyncSocket_TrackLock("ILibAsyncSocket_Disconnect",1,module);)
-    sem_wait(&(module->SendLock));
-    
+        sem_wait(&(module->SendLock));
+
     if(module->internalSocket!=~0)
     {
         //
@@ -534,17 +522,17 @@ void ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
         module->internalSocket = ~0;
         if(s!=-1)
         {
-            #if defined(_WIN32_WCE) || defined(WIN32)
-                    #if defined(WINSOCK2)
-                        shutdown(s,SD_BOTH);
-                    #endif
-                    closesocket(s);
-            #elif defined(_POSIX)
-                    shutdown(s,SHUT_RDWR);
-                    close(s);
-            #elif defined(__SYMBIAN32__)
-                    ILibSocketWrapper_close(s);
-            #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)
+            shutdown(s,SD_BOTH);
+#endif
+            closesocket(s);
+#elif defined(_POSIX)
+            shutdown(s,SHUT_RDWR);
+            close(s);
+#elif defined(__SYMBIAN32__)
+            ILibSocketWrapper_close(s);
+#endif
         }
 
         //
@@ -552,7 +540,7 @@ void ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
         //
         ILibAsyncSocket_ClearPendingSend(socketModule);
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_Disconnect",2,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
         if(module->OnDisconnect!=NULL)
         {
             //
@@ -564,28 +552,28 @@ void ILibAsyncSocket_Disconnect(ILibAsyncSocket_SocketModule socketModule)
     else
     {
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_Disconnect",3,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
     }
 }
 
 void ILibAsyncSocket_ConnectTimeout(void *socketModule)
 {
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
-    
+
 
     sem_wait(&(module->SendLock));
     /* Connection Timeout */
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        #if defined(WINSOCK2)
-            shutdown(module->internalSocket,SD_BOTH);
-        #endif
-        closesocket(module->internalSocket);
-    #elif defined(_POSIX)
-        shutdown(module->internalSocket,SHUT_RDWR);
-        close(module->internalSocket);
-    #elif defined(__SYMBIAN32__)
-        ILibSocketWrapper_close(module->internalSocket);
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)
+    shutdown(module->internalSocket,SD_BOTH);
+#endif
+    closesocket(module->internalSocket);
+#elif defined(_POSIX)
+    shutdown(module->internalSocket,SHUT_RDWR);
+    close(module->internalSocket);
+#elif defined(__SYMBIAN32__)
+    ILibSocketWrapper_close(module->internalSocket);
+#endif
     module->internalSocket = ~0;
     sem_post(&(module->SendLock));
 
@@ -596,20 +584,20 @@ void ILibAsyncSocket_ConnectTimeout(void *socketModule)
 }
 
 /*! \fn ILibAsyncSocket_ConnectTo(ILibAsyncSocket_SocketModule socketModule, int localInterface, int remoteInterface, int remotePortNumber, ILibAsyncSocket_OnInterrupt InterruptPtr,void *user)
-    \brief Attempts to establish a TCP connection
-    \param socketModule The ILibAsyncSocket to initiate the connection
-    \param localInterface The interface to use to establish the connection
-    \param remoteInterface The remote interface to connect to
-    \param remotePortNumber The remote port to connect to
-    \param InterruptPtr Function Pointer that triggers if connection attempt is interrupted
-    \param user User object that will be passed to the \a OnConnect method
+\brief Attempts to establish a TCP connection
+\param socketModule The ILibAsyncSocket to initiate the connection
+\param localInterface The interface to use to establish the connection
+\param remoteInterface The remote interface to connect to
+\param remotePortNumber The remote port to connect to
+\param InterruptPtr Function Pointer that triggers if connection attempt is interrupted
+\param user User object that will be passed to the \a OnConnect method
 */
 void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remoteInterface, int remotePortNumber, ILibAsyncSocket_OnInterrupt InterruptPtr,void *user)
 {
     int flags;
     struct sockaddr_in addr;
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
-    
+
 
     if(module==NULL){return;}
 
@@ -628,55 +616,55 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
 
     addr.sin_port = htons((unsigned short)remotePortNumber);
 
-    
+
     //
     // If there isn't a socket already allocated, we need to allocate one
     //
     if(module->internalSocket==-1)
     {
-        #if defined(WIN32) || defined(_WIN32_WCE)
-            ILibGetStreamSocket(localInterface,0,(HANDLE*)&(module->internalSocket));
-        #else
-            ILibGetStreamSocket(localInterface,0,&(module->internalSocket));
-        #endif
+#if defined(WIN32) || defined(_WIN32_WCE)
+        ILibGetStreamSocket(localInterface,0,(HANDLE*)&(module->internalSocket));
+#else
+        ILibGetStreamSocket(localInterface,0,&(module->internalSocket));
+#endif
     }
-    
+
     //
     // Initialise the buffer pointers, since no data is in them yet.
     //
     module->FinConnect = 0;
     module->BeginPointer = 0;
     module->EndPointer = 0;
-    
+
     //
     // Set the socket to non-blocking mode, because we need to play nice
     // and share the MicroStack thread
     //
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        flags = 1;
-        ioctlsocket(module->internalSocket,FIONBIO,&flags);
-    #elif defined(_POSIX)
-        flags = fcntl(module->internalSocket,F_GETFL,0);
-        fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+    flags = 1;
+    ioctlsocket(module->internalSocket,FIONBIO,&flags);
+#elif defined(_POSIX)
+    flags = fcntl(module->internalSocket,F_GETFL,0);
+    fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
+#endif
 
     //
     // Turn on keep-alives for the socket
     //
     flags = 1;
-    #if !defined(__SYMBIAN32__) //ToDo: Add support
-        setsockopt(module->internalSocket,SOL_SOCKET,SO_KEEPALIVE,(char*)&flags,sizeof(flags));
-    #endif
-    
+#if !defined(__SYMBIAN32__) //ToDo: Add support
+    setsockopt(module->internalSocket,SOL_SOCKET,SO_KEEPALIVE,(char*)&flags,sizeof(flags));
+#endif
+
     //
     // Connect the socket, and force the chain to unblock, since the select statement
     // doesn't have us in the fdset yet.
     //
-    #if !defined(__SYMBIAN32__)
-        connect(module->internalSocket,(struct sockaddr*)&addr,sizeof(addr));
-    #else
-        ILibSocketWrapper_connect(module->internalSocket,(struct sockaddr*)&addr);
-    #endif
+#if !defined(__SYMBIAN32__)
+    connect(module->internalSocket,(struct sockaddr*)&addr,sizeof(addr));
+#else
+    ILibSocketWrapper_connect(module->internalSocket,(struct sockaddr*)&addr);
+#endif
     //
     // Sometimes a Connection attempt can fail, without triggering the FD_SET. We will force
     // a failure after 30 seconds.
@@ -720,7 +708,7 @@ void ILibProcessAsyncSocket(struct ILibAsyncSocketModule *Reader, int pendingRea
             iBeginPointer = Reader->BeginPointer;
             iEndPointer = Reader->EndPointer;
             iPointer = 0;
-            
+
             while(Reader->internalSocket!=~0 && Reader->PAUSE<=0 && Reader->BeginPointer!=Reader->EndPointer && Reader->EndPointer!=0)
             {                
                 Reader->EndPointer = Reader->EndPointer-Reader->BeginPointer;
@@ -752,7 +740,7 @@ void ILibProcessAsyncSocket(struct ILibAsyncSocketModule *Reader, int pendingRea
     {
         return;
     }
-    
+
 
 
     //
@@ -822,7 +810,7 @@ void ILibProcessAsyncSocket(struct ILibAsyncSocketModule *Reader, int pendingRea
         memmove(Reader->buffer,temp,Reader->EndPointer-Reader->BeginPointer);
         Reader->EndPointer -= Reader->BeginPointer;
         Reader->BeginPointer = 0;
-        
+
         //
         // Even though we didn't allocate new memory, we still moved data in the buffer, 
         // so we need to inform people of that, because it might be important
@@ -840,42 +828,42 @@ void ILibProcessAsyncSocket(struct ILibAsyncSocketModule *Reader, int pendingRea
     sem_wait(&(Reader->SendLock));
 
 #if defined(_POSIX) && defined(IP_PKTINFO)
-if(Reader->LocalIPAddress2!=0)
-{
-    opt = 1;
-    toaddr = Reader->LocalIPAddress2;
-    setsockopt(Reader->internalSocket, SOL_IP, IP_PKTINFO, &opt, sizeof(opt));
-
-
-    iov.iov_base = Reader->buffer+Reader->EndPointer;
-    iov.iov_len = Reader->MallocSize-Reader->EndPointer;
-    msgh.msg_control = cbuf;
-    msgh.msg_controllen = sizeof(cbuf);
-    msgh.msg_name = &(Reader->addr);
-    msgh.msg_namelen = addrlen;
-    msgh.msg_iov = &iov;
-    msgh.msg_iovlen = 1;
-
-    bytesReceived = recvmsg(Reader->internalSocket,&msgh,MSG_PEEK);
-    
-    for(cmsg = CMSG_FIRSTHDR(&msgh);
-        cmsg != NULL && cmsg->cmsg_len >= sizeof(*cmsg);
-        cmsg = CMSG_NXTHDR(&msgh,cmsg))
+    if(Reader->LocalIPAddress2!=0)
     {
-        if(cmsg->cmsg_level == SOL_IP &&
-            cmsg->cmsg_type == IP_PKTINFO)
+        opt = 1;
+        toaddr = Reader->LocalIPAddress2;
+        setsockopt(Reader->internalSocket, SOL_IP, IP_PKTINFO, &opt, sizeof(opt));
+
+
+        iov.iov_base = Reader->buffer+Reader->EndPointer;
+        iov.iov_len = Reader->MallocSize-Reader->EndPointer;
+        msgh.msg_control = cbuf;
+        msgh.msg_controllen = sizeof(cbuf);
+        msgh.msg_name = &(Reader->addr);
+        msgh.msg_namelen = addrlen;
+        msgh.msg_iov = &iov;
+        msgh.msg_iovlen = 1;
+
+        bytesReceived = recvmsg(Reader->internalSocket,&msgh,MSG_PEEK);
+
+        for(cmsg = CMSG_FIRSTHDR(&msgh);
+            cmsg != NULL && cmsg->cmsg_len >= sizeof(*cmsg);
+            cmsg = CMSG_NXTHDR(&msgh,cmsg))
         {
-            toaddr = ((struct in_pktinfo*)CMSG_DATA(cmsg))->ipi_spec_dst.s_addr;
-            break;
+            if(cmsg->cmsg_level == SOL_IP &&
+                cmsg->cmsg_type == IP_PKTINFO)
+            {
+                toaddr = ((struct in_pktinfo*)CMSG_DATA(cmsg))->ipi_spec_dst.s_addr;
+                break;
+            }
+        }
+        if(Reader->LocalIPAddress2!=toaddr)
+        {
+            bytesReceived = recvmsg(Reader->internalSocket,&msgh,0);
+            sem_post(&(Reader->SendLock));
+            return;
         }
     }
-    if(Reader->LocalIPAddress2!=toaddr)
-    {
-        bytesReceived = recvmsg(Reader->internalSocket,&msgh,0);
-        sem_post(&(Reader->SendLock));
-        return;
-    }
-}
 #endif
 
 #if !defined(__SYMBIAN32__)
@@ -902,44 +890,44 @@ if(Reader->LocalIPAddress2!=0)
         // This means the socket was gracefully closed by the remote endpoint
         //
         SEM_TRACK(AsyncSocket_TrackLock("ILibProcessAsyncSocket",1,Reader);)
-        ILibAsyncSocket_ClearPendingSend(Reader);
+            ILibAsyncSocket_ClearPendingSend(Reader);
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibProcessAsyncSocket",2,Reader);)
-        if(Reader->CurrentQOSPriorty!=ILibAsyncSocket_QOS_NONE)
-        {
-            ILibAsyncSocket_UnitializeQOS(Reader);
-        }
-        #if defined(_WIN32_WCE) || defined(WIN32)
-            #if defined(WINSOCK2)
-                shutdown(Reader->internalSocket,SD_BOTH);
-            #endif
+            if(Reader->CurrentQOSPriorty!=ILibAsyncSocket_QOS_NONE)
+            {
+                ILibAsyncSocket_UnitializeQOS(Reader);
+            }
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)
+            shutdown(Reader->internalSocket,SD_BOTH);
+#endif
             closesocket(Reader->internalSocket);
-        #elif defined(_POSIX)
+#elif defined(_POSIX)
             shutdown(Reader->internalSocket,SHUT_RDWR);
             close(Reader->internalSocket);
-        #elif defined(__SYMBIAN32__)
+#elif defined(__SYMBIAN32__)
             ILibSocketWrapper_close(Reader->internalSocket);
-        #endif
+#endif
 
-        Reader->internalSocket = ~0;
-        sem_post(&(Reader->SendLock));
+            Reader->internalSocket = ~0;
+            sem_post(&(Reader->SendLock));
 
-        //
-        // Inform the user the socket has closed
-        //
-        if(Reader->OnDisconnect!=NULL)
-        {
-            Reader->OnDisconnect(Reader,Reader->user);
-        }
+            //
+            // Inform the user the socket has closed
+            //
+            if(Reader->OnDisconnect!=NULL)
+            {
+                Reader->OnDisconnect(Reader,Reader->user);
+            }
 
-        //
-        // If we need to free the buffer, do so
-        //
-        if(Reader->buffer!=NULL)
-        {
-            free(Reader->buffer);
-            Reader->buffer = NULL;
-            Reader->MallocSize = 0;
-        }
+            //
+            // If we need to free the buffer, do so
+            //
+            if(Reader->buffer!=NULL)
+            {
+                free(Reader->buffer);
+                Reader->buffer = NULL;
+                Reader->MallocSize = 0;
+            }
     }
     else
     {
@@ -968,7 +956,7 @@ if(Reader->LocalIPAddress2!=0)
             iBeginPointer = Reader->BeginPointer;
             iEndPointer = Reader->EndPointer;
             iPointer = 0;
-            
+
             while(Reader->internalSocket!=~0 && Reader->PAUSE<=0 && Reader->BeginPointer!=Reader->EndPointer && Reader->EndPointer!=0)
             {                
                 Reader->EndPointer = Reader->EndPointer-Reader->BeginPointer;
@@ -988,7 +976,7 @@ if(Reader->LocalIPAddress2!=0)
             Reader->BeginPointer = iBeginPointer;
             Reader->EndPointer = iEndPointer;
         }
-        
+
         //
         // If the user consumed all of the buffer, we can recycle it
         //
@@ -1001,9 +989,9 @@ if(Reader->LocalIPAddress2!=0)
 }
 
 /*! \fn ILibAsyncSocket_GetUser(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the user object
-    \param socketModule The ILibAsyncSocket token to fetch the user object from
-    \returns The user object
+\brief Returns the user object
+\param socketModule The ILibAsyncSocket token to fetch the user object from
+\returns The user object
 */
 void * ILibAsyncSocket_GetUser(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1016,63 +1004,61 @@ void * ILibAsyncSocket_GetUser(ILibAsyncSocket_SocketModule socketModule)
 // <param name="writeset"></param>
 // <param name="errorset"></param>
 // <param name="blocktime"></param>
-void ILibAsyncSocket_PreSelect(void* socketModule,void *readset, void *writeset, void *errorset, int* blocktime)
+void ILibAsyncSocket_PreSelect(void* socketModule, void *readset, void *writeset, void *errorset, int* blocktime)
 {
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
 
     SEM_TRACK(AsyncSocket_TrackLock("ILibAsyncSocket_PreSelect",1,module);)
     sem_wait(&(module->SendLock));
 
-    if(module->internalSocket!=-1)
+    if(module->internalSocket != -1)
     {
-        if(module->PAUSE<0)
+        if(module->PAUSE < 0)
         {
             *blocktime = 0;
         }
-        if(module->FinConnect==0)
+
+        if(module->FinConnect == 0)
         {
             /* Not Connected Yet */
-            #if defined(__SYMBIAN32__)
-                ILibSocketWrapper_FDSET(module->internalSocket,writeset);
-                ILibSocketWrapper_FDSET(module->internalSocket,errorset);
-            #else
-                FD_SET(module->internalSocket,(fd_set*)writeset);
-                FD_SET(module->internalSocket,(fd_set*)errorset);
-            #endif
+#if defined(__SYMBIAN32__)
+            ILibSocketWrapper_FDSET(module->internalSocket,writeset);
+            ILibSocketWrapper_FDSET(module->internalSocket,errorset);
+#else
+            FD_SET(module->internalSocket,(fd_set*)writeset);
+            FD_SET(module->internalSocket,(fd_set*)errorset);
+#endif
         }
         else
         {
-            if(module->PAUSE==0) // Only if this is zero. <0 is resume, so we want to process first
+            if(module->PAUSE == 0) // Only if this is zero. < 0 is resume, so we want to process first
             {
                 /* Already Connected, just needs reading */
-                #if defined(__SYMBIAN32__)
-                    ILibSocketWrapper_FDSET(module->internalSocket,readset);
-                    ILibSocketWrapper_FDSET(module->internalSocket,errorset);
-                #else
-                    FD_SET(module->internalSocket,(fd_set*)readset);
-                    FD_SET(module->internalSocket,(fd_set*)errorset);
-                #endif
+#if defined(__SYMBIAN32__)
+                ILibSocketWrapper_FDSET(module->internalSocket,readset);
+                ILibSocketWrapper_FDSET(module->internalSocket,errorset);
+#else
+                FD_SET(module->internalSocket, (fd_set*)readset);
+                FD_SET(module->internalSocket, (fd_set*)errorset);
+#endif
             }
         }
     }
 
-    if(module->PendingSend_Head!=NULL)
+    if(module->PendingSend_Head != NULL)
     {
-        //
         // If there is pending data to be sent, then we need to check when the socket is writable
-        //
-        #if defined(__SYMBIAN32__)
-            ILibSocketWrapper_FDSET(module->internalSocket,writeset);
-        #else
-            FD_SET(module->internalSocket,(fd_set*)writeset);
-        #endif
+#if defined(__SYMBIAN32__)
+        ILibSocketWrapper_FDSET(module->internalSocket,writeset);
+#else
+        FD_SET(module->internalSocket, (fd_set*)writeset);
+#endif
     }
     SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PreSelect",2,module);)
-    sem_post(&(module->SendLock));
+        sem_post(&(module->SendLock));
 }
-//
+
 // Chained PostSelect handler for ILibAsyncSocket
-//
 // <param name="socketModule"></param>
 // <param name="slct"></param>
 // <param name="readset"></param>
@@ -1080,62 +1066,60 @@ void ILibAsyncSocket_PreSelect(void* socketModule,void *readset, void *writeset,
 // <param name="errorset"></param>
 void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void *writeset, void *errorset)
 {
-    int TriggerSendOK = 0;
+    int TriggerSendOK                       = 0;
     struct ILibAsyncSocket_SendData *temp;
-    int bytesSent=0;
+    int bytesSent                           = 0;
     int flags;
     struct sockaddr_in receivingAddress;
-    int receivingAddressLength = sizeof(struct sockaddr_in);
-    struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
-    int TRY_TO_SEND = 1;
+    int receivingAddressLength              = sizeof(struct sockaddr_in);
+    struct ILibAsyncSocketModule *module    = (struct ILibAsyncSocketModule*)socketModule;
+    int TRY_TO_SEND                         = 1;
 
-    int triggerReadSet=0;
-    int triggerResume=0;
-    int triggerWriteSet=0;
-    int triggerErrorSet=0;
+    int triggerReadSet                      = 0;
+    int triggerResume                       = 0;
+    int triggerWriteSet                     = 0;
+    int triggerErrorSet                     = 0;
 
     struct sockaddr_in dest;
     int destlen = sizeof(dest);
 
     SEM_TRACK(AsyncSocket_TrackLock("ILibAsyncSocket_PostSelect",1,module);)
-    sem_wait(&(module->SendLock));
+        sem_wait(&(module->SendLock));
 
     // Write Handling
-    #if defined(__SYMBIAN32__)
-        if(module->FinConnect!=0 && module->internalSocket!=~0 && ILibSocketWrapper_FDISSET(module->internalSocket,writeset)!=0)
-    #else
-        if(module->FinConnect!=0 && module->internalSocket!=~0 && FD_ISSET(module->internalSocket,(fd_set*)writeset)!=0)
-    #endif
+#if defined(__SYMBIAN32__)
+    if(module->FinConnect!=0 && module->internalSocket!=~0 && ILibSocketWrapper_FDISSET(module->internalSocket,writeset)!=0)
+#else
+    if(module->FinConnect!=0 && module->internalSocket!=~0 && FD_ISSET(module->internalSocket,(fd_set*)writeset)!=0)
+#endif
     {
-        //
         // The socket is writable, and data needs to be sent
-        //
 
 #if defined(__SYMBIAN32__)
-    //
-    // Symbian sends work differently than other platforms.
-    // Since the socket is now writeable, we know that the previous send has completed.
-    // We need to pop pending send off the queue
-    //
-    module->PendingBytesToSend -= module->PendingSend_Head->bufferSize;
-    module->TotalBytesSent += module->PendingSend_Head->bufferSize;
-    if(module->PendingSend_Head==module->PendingSend_Tail)
-    {
-        module->PendingSend_Tail = NULL;
-    }
-    if(module->PendingSend_Head->UserFree==0)
-    {
-        free(module->PendingSend_Head->buffer);
-    }
-    temp = module->PendingSend_Head->Next;
-    free(module->PendingSend_Head);
-    module->PendingSend_Head = temp;
-    if(module->PendingSend_Head==NULL) {TRY_TO_SEND=0;}
+        //
+        // Symbian sends work differently than other platforms.
+        // Since the socket is now writeable, we know that the previous send has completed.
+        // We need to pop pending send off the queue
+        //
+        module->PendingBytesToSend -= module->PendingSend_Head->bufferSize;
+        module->TotalBytesSent += module->PendingSend_Head->bufferSize;
+        if(module->PendingSend_Head==module->PendingSend_Tail)
+        {
+            module->PendingSend_Tail = NULL;
+        }
+        if(module->PendingSend_Head->UserFree==0)
+        {
+            free(module->PendingSend_Head->buffer);
+        }
+        temp = module->PendingSend_Head->Next;
+        free(module->PendingSend_Head);
+        module->PendingSend_Head = temp;
+        if(module->PendingSend_Head==NULL) {TRY_TO_SEND=0;}
 #endif
         //
         // Keep trying to send data, until we are told we can't
         //
-        while(TRY_TO_SEND!=0)
+        while(TRY_TO_SEND != 0)
         {
 
             if(module->PendingSend_Head->remoteAddress==0 && module->PendingSend_Head->remotePort==0)
@@ -1194,29 +1178,26 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
             {
                 // Error, clean up everything
                 TRY_TO_SEND = 0;
-                #if defined(_WIN32_WCE) || defined(WIN32)
-                    bytesSent = WSAGetLastError();
-                    if(bytesSent!=WSAEWOULDBLOCK)
-                #elif defined(_POSIX)
-                    if(errno!=EWOULDBLOCK)
-                #elif defined(__SYMBIAN32__)
-                    if(0)
-                #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+                bytesSent = WSAGetLastError();
+                if(bytesSent!=WSAEWOULDBLOCK)
+#elif defined(_POSIX)
+                if(errno!=EWOULDBLOCK)
+#elif defined(__SYMBIAN32__)
+                if(0)
+#endif
                 {
-                    //
                     // There was an error sending
-                    //
                     ILibAsyncSocket_ClearPendingSend(socketModule);
                     ILibLifeTime_Add(module->LifeTime,socketModule,0,&ILibAsyncSocket_Disconnect,NULL);
                 }
             }
         }
-        //
+
         // This triggers OnSendOK, if all the pending data has been sent.
-        //
         if(module->PendingSend_Head==NULL && bytesSent!=-1) {TriggerSendOK=1;}
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PostSelect",2,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
         if(TriggerSendOK!=0)
         {
             module->OnSendOK(module,module->user);
@@ -1225,12 +1206,12 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
     else
     {
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PostSelect",2,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
     }
 
 
     SEM_TRACK(AsyncSocket_TrackLock("ILibAsyncSocket_PostSelect",1,module);)
-    sem_wait(&(module->SendLock));
+        sem_wait(&(module->SendLock));
 
     //
     // Connection Handling / Read Handling
@@ -1240,15 +1221,13 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
         if(module->FinConnect==0)
         {
             /* Not Connected Yet */
-            #if defined(__SYMBIAN32__)
-                if(ILibSocketWrapper_FDISSET(module->internalSocket,writeset)!=0)
-            #else
-                if(FD_ISSET(module->internalSocket,(fd_set*)writeset)!=0)
-            #endif
+#if defined(__SYMBIAN32__)
+            if(ILibSocketWrapper_FDISSET(module->internalSocket,writeset)!=0)
+#else
+            if(FD_ISSET(module->internalSocket,(fd_set*)writeset)!=0)
+#endif
             {
-                //
                 // Connection was a success, so remove the timeout timer
-                //
                 ILibLifeTime_Remove(module->TimeoutTimer,module);
 
                 /* Connected */
@@ -1260,48 +1239,46 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
                 module->LocalIPAddress = receivingAddress.sin_addr.s_addr;
                 module->FinConnect = 1;
                 module->PAUSE = 0;
-                
+
                 //
                 // Set the socket to non-blocking mode, so we can play nice and share the thread
                 //
-                #if defined(_WIN32_WCE) || defined(WIN32)
-                    flags = 1;
-                    ioctlsocket(module->internalSocket,FIONBIO,&flags);
-                #elif defined(_POSIX)
-                    flags = fcntl(module->internalSocket,F_GETFL,0);
-                    fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
-                #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+                flags = 1;
+                ioctlsocket(module->internalSocket,FIONBIO,&flags);
+#elif defined(_POSIX)
+                flags = fcntl(module->internalSocket,F_GETFL,0);
+                fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
+#endif
 
                 /* Connection Complete */
-                triggerWriteSet=1;
+                triggerWriteSet = 1;
             }
-            #if defined(__SYMBIAN32__)
-                if(ILibSocketWrapper_FDISSET(module->internalSocket,errorset)!=0)
-            #else
-                if(FD_ISSET(module->internalSocket,(fd_set*)errorset)!=0)
-            #endif
+#if defined(__SYMBIAN32__)
+            if(ILibSocketWrapper_FDISSET(module->internalSocket,errorset)!=0)
+#else
+            if(FD_ISSET(module->internalSocket,(fd_set*)errorset)!=0)
+#endif
             {
-                //
                 // Connection was a failure, so remove the timeout timer
-                //
                 ILibLifeTime_Remove(module->TimeoutTimer,module);
 
                 /* Connection Failed */
-                #if defined(_WIN32_WCE) || defined(WIN32)
-                    #if defined(WINSOCK2)    
-                        shutdown(module->internalSocket,SD_BOTH);
-                    #endif
-                    closesocket(module->internalSocket);
-                #elif defined(_POSIX)
-                    shutdown(module->internalSocket,SHUT_RDWR);
-                    close(module->internalSocket);
-                #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)    
+                shutdown(module->internalSocket,SD_BOTH);
+#endif
+                closesocket(module->internalSocket);
+#elif defined(_POSIX)
+                shutdown(module->internalSocket,SHUT_RDWR);
+                close(module->internalSocket);
+#endif
                 module->internalSocket = ~0;
-                triggerErrorSet=1;
+                triggerErrorSet = 1;
             }
 
             SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PostSelect",4,module);)
-            sem_post(&(module->SendLock));
+                sem_post(&(module->SendLock));
 
             if(triggerErrorSet!=0 && module->OnConnect!=NULL)
             {
@@ -1315,26 +1292,26 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
         else
         {
             /* Check if PeerReset */
-            #if defined(__SYMBIAN32__)
-                if(ILibSocketWrapper_FDISSET(module->internalSocket,errorset)!=0)
-            #else
-                if(FD_ISSET(module->internalSocket,(fd_set*)errorset)!=0)
-            #endif
+#if defined(__SYMBIAN32__)
+            if(ILibSocketWrapper_FDISSET(module->internalSocket,errorset)!=0)
+#else
+            if(FD_ISSET(module->internalSocket,(fd_set*)errorset)!=0)
+#endif
             {
                 if(module->CurrentQOSPriorty!=ILibAsyncSocket_QOS_NONE)
                 {
                     ILibAsyncSocket_UnitializeQOS(module);
                 }
                 /* Socket Closed */
-                #if defined(_WIN32_WCE) || defined(WIN32)
-                    #if defined(WINSOCK2)
-                        shutdown(module->internalSocket,SD_BOTH);
-                    #endif
-                    closesocket(module->internalSocket);
-                #elif defined(_POSIX)
-                    shutdown(module->internalSocket,SHUT_RDWR);
-                    close(module->internalSocket);
-                #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+#if defined(WINSOCK2)
+                shutdown(module->internalSocket,SD_BOTH);
+#endif
+                closesocket(module->internalSocket);
+#elif defined(_POSIX)
+                shutdown(module->internalSocket,SHUT_RDWR);
+                close(module->internalSocket);
+#endif
                 module->internalSocket = ~0;
                 module->PAUSE = 1;
 
@@ -1344,27 +1321,25 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
             }
 
             /* Already Connected, just needs reading */
-            #if defined(__SYMBIAN32__)
-                if(ILibSocketWrapper_FDISSET(module->internalSocket,readset)!=0)
-            #else
-                if(FD_ISSET(module->internalSocket,(fd_set*)readset)!=0)
-            #endif
+#if defined(__SYMBIAN32__)
+            if(ILibSocketWrapper_FDISSET(module->internalSocket,readset)!=0)
+#else
+            if(FD_ISSET(module->internalSocket,(fd_set*)readset)!=0)
+#endif
             {
                 /* Data Available */
-                triggerReadSet=1;
+                triggerReadSet = 1;
             }
-            else if(module->PAUSE<0)
+            else if(module->PAUSE < 0)
             {
-                //
                 // Someone resumed a paused connection, but the FD_SET was not triggered
                 // because there is no new data on the socket.
-                //
                 triggerResume = 1;
                 ++module->PAUSE;
             }
 
             SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PostSelect",4,module);)
-            sem_post(&(module->SendLock));
+                sem_post(&(module->SendLock));
 
             if(triggerErrorSet!=0 && module->OnDisconnect!=NULL)
             {
@@ -1379,25 +1354,25 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
     else
     {
         SEM_TRACK(AsyncSocket_TrackUnLock("ILibAsyncSocket_PostSelect",4,module);)
-        sem_post(&(module->SendLock));
+            sem_post(&(module->SendLock));
     }
 }
 
 /*! \fn ILibAsyncSocket_IsFree(ILibAsyncSocket_SocketModule socketModule)
-    \brief Determines if an ILibAsyncSocket is in use
-    \param socketModule The ILibAsyncSocket to query
-    \returns 0 if in use, nonzero otherwise
+\brief Determines if an ILibAsyncSocket is in use
+\param socketModule The ILibAsyncSocket to query
+\returns 0 if in use, nonzero otherwise
 */
 int ILibAsyncSocket_IsFree(ILibAsyncSocket_SocketModule socketModule)
 {
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
-    return(module->internalSocket==~0?1:0);
+    return(module->internalSocket == ~0 ? 1: 0);
 }
 
 /*! \fn ILibAsyncSocket_GetPendingBytesToSend(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the number of bytes that are pending to be sent
-    \param socketModule The ILibAsyncSocket to query
-    \returns Number of pending bytes
+\brief Returns the number of bytes that are pending to be sent
+\param socketModule The ILibAsyncSocket to query
+\returns Number of pending bytes
 */
 unsigned int ILibAsyncSocket_GetPendingBytesToSend(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1406,9 +1381,9 @@ unsigned int ILibAsyncSocket_GetPendingBytesToSend(ILibAsyncSocket_SocketModule 
 }
 
 /*! \fn ILibAsyncSocket_GetTotalBytesSent(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the total number of bytes that have been sent, since the last reset
-    \param socketModule The ILibAsyncSocket to query
-    \returns Number of bytes sent
+\brief Returns the total number of bytes that have been sent, since the last reset
+\param socketModule The ILibAsyncSocket to query
+\returns Number of bytes sent
 */
 unsigned int ILibAsyncSocket_GetTotalBytesSent(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1417,8 +1392,8 @@ unsigned int ILibAsyncSocket_GetTotalBytesSent(ILibAsyncSocket_SocketModule sock
 }
 
 /*! \fn ILibAsyncSocket_ResetTotalBytesSent(ILibAsyncSocket_SocketModule socketModule)
-    \brief Resets the total bytes sent counter
-    \param socketModule The ILibAsyncSocket to reset
+\brief Resets the total bytes sent counter
+\param socketModule The ILibAsyncSocket to reset
 */
 void ILibAsyncSocket_ResetTotalBytesSent(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1427,11 +1402,11 @@ void ILibAsyncSocket_ResetTotalBytesSent(ILibAsyncSocket_SocketModule socketModu
 }
 
 /*! \fn ILibAsyncSocket_GetBuffer(ILibAsyncSocket_SocketModule socketModule, char **buffer, int *BeginPointer, int *EndPointer)
-    \brief Returns the buffer associated with an ILibAsyncSocket
-    \param socketModule The ILibAsyncSocket to obtain the buffer from
-    \param[out] buffer The buffer
-    \param[out] BeginPointer Stating offset of the buffer
-    \param[out] EndPointer Length of buffer
+\brief Returns the buffer associated with an ILibAsyncSocket
+\param socketModule The ILibAsyncSocket to obtain the buffer from
+\param[out] buffer The buffer
+\param[out] BeginPointer Stating offset of the buffer
+\param[out] EndPointer Length of buffer
 */
 void ILibAsyncSocket_GetBuffer(ILibAsyncSocket_SocketModule socketModule, char **buffer, int *BeginPointer, int *EndPointer)
 {
@@ -1475,13 +1450,13 @@ void OnILibAsyncSocket_ReplaceSocketSink(void *obj)
     }
     if(data->module->internalSocket!=~0)
     {
-        #if defined(_WIN32_WCE) || defined(WIN32)
-            closesocket(data->module->internalSocket);
-        #elif defined(_POSIX)
-            close(data->module->internalSocket);
-        #elif defined(__SYMBIAN32__)
-            ILibSocketWrapper_close(data->module->internalSocket);
-        #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+        closesocket(data->module->internalSocket);
+#elif defined(_POSIX)
+        close(data->module->internalSocket);
+#elif defined(__SYMBIAN32__)
+        ILibSocketWrapper_close(data->module->internalSocket);
+#endif
         data->module->internalSocket = ~0;
     }
 
@@ -1507,22 +1482,22 @@ void ILibAsyncSocket_ReplaceSocket(ILibAsyncSocket_SocketModule socketModule, vo
 }
 
 /*! \fn ILibAsyncSocket_UseThisSocket(ILibAsyncSocket_SocketModule socketModule,void* UseThisSocket,ILibAsyncSocket_OnInterrupt InterruptPtr,void *user)
-    \brief Associates an actual socket with ILibAsyncSocket
-    \par
-    Instead of calling \a ConnectTo, you can call this method to associate with an already
-    connected socket.
-    \param socketModule The ILibAsyncSocket to associate
-    \param UseThisSocket The socket to associate
-    \param InterruptPtr Function Pointer that triggers when the TCP connection is interrupted
-    \param user User object to associate with this session
+\brief Associates an actual socket with ILibAsyncSocket
+\par
+Instead of calling \a ConnectTo, you can call this method to associate with an already
+connected socket.
+\param socketModule The ILibAsyncSocket to associate
+\param UseThisSocket The socket to associate
+\param InterruptPtr Function Pointer that triggers when the TCP connection is interrupted
+\param user User object to associate with this session
 */
 void ILibAsyncSocket_UseThisSocket(ILibAsyncSocket_SocketModule socketModule,void* UseThisSocket,ILibAsyncSocket_OnInterrupt InterruptPtr,void *user)
 {
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        SOCKET TheSocket = *((SOCKET*)UseThisSocket);
-    #elif defined(_POSIX) || defined(__SYMBIAN32__)
-        int TheSocket = *((int*)UseThisSocket);
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+    SOCKET TheSocket = *((SOCKET*)UseThisSocket);
+#elif defined(_POSIX) || defined(__SYMBIAN32__)
+    int TheSocket = *((int*)UseThisSocket);
+#endif
     int flags;
     struct ILibAsyncSocketModule* module = (struct ILibAsyncSocketModule*)socketModule;
 
@@ -1548,19 +1523,19 @@ void ILibAsyncSocket_UseThisSocket(ILibAsyncSocket_SocketModule socketModule,voi
     //
     // Make sure the socket is non-blocking, so we can play nice and share the thread
     //
-    #if defined(_WIN32_WCE) || defined(WIN32)
-        flags = 1;
-        ioctlsocket(module->internalSocket,FIONBIO,&flags);
-    #elif defined(_POSIX)
-        flags = fcntl(module->internalSocket,F_GETFL,0);
-        fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
-    #endif
+#if defined(_WIN32_WCE) || defined(WIN32)
+    flags = 1;
+    ioctlsocket(module->internalSocket,FIONBIO,&flags);
+#elif defined(_POSIX)
+    flags = fcntl(module->internalSocket,F_GETFL,0);
+    fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
+#endif
 }
 
 /*! \fn ILibAsyncSocket_GetRemoteInterface(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the Remote Interface of a connected session
-    \param socketModule The ILibAsyncSocket to query
-    \returns The remote interface
+\brief Returns the Remote Interface of a connected session
+\param socketModule The ILibAsyncSocket to query
+\returns The remote interface
 */
 int ILibAsyncSocket_GetRemoteInterface(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1568,9 +1543,9 @@ int ILibAsyncSocket_GetRemoteInterface(ILibAsyncSocket_SocketModule socketModule
     return(module->RemoteIPAddress);
 }
 /*! \fn ILibAsyncSocket_GetRemotePort(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the Port number of the origin of the last received packet
-    \param socketModule The ILibAsyncSocket to query
-    \returns The remote port
+\brief Returns the Port number of the origin of the last received packet
+\param socketModule The ILibAsyncSocket to query
+\returns The remote port
 */
 unsigned short ILibAsyncSocket_GetRemotePort(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1579,9 +1554,9 @@ unsigned short ILibAsyncSocket_GetRemotePort(ILibAsyncSocket_SocketModule socket
 }
 
 /*! \fn ILibAsyncSocket_GetLocalInterface(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the Local Interface of a connected session, in network order
-    \param socketModule The ILibAsyncSocket to query
-    \returns The local interface
+\brief Returns the Local Interface of a connected session, in network order
+\param socketModule The ILibAsyncSocket to query
+\returns The local interface
 */
 int ILibAsyncSocket_GetLocalInterface(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1604,9 +1579,9 @@ int ILibAsyncSocket_GetLocalInterface(ILibAsyncSocket_SocketModule socketModule)
     }
 }
 /*! \fn unsigned short ILibAsyncSocket_GetLocalPort(ILibAsyncSocket_SocketModule socketModule)
-    \brief Returns the Local Port of a connected session, in host order
-    \param socketModule The ILibAsyncSocket to query
-    \returns The local port number
+\brief Returns the Local Port of a connected session, in host order
+\param socketModule The ILibAsyncSocket to query
+\returns The local port number
 */
 unsigned short ILibAsyncSocket_GetLocalPort(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1624,10 +1599,10 @@ unsigned short ILibAsyncSocket_GetLocalPort(ILibAsyncSocket_SocketModule socketM
 }
 
 /*! \fn ILibAsyncSocket_Resume(ILibAsyncSocket_SocketModule socketModule)
-    \brief Resumes a paused session
-    \par
-    Sessions can be paused, such that further data is not read from the socket until resumed
-    \param socketModule The ILibAsyncSocket to resume
+\brief Resumes a paused session
+\par
+Sessions can be paused, such that further data is not read from the socket until resumed
+\param socketModule The ILibAsyncSocket to resume
 */
 void ILibAsyncSocket_Resume(ILibAsyncSocket_SocketModule socketModule)
 {
@@ -1640,9 +1615,9 @@ void ILibAsyncSocket_Resume(ILibAsyncSocket_SocketModule socketModule)
 
 }
 /*! \fn ILibAsyncSocket_GetSocket(ILibAsyncSocket_SocketModule module)
-    \brief Obtain the underlying raw socket
-    \param module The ILibAsyncSocket to query
-    \returns The raw socket
+\brief Obtain the underlying raw socket
+\param module The ILibAsyncSocket to query
+\returns The raw socket
 */
 void* ILibAsyncSocket_GetSocket(ILibAsyncSocket_SocketModule module)
 {
@@ -1668,7 +1643,7 @@ int ILibAsyncSocket_WasClosedBecauseBufferSizeExceeded(ILibAsyncSocket_SocketMod
 }
 int ILibAsyncSocket_InitializeQOS(ILibAsyncSocket_SocketModule module)
 {
-    
+
     struct ILibAsyncSocketModule *sm = (struct ILibAsyncSocketModule*)module;
 #if defined(WIN32) && defined(WIN32_QWAVE)
     QOS_VERSION version;
@@ -1694,36 +1669,36 @@ void ILibAsyncSocket_SetQOSPriority(ILibAsyncSocket_SocketModule module, enum IL
 #endif
     switch(priority)
     {
-        case ILibAsyncSocket_QOS_BACKGROUND:    
+    case ILibAsyncSocket_QOS_BACKGROUND:    
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeBackground;
+        qtt = QOSTrafficTypeBackground;
 #endif
-            break;
-        case ILibAsyncSocket_QOS_EXCELLENT_EFFORT:
+        break;
+    case ILibAsyncSocket_QOS_EXCELLENT_EFFORT:
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeExcellentEffort;
+        qtt = QOSTrafficTypeExcellentEffort;
 #endif
-            break;
-        case ILibAsyncSocket_QOS_AUDIO_VIDEO:
+        break;
+    case ILibAsyncSocket_QOS_AUDIO_VIDEO:
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeAudioVideo;
+        qtt = QOSTrafficTypeAudioVideo;
 #endif
-            break;
-        case ILibAsyncSocket_QOS_VOICE:    
+        break;
+    case ILibAsyncSocket_QOS_VOICE:    
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeVoice;
+        qtt = QOSTrafficTypeVoice;
 #endif            
-            break;
-        case ILibAsyncSocket_QOS_CONTROL:
+        break;
+    case ILibAsyncSocket_QOS_CONTROL:
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeControl;
+        qtt = QOSTrafficTypeControl;
 #endif    
-            break;
-        default:
+        break;
+    default:
 #if defined(WIN32) && defined(WIN32_QWAVE)
-            qtt = QOSTrafficTypeBestEffort;
+        qtt = QOSTrafficTypeBestEffort;
 #endif    
-            break;
+        break;
     }
 
     if(sm->CurrentQOSPriorty != priority)

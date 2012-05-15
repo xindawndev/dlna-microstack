@@ -1,22 +1,22 @@
 #ifdef MEMORY_CHECK
-    #include <assert.h>
-    #define MEMCHECK(x) x
+#include <assert.h>
+#define MEMCHECK(x) x
 #else
-    #define MEMCHECK(x)
+#define MEMCHECK(x)
 #endif
 
 
 #if defined(WIN32)
-    #define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
 #endif
 
 
 #if defined(WINSOCK2)
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-    #include <winsock.h>
-    #include <wininet.h>
+#include <winsock.h>
+#include <wininet.h>
 #endif
 
 
@@ -56,7 +56,7 @@ void WebClient_TrackUnLock(const char* MethodName, int Occurance, void *data)
 
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
-    #include <crtdbg.h>
+#include <crtdbg.h>
 #endif
 
 #ifdef ILibWebClient_SESSION_TRACKING
@@ -72,7 +72,7 @@ void ILibWebClient_SessionTrack(void *RequestToken, void *Session, char *msg)
 }
 #define SESSION_TRACK(RequestToken,Session,msg) ILibWebClient_SessionTrack(RequestToken,Session,msg)
 #else
-    #define SESSION_TRACK(RequestToken,Session,msg)
+#define SESSION_TRACK(RequestToken,Session,msg)
 #endif
 
 
@@ -176,10 +176,10 @@ struct ILibWebClientDataObject
     int CancelRequest;
     int FinHeader;
     int Chunked;
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     struct ILibWebClient_ChunkData *chunk;
     int ConnectionCloseSpecified;
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
     int BytesLeft;
     int WaitForClose;
     int Closing;
@@ -308,52 +308,52 @@ void ILibWebClient_DestroyWebClientDataObject(ILibWebClient_StateObject token)
         ILibAsyncSocket_Disconnect(wcdo->SOCK);
     }
 
-        if(wcdo->header!=NULL)
-        {
-            //
-            // The header needs to be freed
-            //
-            ILibDestructPacket(wcdo->header);
-            wcdo->header = NULL;
-        }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
-        if(wcdo->chunk!=NULL)
-        {
-            //
-            // The resources associated with the Chunk Processing needs to be freed
-            //
-            if(wcdo->chunk->buffer!=NULL) {free(wcdo->chunk->buffer);}
-            free(wcdo->chunk);
-            wcdo->chunk = NULL;
-        }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    if(wcdo->header!=NULL)
+    {
         //
-        // Iterate through all the pending requests
+        // The header needs to be freed
         //
+        ILibDestructPacket(wcdo->header);
+        wcdo->header = NULL;
+    }
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    if(wcdo->chunk!=NULL)
+    {
+        //
+        // The resources associated with the Chunk Processing needs to be freed
+        //
+        if(wcdo->chunk->buffer!=NULL) {free(wcdo->chunk->buffer);}
+        free(wcdo->chunk);
+        wcdo->chunk = NULL;
+    }
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //
+    // Iterate through all the pending requests
+    //
+    wr = ILibQueue_DeQueue(wcdo->RequestQueue);
+    while(wr!=NULL)
+    {
+        if(wcdo->Server==0 && wr->OnResponse!=NULL)
+        {        
+            //
+            // If this is a client request, then we need to signal
+            // that this request is being aborted
+            //
+            wr->OnResponse(
+                wcdo,
+                WEBCLIENT_DESTROYED,
+                NULL,
+                NULL,
+                NULL,
+                0,
+                -1,
+                wr->user1,
+                wr->user2,
+                &zero);        
+        }
+        ILibWebClient_DestroyWebRequest(wr);
         wr = ILibQueue_DeQueue(wcdo->RequestQueue);
-        while(wr!=NULL)
-        {
-            if(wcdo->Server==0 && wr->OnResponse!=NULL)
-            {        
-                //
-                // If this is a client request, then we need to signal
-                // that this request is being aborted
-                //
-                wr->OnResponse(
-                        wcdo,
-                        WEBCLIENT_DESTROYED,
-                        NULL,
-                        NULL,
-                        NULL,
-                        0,
-                        -1,
-                        wr->user1,
-                        wr->user2,
-                        &zero);        
-            }
-            ILibWebClient_DestroyWebRequest(wr);
-            wr = ILibQueue_DeQueue(wcdo->RequestQueue);
-        }
+    }
 
     ILibQueue_Destroy(wcdo->RequestQueue);
     free(wcdo);
@@ -384,7 +384,7 @@ void ILibDestroyWebClient(void *object)
         ILibWebClient_DestroyWebClientDataObject(wcdo);
     }
     ILibHashTree_DestroyEnumerator(en);
-    
+
     //
     // Free all the other associated resources
     //
@@ -407,7 +407,7 @@ void ILibWebClient_ResetWCDO(struct ILibWebClientDataObject *wcdo)
     {
         struct ILibWebClient_PipelineRequestToken * plrt = ( struct ILibWebClient_PipelineRequestToken * ) rt;
         //check the cancel request in the timer list
-        
+
         if( NULL != plrt->timer )
         {
             ILibLifeTime_Remove(plrt->timer , plrt );
@@ -423,9 +423,9 @@ void ILibWebClient_ResetWCDO(struct ILibWebClientDataObject *wcdo)
     wcdo->InitialRequestAnswered = 1;
     wcdo->DisconnectSent=0;
     wcdo->PendingConnectionIndex=-1;
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     wcdo->ConnectionCloseSpecified=0;
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
 
     if(wcdo->chunk!=NULL)
     {
@@ -462,7 +462,7 @@ void ILibWebClient_TimerSink(void *object)
 
     void *DisconnectSocket = NULL;
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_TimerSink",1,wcdo->Parent);)
-    sem_wait(&(wcdo->Parent->QLock));
+        sem_wait(&(wcdo->Parent->QLock));
     if(ILibQueue_IsEmpty(wcdo->RequestQueue)!=0)
     {
         //
@@ -491,7 +491,7 @@ void ILibWebClient_TimerSink(void *object)
             ILibDeleteEntry(wcdo->Parent->DataTable,key,keyLength);
             ILibDeleteEntry(wcdo->Parent->idleTable,key,keyLength);
             SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_TimerSink",2,wcdo->Parent);)
-            sem_post(&(wcdo->Parent->QLock));
+                sem_post(&(wcdo->Parent->QLock));
             ILibWebClient_DestroyWebClientDataObject(wcdo2);
             return;
         }
@@ -506,14 +506,14 @@ void ILibWebClient_TimerSink(void *object)
                 wcdo->IndexNumber);
             MEMCHECK(assert(IPV4AddressLength<=21);)
 
-            ILibAddEntry(wcdo->Parent->idleTable,IPV4Address,IPV4AddressLength,wcdo);
+                ILibAddEntry(wcdo->Parent->idleTable,IPV4Address,IPV4AddressLength,wcdo);
             ++wcdo->Parent->idleCount;
             wcdo->SOCK = NULL;
             wcdo->DisconnectSent=0;
         }
     }
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_TimerSink",3,wcdo->Parent);)
-    sem_post(&(wcdo->Parent->QLock));
+        sem_post(&(wcdo->Parent->QLock));
     //
     // Let the user know, the socket has been disconnected
     //
@@ -533,7 +533,7 @@ void ILibWebClient_FinishedResponse_Server(ILibWebClient_StateObject _wcdo)
 
     if(wcdo==NULL) {return;}
 
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     if(wcdo->chunk!=NULL)
     {
         //
@@ -543,7 +543,7 @@ void ILibWebClient_FinishedResponse_Server(ILibWebClient_StateObject _wcdo)
         free(wcdo->chunk);
         wcdo->chunk = NULL;
     }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
     if(wcdo->header!=NULL)
     {
         //
@@ -592,7 +592,7 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
 
 
 
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     if(wcdo->chunk!=NULL)
     {
         //
@@ -602,7 +602,7 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
         free(wcdo->chunk);
         wcdo->chunk = NULL;
     }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
     if(wcdo->header!=NULL)
     {
         //
@@ -625,16 +625,16 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
     if(wcdo->SOCK==NULL|| ILibAsyncSocket_IsFree(wcdo->SOCK))
     {
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_FinishedResponse",1,wcdo->Parent);)
-        sem_wait(&(wcdo->Parent->QLock));
+            sem_wait(&(wcdo->Parent->QLock));
         ILibWebClient_DestroyWebRequest(ILibQueue_DeQueue(wcdo->RequestQueue));
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_FinishedResponse",2,wcdo->Parent);)
-        sem_post(&(wcdo->Parent->QLock));
+            sem_post(&(wcdo->Parent->QLock));
         return;
     }
 
 
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_FinishedResponse",1,wcdo->Parent);)
-    sem_wait(&(wcdo->Parent->QLock));
+        sem_wait(&(wcdo->Parent->QLock));
     wr = ILibQueue_DeQueue(wcdo->RequestQueue);
     if(wr!=NULL)
     {
@@ -657,8 +657,8 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
         }
     }
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_FinishedResponse",2,wcdo->Parent);)
-    sem_post(&(wcdo->Parent->QLock));
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+        sem_post(&(wcdo->Parent->QLock));
+    //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     if(wr!=NULL)
     {
         //
@@ -689,10 +689,10 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
     }
     if(wcdo->PipelineFlag==PIPELINE_NO)
     {
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
         /*    Pipelining is not supported, so we should just close the socket, instead
-            of waiting for the other guy to close it, because if they forget to, it will
-            screw us over if there are pending requests */
+        of waiting for the other guy to close it, because if they forget to, it will
+        screw us over if there are pending requests */
 
         //
         // It should also be noted, that when this closes, the module will realize there are
@@ -706,9 +706,9 @@ void ILibWebClient_FinishedResponse(ILibAsyncSocket_SocketModule socketModule, s
             //
             ILibAsyncSocket_Disconnect(wcdo->SOCK);
         }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
     }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+    //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
 }
 
 void ILibWebClient_ResetUserObjects(ILibWebClient_StateObject webstate, void *user1, void *user2)
@@ -754,13 +754,13 @@ void ILibWebClient_ProcessChunk(ILibAsyncSocket_SocketModule socketModule, struc
     if(wcdo->Parent!=NULL) 
     {
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_ProcessChunk",1,wcdo->Parent);)
-        sem_wait(&(wcdo->Parent->QLock));
+            sem_wait(&(wcdo->Parent->QLock));
     }
     wr = ILibQueue_PeekQueue(wcdo->RequestQueue);
     if(wcdo->Parent!=NULL) 
     {
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_ProcessChunk",2,wcdo->Parent);)
-        sem_post(&(wcdo->Parent->QLock));
+            sem_post(&(wcdo->Parent->QLock));
     }
 
     if(wcdo->chunk==NULL)
@@ -780,177 +780,152 @@ void ILibWebClient_ProcessChunk(ILibAsyncSocket_SocketModule socketModule, struc
         //
         // Based on the Chunk Flag, we can figure out how to parse this thing
         //
-        case STARTCHUNK:
-            // Reading Chunk Header
-            if(endPointer<3){return;}
-            for(i=2;i<endPointer;++i)
-            {
-                if(buffer[i-2]=='\r' && buffer[i-1]=='\n')
-                {
-                    //
-                    // The chunk header is terminated with a CRLF. The part before the ';'
-                    // is the hex number representing the length of the chunk
-                    //
-                    pr = ILibParseString(buffer,0,i-2,";",1);
-                    pr->FirstResult->data[pr->FirstResult->datalength] = '\0';
-                    wcdo->chunk->bytesLeft  = (int)strtol(pr->FirstResult->data,&hex,16);
-                    *p_beginPointer = i;
-                    wcdo->chunk->Flag=wcdo->chunk->bytesLeft==0?FOOTERCHUNK:DATACHUNK;
-                    ILibDestructParserResults(pr);
-                    break;
-                }
-            }
-            break;
-        case ENDCHUNK:
-            if(endPointer>=2)
+    case STARTCHUNK:
+        // Reading Chunk Header
+        if(endPointer<3){return;}
+        for(i=2;i<endPointer;++i)
+        {
+            if(buffer[i-2]=='\r' && buffer[i-1]=='\n')
             {
                 //
-                // There is more chunks to come
+                // The chunk header is terminated with a CRLF. The part before the ';'
+                // is the hex number representing the length of the chunk
                 //
-                *p_beginPointer = 2;
-                wcdo->chunk->Flag = STARTCHUNK;
+                pr = ILibParseString(buffer,0,i-2,";",1);
+                pr->FirstResult->data[pr->FirstResult->datalength] = '\0';
+                wcdo->chunk->bytesLeft  = (int)strtol(pr->FirstResult->data,&hex,16);
+                *p_beginPointer = i;
+                wcdo->chunk->Flag=wcdo->chunk->bytesLeft==0?FOOTERCHUNK:DATACHUNK;
+                ILibDestructParserResults(pr);
+                break;
             }
-            break;
-        case DATACHUNK:
-            if(endPointer>=wcdo->chunk->bytesLeft)
-            {
-                //
-                // Only consume what we need
-                //
-                i = wcdo->chunk->bytesLeft;
-            }
-            else
-            {
-                //
-                // Consume all of the data
-                //
-                i=endPointer;
-            }
+        }
+        break;
+    case ENDCHUNK:
+        if(endPointer>=2)
+        {
+            //
+            // There is more chunks to come
+            //
+            *p_beginPointer = 2;
+            wcdo->chunk->Flag = STARTCHUNK;
+        }
+        break;
+    case DATACHUNK:
+        if(endPointer>=wcdo->chunk->bytesLeft)
+        {
+            //
+            // Only consume what we need
+            //
+            i = wcdo->chunk->bytesLeft;
+        }
+        else
+        {
+            //
+            // Consume all of the data
+            //
+            i=endPointer;
+        }
 
-            if(wcdo->chunk->read_BeginPointer!= wcdo->chunk->read_EndPointer)
+        if(wcdo->chunk->read_BeginPointer!= wcdo->chunk->read_EndPointer)
+        {
+            //
+            // The user didn't consume all of the data, so we need to copy the data
+            // into this buffer, before passing it to the user
+            //
+            // But before we do that, we need to check to see if our buffer is big enough
+            //
+            if(wcdo->chunk->offset+endPointer>wcdo->chunk->mallocSize)
             {
                 //
-                // The user didn't consume all of the data, so we need to copy the data
-                // into this buffer, before passing it to the user
+                // The buffer is too small, we need to make it bigger
+                // ToDo: Add code to enforce a max buffer size if specified
+                // ToDo: Does the above layer need to know when buffers were realloced?
                 //
-                // But before we do that, we need to check to see if our buffer is big enough
-                //
-                if(wcdo->chunk->offset+endPointer>wcdo->chunk->mallocSize)
-                {
-                    //
-                    // The buffer is too small, we need to make it bigger
-                    // ToDo: Add code to enforce a max buffer size if specified
-                    // ToDo: Does the above layer need to know when buffers were realloced?
-                    //
-                    resize = wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize>INITIAL_BUFFER_SIZE?wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize:INITIAL_BUFFER_SIZE;
-                    wcdo->chunk->buffer = (char*)realloc(wcdo->chunk->buffer,wcdo->chunk->mallocSize+resize);
-                    wcdo->chunk->mallocSize += resize;
-                }
-                //
-                // Write the decoded chunk blob into the buffer
-                //
-                memcpy(wcdo->chunk->buffer+wcdo->chunk->offset,buffer,i);
-                MEMCHECK(assert(wcdo->chunk->offset+i<=wcdo->chunk->mallocSize);)
+                resize = wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize>INITIAL_BUFFER_SIZE?wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize:INITIAL_BUFFER_SIZE;
+                wcdo->chunk->buffer = (char*)realloc(wcdo->chunk->buffer,wcdo->chunk->mallocSize+resize);
+                wcdo->chunk->mallocSize += resize;
+            }
+            //
+            // Write the decoded chunk blob into the buffer
+            //
+            memcpy(wcdo->chunk->buffer+wcdo->chunk->offset,buffer,i);
+            MEMCHECK(assert(wcdo->chunk->offset+i<=wcdo->chunk->mallocSize);)
                 //
                 // Adjust our counters
                 //
                 wcdo->chunk->offset+=i;
-            }
-            else
-            {
-                //
-                // We aren't growing this buffer for the user, so we can start out
-                // by trying to just pass the underlying buffer, instead of copying it
-                //
-                passthru=1;
-            }
+        }
+        else
+        {
+            //
+            // We aren't growing this buffer for the user, so we can start out
+            // by trying to just pass the underlying buffer, instead of copying it
+            //
+            passthru=1;
+        }
 
-            bp=0;
-            if(wr!=NULL && wr->OnResponse!=NULL)
-            {
-                //
-                // Let the user know we got some data
-                //
+        bp=0;
+        if(wr!=NULL && wr->OnResponse!=NULL)
+        {
+            //
+            // Let the user know we got some data
+            //
 
-                if(passthru)
+            if(passthru)
+            {
+                wr->OnResponse(
+                    wcdo,
+                    0,
+                    wcdo->header,
+                    buffer,
+                    &bp,
+                    i,
+                    0,
+                    wr->user1,
+                    wr->user2,
+                    &(wcdo->PAUSE));    
+
+                if(bp==0)
                 {
-                    wr->OnResponse(
-                        wcdo,
-                        0,
-                        wcdo->header,
-                        buffer,
-                        &bp,
-                        i,
-                        0,
-                        wr->user1,
-                        wr->user2,
-                        &(wcdo->PAUSE));    
+                    //
+                    // User didn't consume anything, so probably
+                    // wants to grow the buffer
+                    //
+                    wcdo->chunk->read_BeginPointer = 0;
+                    wcdo->chunk->read_EndPointer = i;
 
-                    if(bp==0)
+                    //
+                    // We need to copy this data, so the stack can continue processing
+                    //
+                    if(wcdo->chunk->offset+endPointer>wcdo->chunk->mallocSize)
                     {
                         //
-                        // User didn't consume anything, so probably
-                        // wants to grow the buffer
+                        // The buffer is too small, we need to make it bigger
+                        // ToDo: Add code to enforce a max buffer size if specified
+                        // ToDo: Does the above layer need to know when buffers were realloced?
                         //
-                        wcdo->chunk->read_BeginPointer = 0;
-                        wcdo->chunk->read_EndPointer = i;
-
-                        //
-                        // We need to copy this data, so the stack can continue processing
-                        //
-                        if(wcdo->chunk->offset+endPointer>wcdo->chunk->mallocSize)
-                        {
-                            //
-                            // The buffer is too small, we need to make it bigger
-                            // ToDo: Add code to enforce a max buffer size if specified
-                            // ToDo: Does the above layer need to know when buffers were realloced?
-                            //
-                            resize = wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize>INITIAL_BUFFER_SIZE?wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize:INITIAL_BUFFER_SIZE;
-                            wcdo->chunk->buffer = (char*)realloc(wcdo->chunk->buffer,wcdo->chunk->mallocSize+resize);
-                            wcdo->chunk->mallocSize += resize;
-                        }
-                        memcpy(wcdo->chunk->buffer+wcdo->chunk->offset,buffer,i);
-                        wcdo->chunk->offset+=i;
-                        bp = i;
+                        resize = wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize>INITIAL_BUFFER_SIZE?wcdo->chunk->offset+endPointer-wcdo->chunk->mallocSize:INITIAL_BUFFER_SIZE;
+                        wcdo->chunk->buffer = (char*)realloc(wcdo->chunk->buffer,wcdo->chunk->mallocSize+resize);
+                        wcdo->chunk->mallocSize += resize;
                     }
-                    else 
-                    {
-                        //
-                        // User consumed something at least. We don't need to
-                        // copy anything just yet, because maybe they'll consume
-                        // everything on the next pass
-                        //
-                        if(bp!=i)
-                        {
-                            wcdo->chunk->read_BeginPointer = bp;
-                            wcdo->chunk->read_EndPointer = i;
-                        }
-                        else
-                        {
-                            //
-                            // Everything was consumed, so we can
-                            // set things up, so on the next pass we just
-                            // allow the buffer to passthru
-                            //
-                            wcdo->chunk->read_BeginPointer = 0;
-                            wcdo->chunk->read_EndPointer = 0;
-                        }
-                    }
+                    memcpy(wcdo->chunk->buffer+wcdo->chunk->offset,buffer,i);
+                    wcdo->chunk->offset+=i;
+                    bp = i;
                 }
-                else
+                else 
                 {
-                    wr->OnResponse(
-                        wcdo,
-                        0,
-                        wcdo->header,
-                        wcdo->chunk->buffer,
-                        &bp,
-                        wcdo->chunk->offset,
-                        0,
-                        wr->user1,
-                        wr->user2,
-                        &(wcdo->PAUSE));    
-                    if(bp==wcdo->chunk->offset)
+                    //
+                    // User consumed something at least. We don't need to
+                    // copy anything just yet, because maybe they'll consume
+                    // everything on the next pass
+                    //
+                    if(bp!=i)
+                    {
+                        wcdo->chunk->read_BeginPointer = bp;
+                        wcdo->chunk->read_EndPointer = i;
+                    }
+                    else
                     {
                         //
                         // Everything was consumed, so we can
@@ -960,80 +935,105 @@ void ILibWebClient_ProcessChunk(ILibAsyncSocket_SocketModule socketModule, struc
                         wcdo->chunk->read_BeginPointer = 0;
                         wcdo->chunk->read_EndPointer = 0;
                     }
+                }
+            }
+            else
+            {
+                wr->OnResponse(
+                    wcdo,
+                    0,
+                    wcdo->header,
+                    wcdo->chunk->buffer,
+                    &bp,
+                    wcdo->chunk->offset,
+                    0,
+                    wr->user1,
+                    wr->user2,
+                    &(wcdo->PAUSE));    
+                if(bp==wcdo->chunk->offset)
+                {
+                    //
+                    // Everything was consumed, so we can
+                    // set things up, so on the next pass we just
+                    // allow the buffer to passthru
+                    //
+                    wcdo->chunk->read_BeginPointer = 0;
+                    wcdo->chunk->read_EndPointer = 0;
+                }
+                else
+                {
+                    //
+                    // Not everything was consumed
+                    //
+                    wcdo->chunk->read_BeginPointer = bp;
+                    wcdo->chunk->read_EndPointer = wcdo->chunk->offset;
+                }
+                bp=i;
+            }
+        }
+
+
+        wcdo->chunk->bytesLeft-=bp;
+        *p_beginPointer = bp;
+        if(wcdo->chunk->bytesLeft==0)
+        {
+            wcdo->chunk->Flag = ENDCHUNK;
+        }
+        break;
+    case FOOTERCHUNK:
+        if(endPointer>=2)
+        {
+            for(i=2;i<=endPointer;++i)
+            {
+                if(buffer[i-2]=='\r' && buffer[i-1]=='\n')
+                {
+                    //
+                    // An empty line means the chunk is finished
+                    //
+                    if(i==2)
+                    {
+                        // FINISHED
+                        if(wr != NULL && wr->OnResponse!=NULL)
+                        {
+                            bp = wcdo->chunk->read_BeginPointer;
+                            wr->OnResponse(
+                                wcdo,
+                                0,
+                                wcdo->header,
+                                wcdo->chunk->buffer,
+                                &bp,
+                                wcdo->chunk->read_EndPointer,
+                                -1,
+                                wr->user1,
+                                wr->user2,
+                                &(wcdo->PAUSE));            
+                        }
+                        if(ILibAsyncSocket_IsFree(socketModule)==0)
+                        {
+                            //
+                            // Free the resources associated with this chunk
+                            //
+                            if(wcdo->chunk!=NULL)
+                            {
+                                if(wcdo->chunk->buffer!=NULL) {free(wcdo->chunk->buffer);}
+                                free(wcdo->chunk);
+                                wcdo->chunk = NULL;
+                            }
+                            ILibWebClient_FinishedResponse(wcdo->SOCK,wcdo);
+                        }
+                    }
                     else
                     {
                         //
-                        // Not everything was consumed
+                        // ToDo: This is where to add code to add support trailers
                         //
-                        wcdo->chunk->read_BeginPointer = bp;
-                        wcdo->chunk->read_EndPointer = wcdo->chunk->offset;
                     }
-                    bp=i;
+                    *p_beginPointer = i;
+                    break;
                 }
             }
-            
-            
-            wcdo->chunk->bytesLeft-=bp;
-            *p_beginPointer = bp;
-            if(wcdo->chunk->bytesLeft==0)
-            {
-                wcdo->chunk->Flag = ENDCHUNK;
-            }
-            break;
-        case FOOTERCHUNK:
-            if(endPointer>=2)
-            {
-                for(i=2;i<=endPointer;++i)
-                {
-                    if(buffer[i-2]=='\r' && buffer[i-1]=='\n')
-                    {
-                        //
-                        // An empty line means the chunk is finished
-                        //
-                        if(i==2)
-                        {
-                            // FINISHED
-                            if(wr != NULL && wr->OnResponse!=NULL)
-                            {
-                                bp = wcdo->chunk->read_BeginPointer;
-                                wr->OnResponse(
-                                    wcdo,
-                                    0,
-                                    wcdo->header,
-                                    wcdo->chunk->buffer,
-                                    &bp,
-                                    wcdo->chunk->read_EndPointer,
-                                    -1,
-                                    wr->user1,
-                                    wr->user2,
-                                    &(wcdo->PAUSE));            
-                            }
-                            if(ILibAsyncSocket_IsFree(socketModule)==0)
-                            {
-                                //
-                                // Free the resources associated with this chunk
-                                //
-                                if(wcdo->chunk!=NULL)
-                                {
-                                    if(wcdo->chunk->buffer!=NULL) {free(wcdo->chunk->buffer);}
-                                    free(wcdo->chunk);
-                                    wcdo->chunk = NULL;
-                                }
-                                ILibWebClient_FinishedResponse(wcdo->SOCK,wcdo);
-                            }
-                        }
-                        else
-                        {
-                            //
-                            // ToDo: This is where to add code to add support trailers
-                            //
-                        }
-                        *p_beginPointer = i;
-                        break;
-                    }
-                }
-            }
-            break;
+        }
+        break;
     }
 }
 //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
@@ -1069,13 +1069,13 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
     if(wcdo->Server==0)
     {
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_OnData",1,wcdo->Parent);)
-        sem_wait(&(wcdo->Parent->QLock));
+            sem_wait(&(wcdo->Parent->QLock));
     }
     wr = (struct ILibWebRequest*)ILibQueue_PeekQueue(wcdo->RequestQueue);
     if(wcdo->Server==0)
     {
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnData",2,wcdo->Parent);)
-        sem_post(&(wcdo->Parent->QLock));
+            sem_post(&(wcdo->Parent->QLock));
     }
     if(wr==NULL)
     {
@@ -1167,7 +1167,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                             free(tempIP);
                             free(tempPath);
                         }
-                        
+
                         wcdo->header->Source = &(wcdo->source);
                         wcdo->header->ReceivingAddress = wcdo->LocalIP;
                         //
@@ -1176,7 +1176,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                         phfn = wcdo->header->FirstField;
                         while(phfn!=NULL)
                         {
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+                            //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
                             if(phfn->FieldLength==17 && strncasecmp(phfn->Field,"transfer-encoding",17)==0)
                             {
                                 if(phfn->FieldDataLength==7 && strncasecmp(phfn->FieldData,"chunked",7)==0)
@@ -1198,7 +1198,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                                     wcdo->ConnectionCloseSpecified=1;
                                 }
                             }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+                            //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
                             if(phfn->FieldLength==14 && strncasecmp(phfn->Field,"content-length",14)==0)
                             {
                                 //
@@ -1210,7 +1210,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                             }
                             phfn = phfn->NextField;
                         }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+                        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
                         if(atof(wcdo->header->Version)>1.0)
                         {
                             //
@@ -1249,7 +1249,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                             wcdo->WaitForClose=0;
                             wcdo->BytesLeft = 0;
                         }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+                        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
                         if(wcdo->Server!=0 && wcdo->BytesLeft==-1 && wcdo->Chunked==0)
                         {
                             //
@@ -1373,7 +1373,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                                     }
                                 }
                             }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+                            //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
                             else
                             {
                                 //
@@ -1427,8 +1427,8 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                                         }
                                     }
                                 }
-                                
-                                
+
+
                                 //
                                 // This packet is chunk encoded, so we need to run it
                                 // through our Chunk Processor
@@ -1439,7 +1439,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                                 ILibDestructPacket(wcdo->header);
                                 wcdo->header = tph;
                             }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+                            //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
                         }
                     }
                     else
@@ -1514,7 +1514,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
                 }
             }
         }
-//{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
+        //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
         else
         {
             //
@@ -1522,7 +1522,7 @@ void ILibWebClient_OnData(ILibAsyncSocket_SocketModule  socketModule,char* buffe
             //
             ILibWebClient_ProcessChunk(socketModule,wcdo,buffer,p_beginPointer,endPointer);
         }
-//{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
+        //{{{ <--REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT }}}
     }
     if(ILibAsyncSocket_IsFree(socketModule)==0)
     {
@@ -1545,9 +1545,9 @@ void ILibWebClient_RetrySink(ILibWebClient_StateObject object)
 {
     struct ILibWebClientDataObject *wcdo = (struct ILibWebClientDataObject*)object;
     struct ILibWebClientManager *wcm = wcdo->Parent;
-    
+
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_RetrySink",1,wcm);)
-    sem_wait(&(wcm->QLock));
+        sem_wait(&(wcm->QLock));
     wcdo->ExponentialBackoff = wcdo->ExponentialBackoff==0?1:wcdo->ExponentialBackoff * 2;
     if(wcdo->ExponentialBackoff>0)
     {
@@ -1557,7 +1557,7 @@ void ILibWebClient_RetrySink(ILibWebClient_StateObject object)
         ILibQueue_EnQueue(wcdo->Parent->backlogQueue,wcdo);
     }
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_RetrySink",3,wcm);)
-    sem_post(&(wcm->QLock));
+        sem_post(&(wcm->QLock));
 
     if(!ILibIsChainBeingDestroyed(wcm->Chain))
     {
@@ -1609,12 +1609,12 @@ void ILibWebClient_OnConnect(ILibAsyncSocket_SocketModule socketModule, int Conn
         //Success: Send First Request
         wcdo->LocalIP = ILibAsyncSocket_GetLocalInterface(socketModule);
         wcdo->ExponentialBackoff=1;
-        
+
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_OnConnect",1,wcdo->Parent);)
-        sem_wait(&(wcdo->Parent->QLock));
+            sem_wait(&(wcdo->Parent->QLock));
         r = ILibQueue_PeekQueue(wcdo->RequestQueue);
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnConnect",2,wcdo->Parent);)
-        sem_post(&(wcdo->Parent->QLock));
+            sem_post(&(wcdo->Parent->QLock));
         if(r!=NULL)
         {
             if(r->CurrentQOS!=ILibAsyncSocket_QOS_NONE)
@@ -1626,7 +1626,7 @@ void ILibWebClient_OnConnect(ILibAsyncSocket_SocketModule socketModule, int Conn
             {
                 ILibAsyncSocket_Send(socketModule,r->Buffer[i],r->BufferLength[i],-1);
             }
-        
+
             if(r->streamedState!=NULL)
             {
                 ILibWebClient_OnSendOKSink(socketModule,wcdo);
@@ -1658,11 +1658,11 @@ void ILibWebClient_OnConnect(ILibAsyncSocket_SocketModule socketModule, int Conn
             keyLength = sprintf(key,"%s:%d:%d",inet_ntoa(wcdo->remote.sin_addr),(int)ntohs(wcdo->remote.sin_port),wcdo->IndexNumber);        
             MEMCHECK(assert(keyLength<=25);) 
 
-            ILibDeleteEntry(wcdo->Parent->DataTable,key,keyLength);
+                ILibDeleteEntry(wcdo->Parent->DataTable,key,keyLength);
             ILibDeleteEntry(wcdo->Parent->idleTable,key,keyLength);
-            
+
             SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_RetrySink",2,wcm);)
-            sem_post(&(wcdo->Parent->QLock));
+                sem_post(&(wcdo->Parent->QLock));
             ILibWebClient_DestroyWebClientDataObject(wcdo);
         }
         else
@@ -1731,12 +1731,12 @@ void ILibWebClient_OnDisconnectSink(ILibAsyncSocket_SocketModule socketModule, v
         // all the data we need
         //
         ILibAsyncSocket_GetBuffer(socketModule,&buffer,&BeginPointer,&EndPointer);
-        
+
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_OnDisconnect",1,wcdo->Parent);)
-        sem_wait(&(wcdo->Parent->QLock));
+            sem_wait(&(wcdo->Parent->QLock));
         wr = ILibQueue_DeQueue(wcdo->RequestQueue);
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnDisconnect",2,wcdo->Parent);)
-        sem_post(&(wcdo->Parent->QLock));
+            sem_post(&(wcdo->Parent->QLock));
         wcdo->InitialRequestAnswered=1;
         //{{{ REMOVE_THIS_FOR_HTTP/1.0_ONLY_SUPPORT--> }}}
         wcdo->PipelineFlag = PIPELINE_NO;
@@ -1772,14 +1772,14 @@ void ILibWebClient_OnDisconnectSink(ILibAsyncSocket_SocketModule socketModule, v
             ILibDestructPacket(h);
         }
     }
-    
+
     if(wcdo->Closing!=0){return;}
 
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_OnDisconnect",3,wcdo->Parent);)
-    sem_wait(&(wcdo->Parent->QLock));
+        sem_wait(&(wcdo->Parent->QLock));
     wr = ILibQueue_PeekQueue(wcdo->RequestQueue);
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnDisconnect",4,wcdo->Parent);)
-    sem_post(&(wcdo->Parent->QLock));
+        sem_post(&(wcdo->Parent->QLock));
 
     if(wr!=NULL)
     {
@@ -1807,7 +1807,7 @@ void ILibWebClient_OnDisconnectSink(ILibAsyncSocket_SocketModule socketModule, v
                 sem_wait(&(wcdo->Parent->QLock));
                 wr = ILibQueue_DeQueue(wcdo->RequestQueue);
                 SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnDisconnect",6,wcdo->Parent);)
-                sem_post(&(wcdo->Parent->QLock));
+                    sem_post(&(wcdo->Parent->QLock));
                 if(wr!=NULL)
                 {
                     ILibWebClient_DestroyWebRequest(wr);
@@ -1816,10 +1816,10 @@ void ILibWebClient_OnDisconnectSink(ILibAsyncSocket_SocketModule socketModule, v
             ILibWebClient_FinishedResponse(socketModule,wcdo);    
 
             SEM_TRACK(WebClient_TrackLock("ILibWebClient_OnDisconnect",5,wcdo->Parent);)
-            sem_wait(&(wcdo->Parent->QLock));
+                sem_wait(&(wcdo->Parent->QLock));
             wr = ILibQueue_PeekQueue(wcdo->RequestQueue);
             SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_OnDisconnect",6,wcdo->Parent);)
-            sem_post(&(wcdo->Parent->QLock));
+                sem_post(&(wcdo->Parent->QLock));
             if(wr==NULL){return;}
         }
 
@@ -1848,13 +1848,11 @@ void ILibWebClient_PreProcess(void* WebClientModule,fd_set *readset, fd_set *wri
     int i;
     int OK=0;
 
-    //
     // Try and satisfy as many things as we can. If we have resources
     // grab a socket and go
-    //
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_PreProcess",1,wcm);)
     sem_wait(&(wcm->QLock));
-    while(OK==0 && ILibQueue_IsEmpty(wcm->backlogQueue)==0)
+    while(OK==0 && ILibQueue_IsEmpty(wcm->backlogQueue) == 0)
     {
         OK=1;
         for(i=0;i<wcm->socksLength;++i)
@@ -1863,7 +1861,7 @@ void ILibWebClient_PreProcess(void* WebClientModule,fd_set *readset, fd_set *wri
             {
                 OK=0;
                 wcdo = ILibQueue_DeQueue(wcm->backlogQueue);
-                if(wcdo!=NULL)
+                if(wcdo != NULL)
                 {
                     wcdo->Closing = 0;
                     wcdo->PendingConnectionIndex = i;
@@ -1876,11 +1874,12 @@ void ILibWebClient_PreProcess(void* WebClientModule,fd_set *readset, fd_set *wri
                         wcdo);
                 }
             }
-            if(ILibQueue_IsEmpty(wcm->backlogQueue)!=0) {break;}
+            if(ILibQueue_IsEmpty(wcm->backlogQueue) != 0) 
+                break;
         }
     }
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_PreProcess",2,wcm);)
-    sem_post(&(wcm->QLock));
+        sem_post(&(wcm->QLock));
 }
 
 //
@@ -1898,15 +1897,11 @@ void ILibWebClient_OnBufferReAllocate(ILibAsyncSocket_SocketModule token, void *
     struct ILibWebClientDataObject *wcdo = (struct ILibWebClientDataObject*)user;
     if(wcdo!=NULL && wcdo->header!=NULL)
     {
-        //
         // Sometimes, the header was copied, in which case this realloc doesn't affect us
-        //
         if(wcdo->header->ClonedPacket==0)
         {
-            //
             // Sometimes the user instantiated the string, so again
             // this may not concern us
-            //
             if(wcdo->header->UserAllocStrings==0)
             {
                 if(wcdo->header->StatusCode==-1)
@@ -1921,10 +1916,8 @@ void ILibWebClient_OnBufferReAllocate(ILibAsyncSocket_SocketModule token, void *
                     wcdo->header->StatusData += offSet;
                 }
             }
-            //
             // Sometimes the user instantiated the string, so again
             // this may not concern us
-            //
             if(wcdo->header->UserAllocVersion==0)
             {
                 wcdo->header->Version += offSet;
@@ -1947,8 +1940,6 @@ void ILibWebClient_OnBufferReAllocate(ILibAsyncSocket_SocketModule token, void *
     }
 }
 
-
-
 //
 // Internal method called by the ILibWebServer module to create a WebClientDataObject
 //
@@ -1964,11 +1955,11 @@ ILibWebClient_StateObject ILibCreateWebClientEx(ILibWebClient_OnResponse OnRespo
 
     wcdo = (struct ILibWebClientDataObject*)malloc(sizeof(struct ILibWebClientDataObject));
     memset(wcdo,0,sizeof(struct ILibWebClientDataObject));
-    wcdo->Parent = NULL;
-    wcdo->RequestQueue = ILibQueue_Create();
-    wcdo->Server = 1;
-    wcdo->SOCK = socketModule;
-    wcdo->PendingConnectionIndex=-1;
+    wcdo->Parent                    = NULL;
+    wcdo->RequestQueue              = ILibQueue_Create();
+    wcdo->Server                    = 1;
+    wcdo->SOCK                      = socketModule;
+    wcdo->PendingConnectionIndex    =-1;
 
     wr = (struct ILibWebRequest*)malloc(sizeof(struct ILibWebRequest));
     memset(wr,0,sizeof(struct ILibWebRequest));
@@ -2055,42 +2046,38 @@ char *ILibWebClient_QueryWCDO(ILibWebClient_RequestManager wcm, char *query)
 }
 #endif
 /*! \fn ILibCreateWebClient(int PoolSize,void *Chain)
-    \brief Constructor to create a new ILibWebClient
-    \param PoolSize The max number of ILibAsyncSockets to have in the pool
-    \param Chain The chain to add this module to. (Chain must <B>not</B> be running)
-    \returns An ILibWebClient
+\brief Constructor to create a new ILibWebClient
+\param PoolSize The max number of ILibAsyncSockets to have in the pool
+\param Chain The chain to add this module to. (Chain must <B>not</B> be running)
+\returns An ILibWebClient
 */
 ILibWebClient_RequestManager ILibCreateWebClient(int PoolSize,void *Chain)
 {
     int i;
     struct ILibWebClientManager *RetVal;
-    
-    if(Chain==NULL){return(NULL);}
+
+    if(Chain == NULL)
+        return (NULL);
 
     RetVal = (struct ILibWebClientManager*)malloc(sizeof(struct ILibWebClientManager));
     memset(RetVal,0,sizeof(struct ILibWebClientManager));
-    RetVal->MaxConnectionsToSameServer = 1;
-    
-    RetVal->Destroy = &ILibDestroyWebClient;
-    RetVal->PreSelect = &ILibWebClient_PreProcess;
-    //RetVal->PostSelect = &ILibWebClient_PreProcess;
-
-    RetVal->socksLength = PoolSize;
-    RetVal->socks = (void**)malloc(PoolSize*sizeof(void*));
+    RetVal->MaxConnectionsToSameServer  = 1;
+    RetVal->Destroy                     = &ILibDestroyWebClient;
+    RetVal->PreSelect                   = &ILibWebClient_PreProcess;
+    //RetVal->PostSelect                = &ILibWebClient_PreProcess;
+    RetVal->socksLength                 = PoolSize;
+    RetVal->socks                       = (void**)malloc(PoolSize*sizeof(void*));
     sem_init(&(RetVal->QLock),0,1);
-    RetVal->Chain = Chain;
+    RetVal->Chain                       = Chain;
+    RetVal->backlogQueue                = ILibQueue_Create();
+    RetVal->DataTable                   = ILibInitHashTree();
+    RetVal->idleTable                   = ILibInitHashTree();
 
-    RetVal->backlogQueue = ILibQueue_Create();
-    RetVal->DataTable = ILibInitHashTree();
-    RetVal->idleTable = ILibInitHashTree();
 
-    
-    ILibAddToChain(Chain,RetVal);
-    RetVal->timer = ILibCreateLifeTime(Chain);
-    //
+    ILibAddToChain(Chain, RetVal);
+    RetVal->timer                       = ILibCreateLifeTime(Chain);
     // Create our pool of sockets
-    //
-    for(i=0;i<PoolSize;++i)
+    for(i = 0; i < PoolSize; ++i)
     {
         RetVal->socks[i] = ILibCreateAsyncSocketModule(
             Chain,
@@ -2099,12 +2086,10 @@ ILibWebClient_RequestManager ILibCreateWebClient(int PoolSize,void *Chain)
             &ILibWebClient_OnConnect,
             &ILibWebClient_OnDisconnectSink,
             &ILibWebClient_OnSendOKSink);
-        //
         // We want to know about any buffer reallocations, because we may need to fix some things
-        //
-        ILibAsyncSocket_SetReAllocateNotificationCallback(RetVal->socks[i],&ILibWebClient_OnBufferReAllocate);
+        ILibAsyncSocket_SetReAllocateNotificationCallback(RetVal->socks[i], &ILibWebClient_OnBufferReAllocate);
     }
-    return((void*)RetVal);
+    return ((void*)RetVal);
 }
 
 void ILibWebClient_SetMaxConcurrentSessionsToServer(ILibWebClient_RequestManager WebClient, int maxConnections)
@@ -2114,22 +2099,22 @@ void ILibWebClient_SetMaxConcurrentSessionsToServer(ILibWebClient_RequestManager
 }
 
 /*! \fn ILibWebClient_PipelineRequest(ILibWebClient_RequestManager WebClient, struct sockaddr_in *RemoteEndpoint, struct packetheader *packet, ILibWebClient_OnResponse OnResponse, void *user1, void *user2)
-    \brief Queues a new web request
-    \param WebClient The ILibWebClient to queue the requests to
-    \param RemoteEndpoint The destination
-    \param packet The packet to send
-    \param OnResponse Response Handler
-    \param user1 User object
-    \param user2 User object
-    \returns Request Token
+\brief Queues a new web request
+\param WebClient The ILibWebClient to queue the requests to
+\param RemoteEndpoint The destination
+\param packet The packet to send
+\param OnResponse Response Handler
+\param user1 User object
+\param user2 User object
+\returns Request Token
 */
 ILibWebClient_RequestToken ILibWebClient_PipelineRequest(
-                                ILibWebClient_RequestManager WebClient, 
-                                struct sockaddr_in *RemoteEndpoint, 
-                                struct packetheader *packet,
-                                ILibWebClient_OnResponse OnResponse,
-                                void *user1,
-                                void *user2)
+    ILibWebClient_RequestManager WebClient, 
+struct sockaddr_in *RemoteEndpoint, 
+struct packetheader *packet,
+    ILibWebClient_OnResponse OnResponse,
+    void *user1,
+    void *user2)
 {
     int bufferLength;
     char *buffer;
@@ -2141,7 +2126,7 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequest(
 
 ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
     ILibWebClient_RequestManager WebClient, 
-    struct sockaddr_in *RemoteEndpoint, 
+struct sockaddr_in *RemoteEndpoint, 
     char *headerBuffer,
     int headerBufferLength,
     int headerBuffer_FREE,
@@ -2149,7 +2134,7 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
     int bodyBufferLength,
     int bodyBuffer_FREE,
     ILibWebClient_OnResponse OnResponse,
-    struct ILibWebClient_StreamedRequestState *state,
+struct ILibWebClient_StreamedRequestState *state,
     void *user1,
     void *user2)
 {
@@ -2199,7 +2184,7 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
     request->OnResponse = OnResponse;
     request->user1 = user1;
     request->user2 = user2;
-    
+
     request->remote.sin_port = RemoteEndpoint->sin_port;
     request->remote.sin_addr.s_addr = RemoteEndpoint->sin_addr.s_addr;
 
@@ -2207,7 +2192,7 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
     // Does the client already have a connection to the server?
     //
     SEM_TRACK(WebClient_TrackLock("ILibWebClient_PipelineRequestEx",1,wcm);)
-    sem_wait(&(wcm->QLock));
+        sem_wait(&(wcm->QLock));
 
     if(wcm->MaxConnectionsToSameServer>1)
     {
@@ -2218,13 +2203,13 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
                 ntohs(RemoteEndpoint->sin_port),
                 i);
             MEMCHECK(assert(IPV4AddressLength<=25);)
-            if(ILibHasEntry(wcm->DataTable,IPV4Address,IPV4AddressLength)==0)
-            {
-                //
-                // A free slot!
-                //
-                break;
-            }
+                if(ILibHasEntry(wcm->DataTable,IPV4Address,IPV4AddressLength)==0)
+                {
+                    //
+                    // A free slot!
+                    //
+                    break;
+                }
         }
         if(i==wcm->MaxConnectionsToSameServer)
         {
@@ -2241,8 +2226,8 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
                     ntohs(RemoteEndpoint->sin_port),
                     i);
                 MEMCHECK(assert(IPV4AddressLength<=25);)
-                wcdo = (struct ILibWebClientDataObject*)ILibGetEntry(wcm->DataTable,IPV4Address,IPV4AddressLength);
-                
+                    wcdo = (struct ILibWebClientDataObject*)ILibGetEntry(wcm->DataTable,IPV4Address,IPV4AddressLength);
+
                 if(numberOfItems==-1)
                 {
                     numberOfItems = ILibLinkedList_GetCount(wcdo->RequestQueue);
@@ -2360,7 +2345,7 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
         }
     }
     SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_PipelineRequestEx",2,wcm);)
-    sem_post(&(wcm->QLock));
+        sem_post(&(wcm->QLock));
     if(ForceUnBlock!=0)
     {
         ILibForceUnBlockChain(wcm->Chain);
@@ -2370,37 +2355,37 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx2(
 }
 
 /*! \fn ILibWebClient_PipelineRequestEx(
-    ILibWebClient_RequestManager WebClient, 
-    struct sockaddr_in *RemoteEndpoint, 
-    char *headerBuffer,
-    int headerBufferLength,
-    int headerBuffer_FREE,
-    char *bodyBuffer,
-    int bodyBufferLength,
-    int bodyBuffer_FREE,
-    ILibWebClient_OnResponse OnResponse,
-    void *user1,
-    void *user2)
-    \brief Queues a new web request
-    \par
-    This method differs from ILibWebClient_PiplineRequest, in that this method
-    allows you to directly specify the buffers, rather than a packet structure
-    \param WebClient The ILibWebClient to queue the requests to
-    \param RemoteEndpoint The destination
-    \param headerBuffer The buffer containing the headers
-    \param headerBufferLength The length of the headers
-    \param headerBuffer_FREE Flag indicating memory ownership of buffer
-    \param bodyBuffer The buffer containing the HTTP body
-    \param bodyBufferLength The length of the buffer
-    \param bodyBuffer_FREE Flag indicating memory ownership of buffer
-    \param OnResponse Data reception handler
-    \param user1 User object
-    \param user2 User object
-    \returns Request Token
+ILibWebClient_RequestManager WebClient, 
+struct sockaddr_in *RemoteEndpoint, 
+char *headerBuffer,
+int headerBufferLength,
+int headerBuffer_FREE,
+char *bodyBuffer,
+int bodyBufferLength,
+int bodyBuffer_FREE,
+ILibWebClient_OnResponse OnResponse,
+void *user1,
+void *user2)
+\brief Queues a new web request
+\par
+This method differs from ILibWebClient_PiplineRequest, in that this method
+allows you to directly specify the buffers, rather than a packet structure
+\param WebClient The ILibWebClient to queue the requests to
+\param RemoteEndpoint The destination
+\param headerBuffer The buffer containing the headers
+\param headerBufferLength The length of the headers
+\param headerBuffer_FREE Flag indicating memory ownership of buffer
+\param bodyBuffer The buffer containing the HTTP body
+\param bodyBufferLength The length of the buffer
+\param bodyBuffer_FREE Flag indicating memory ownership of buffer
+\param OnResponse Data reception handler
+\param user1 User object
+\param user2 User object
+\returns Request Token
 */
 ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx(
     ILibWebClient_RequestManager WebClient, 
-    struct sockaddr_in *RemoteEndpoint, 
+struct sockaddr_in *RemoteEndpoint, 
     char *headerBuffer,
     int headerBufferLength,
     int headerBuffer_FREE,
@@ -2414,13 +2399,13 @@ ILibWebClient_RequestToken ILibWebClient_PipelineRequestEx(
     return(ILibWebClient_PipelineRequestEx2(WebClient,RemoteEndpoint,headerBuffer,headerBufferLength,headerBuffer_FREE,bodyBuffer,bodyBufferLength,bodyBuffer_FREE,OnResponse,NULL,user1,user2));
 }
 ILibWebClient_RequestToken ILibWebClient_PipelineRequest2(
-                                ILibWebClient_RequestManager WebClient, 
-                                struct sockaddr_in *RemoteEndpoint, 
-                                struct packetheader *packet,
-                                ILibWebClient_OnResponse OnResponse,
-                                struct ILibWebClient_StreamedRequestState *state,
-                                void *user1,
-                                void *user2)
+    ILibWebClient_RequestManager WebClient, 
+struct sockaddr_in *RemoteEndpoint, 
+struct packetheader *packet,
+    ILibWebClient_OnResponse OnResponse,
+struct ILibWebClient_StreamedRequestState *state,
+    void *user1,
+    void *user2)
 {
     int bufferLength;
     char *buffer;
@@ -2441,10 +2426,10 @@ struct packetheader *ILibWebClient_GetHeaderFromDataObject(ILibWebClient_StateOb
 }
 
 /*! \fn ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,char *IP,int Port)
-    \brief Deletes all pending requests to a specific IP/Port combination
-    \param WebClientToken The ILibWebClient to purge
-    \param IP The IP address of the destination
-    \param Port The destination port
+\brief Deletes all pending requests to a specific IP/Port combination
+\param WebClientToken The ILibWebClient to purge
+\param IP The IP address of the destination
+\param Port The destination port
 */
 void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,char *IP,int Port)
 {
@@ -2457,7 +2442,7 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
     int i;
 
     void *RemoveQ;
-    
+
     if(wcm==NULL) {return;}
 
     RemoveQ = ILibQueue_Create();
@@ -2468,11 +2453,11 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
         IPV4AddressLength = sprintf(IPV4Address,"%s:%d:%d",IP,Port,i);
         MEMCHECK(assert(IPV4AddressLength<=24);) 
 
-        //
-        // Are there any pending requests to this IP/Port combo?
-        //
-        SEM_TRACK(WebClient_TrackLock("ILibWebClient_DeleteRequests",1,wcm);)
-        sem_wait(&(wcm->QLock));
+            //
+            // Are there any pending requests to this IP/Port combo?
+            //
+            SEM_TRACK(WebClient_TrackLock("ILibWebClient_DeleteRequests",1,wcm);)
+            sem_wait(&(wcm->QLock));
         if(ILibHasEntry(wcm->DataTable,IPV4Address,IPV4AddressLength)!=0)
         {
             //
@@ -2493,12 +2478,12 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
                     wr = (struct ILibWebRequest*)ILibQueue_DeQueue(wcdo->RequestQueue);
                     ILibQueue_EnQueue(RemoveQ,wr);
                 }
-            
+
                 ILibLifeTime_Remove(wcdo->Parent->timer,wcdo);
             }
         }
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_DeleteRequests",2,wcm);)
-        sem_post(&(wcm->QLock));
+            sem_post(&(wcm->QLock));
     }
 
 
@@ -2511,8 +2496,8 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
         // Tell the user, we are aborting these requests
         //
         wr = (struct ILibWebRequest*)ILibQueue_DeQueue(RemoveQ);
-                    if(wr->OnResponse!=NULL)
-        wr->OnResponse(                
+        if(wr->OnResponse!=NULL)
+            wr->OnResponse(                
             NULL,
             WEBCLIENT_DELETED,
             NULL,
@@ -2523,7 +2508,7 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
             wr->user1,
             wr->user2,
             &zero);
-        
+
         ILibWebClient_DestroyWebRequest(wr);
     }
     if(wcdo!=NULL && wcdo->Parent!=NULL)
@@ -2542,16 +2527,16 @@ void ILibWebClient_DeleteRequests(ILibWebClient_RequestManager WebClientToken,ch
 }
 
 /*! \fn ILibWebClient_Resume(ILibWebClient_StateObject wcdo)
-    \brief Resumes a paused connection
-    \par
-    If the client has set the PAUSED flag, the underlying socket will no longer
-    read data from the NIC. This method, resumes the socket.
-    \param wcdo The associated WebClientDataObject
+\brief Resumes a paused connection
+\par
+If the client has set the PAUSED flag, the underlying socket will no longer
+read data from the NIC. This method, resumes the socket.
+\param wcdo The associated WebClientDataObject
 */
 void ILibWebClient_Resume(ILibWebClient_StateObject wcdo)
 {
     struct ILibWebClientDataObject *d = (struct ILibWebClientDataObject*)wcdo;
-    
+
     if(d!=NULL)
     {
         d->PAUSE = 0;
@@ -2568,15 +2553,15 @@ void ILibWebClient_Pause(ILibWebClient_StateObject wcdo)
 }
 
 /*! \fn ILibWebClient_Disconnect(ILibWebClient_StateObject wcdo)
-    \brief Disconnects the underlying socket, of a client object.
-    \par
-    <b>Note</b>: This is <b>not</b> to be used to close an HTTP Session, as ILibWebClient does not
-    keep separate states for client sessions. The HTTP behavior is abstracted, such that the user <b>must</b> not
-    make any assumptions about the connection, because multiple requests could be multiplexed into a single connection.
-    <br><br>
-    If the user desires to cancel their client session, they need to cancel the requests that they had made. That can
-    be accomplished by calling \a ILibWebClient_CancelRequest, with the RequestToken obtained from \a ILibWebClient_PipelineRequest.
-    \param wcdo WebClient State Object, obtained from \a ILibCreateWebClientEx.
+\brief Disconnects the underlying socket, of a client object.
+\par
+<b>Note</b>: This is <b>not</b> to be used to close an HTTP Session, as ILibWebClient does not
+keep separate states for client sessions. The HTTP behavior is abstracted, such that the user <b>must</b> not
+make any assumptions about the connection, because multiple requests could be multiplexed into a single connection.
+<br><br>
+If the user desires to cancel their client session, they need to cancel the requests that they had made. That can
+be accomplished by calling \a ILibWebClient_CancelRequest, with the RequestToken obtained from \a ILibWebClient_PipelineRequest.
+\param wcdo WebClient State Object, obtained from \a ILibCreateWebClientEx.
 */
 void ILibWebClient_Disconnect(ILibWebClient_StateObject wcdo)
 {
@@ -2592,7 +2577,7 @@ void ILibWebClient_CancelRequestEx2(ILibWebClient_StateObject wcdo, void *userRe
     void *node,*nextnode;
     struct ILibWebRequest *wr;
     struct ILibWebClientDataObject *_wcdo = (struct ILibWebClientDataObject*)wcdo;
-    
+
     int HeadDeleted = 0;
     void *head;
 
@@ -2606,7 +2591,7 @@ void ILibWebClient_CancelRequestEx2(ILibWebClient_StateObject wcdo, void *userRe
         PendingRequestQ = ILibQueue_Create();
 
         SEM_TRACK(WebClient_TrackLock("ILibWebClient_CancelRequest",1,wcdo->Parent);)
-        sem_wait(&(_wcdo->Parent->QLock));
+            sem_wait(&(_wcdo->Parent->QLock));
 
         head = node = ILibLinkedList_GetNode_Head(_wcdo->RequestQueue);
         while(node!=NULL)
@@ -2625,7 +2610,7 @@ void ILibWebClient_CancelRequestEx2(ILibWebClient_StateObject wcdo, void *userRe
                 {
                     SESSION_TRACK(wr->requestToken,NULL,"Cancelling Request");
                 }
-                
+
                 ILibQueue_EnQueue(PendingRequestQ,wr);
                 ILibLinkedList_Remove(node);
             }
@@ -2662,9 +2647,9 @@ void ILibWebClient_CancelRequestEx2(ILibWebClient_StateObject wcdo, void *userRe
                 ILibQueue_EnQueue(_wcdo->Parent->backlogQueue,_wcdo);                
             }
         }
-        
+
         SEM_TRACK(WebClient_TrackUnLock("ILibWebClient_CancelRequest",2,wcdo->Parent);)
-        sem_post(&(_wcdo->Parent->QLock));
+            sem_post(&(_wcdo->Parent->QLock));
 
         wr = (struct ILibWebRequest*)ILibQueue_DeQueue(PendingRequestQ);
         while(wr!=NULL)
@@ -2697,8 +2682,8 @@ void ILibWebClient_CancelRequestEx(void *RequestToken)
 }
 
 /*! \fn ILibWebClient_CancelRequest(ILibWebClient_RequestToken RequestToken)
-    \brief Cancels a pending request via the RequestToken received when making the request.
-    \param RequestToken The identifier obtained from calls to \a ILibWebClient_PipelineRequest.
+\brief Cancels a pending request via the RequestToken received when making the request.
+\param RequestToken The identifier obtained from calls to \a ILibWebClient_PipelineRequest.
 */
 void ILibWebClient_CancelRequest(ILibWebClient_RequestToken RequestToken)
 {
@@ -2708,9 +2693,9 @@ void ILibWebClient_CancelRequest(ILibWebClient_RequestToken RequestToken)
     }
 }
 /*! \fn ILibWebClient_GetRequestToken_FromStateObject(ILibWebClient_StateObject WebStateObject)
-    \brief Obtains the Request Token associated with the specified WebReader (response) token.
-    \param WebStateObject The response token obtained from the response handler passed into \a ILibWebClient_PipelineRequest.
-    \returns The request identifier of the request this response was for
+\brief Obtains the Request Token associated with the specified WebReader (response) token.
+\param WebStateObject The response token obtained from the response handler passed into \a ILibWebClient_PipelineRequest.
+\returns The request identifier of the request this response was for
 */
 ILibWebClient_RequestToken ILibWebClient_GetRequestToken_FromStateObject(ILibWebClient_StateObject WebStateObject)
 {
@@ -2732,8 +2717,8 @@ ILibWebClient_RequestToken ILibWebClient_GetRequestToken_FromStateObject(ILibWeb
 }
 
 /*! \fn ILibWebClient_StateObject ILibWebClient_GetStateObjectFromRequestToken(ILibWebClient_RequestToken token)
-    \brief Obtain the user object that was associated with a request, from the request token
-    \param token The token that was obtained from a call to \a ILibWebClient_PipelineRequest or \a ILibWebClient_PipelineRequestEx
+\brief Obtain the user object that was associated with a request, from the request token
+\param token The token that was obtained from a call to \a ILibWebClient_PipelineRequest or \a ILibWebClient_PipelineRequestEx
 */
 ILibWebClient_StateObject ILibWebClient_GetStateObjectFromRequestToken(ILibWebClient_RequestToken token)
 {
@@ -2745,14 +2730,14 @@ ILibWebClient_StateObject ILibWebClient_GetStateObjectFromRequestToken(ILibWebCl
 
 
 /*! \fn ILibWebClient_RequestToken ILibWebClient_PipelineStreamedRequest(ILibWebClient_RequestManager WebClient,struct sockaddr_in *RemoteEndpoint,struct packetheader *packet,ILibWebClient_OnResponse OnResponse,ILibWebClient_OnSendOK OnSendOK,void *user1,void *user2)
-    \brief Queues a web request, but allows for streaming of the request body
-    \param WebClient The client to queue to request onto
-    \param RemoteEndpoint The server to make the request to
-    \param packet The HTTP headers to send to the server
-    \param OnResponse Function pointer that will get triggered apon receipt of a response
-    \param OnSendOK Function pointer that will trigger when a connection has been established and again when all calls to ILibWebClient_StreamRequestBody() have completed
-    \param user1 User state object
-    \param user2 User state object
+\brief Queues a web request, but allows for streaming of the request body
+\param WebClient The client to queue to request onto
+\param RemoteEndpoint The server to make the request to
+\param packet The HTTP headers to send to the server
+\param OnResponse Function pointer that will get triggered apon receipt of a response
+\param OnSendOK Function pointer that will trigger when a connection has been established and again when all calls to ILibWebClient_StreamRequestBody() have completed
+\param user1 User state object
+\param user2 User state object
 */
 ILibWebClient_RequestToken ILibWebClient_PipelineStreamedRequest(ILibWebClient_RequestManager WebClient,struct sockaddr_in *RemoteEndpoint,struct packetheader *packet,ILibWebClient_OnResponse OnResponse,ILibWebClient_OnSendOK OnSendOK,void *user1,void *user2)
 {
@@ -2764,25 +2749,25 @@ ILibWebClient_RequestToken ILibWebClient_PipelineStreamedRequest(ILibWebClient_R
     state->doNotSendRightAway=1;
 
     ILibAddHeaderLine(packet,"Transfer-Encoding",17,"chunked",7);
-    
+
     return(ILibWebClient_PipelineRequest2(WebClient,RemoteEndpoint,packet,OnResponse,state,user1,user2));
 }
 
 /*! \fn void ILibWebClient_StreamRequestBody(ILibWebClient_RequestToken token, char *body,int bodyLength, enum ILibAsyncSocket_MemoryOwnership MemoryOwnership,int done)
-    \brief Streams part of the request body
-    \param token The RequestToken received from a call to ILibWebClient_PipelineStreamedRequest()
-    \param body The buffer to send
-    \param bodyLength Size of the buffer to send
-    \param MemoryOwnership Memory ownership flag for the buffer
-    \param done Non-zero if all of the body has been submitted
+\brief Streams part of the request body
+\param token The RequestToken received from a call to ILibWebClient_PipelineStreamedRequest()
+\param body The buffer to send
+\param bodyLength Size of the buffer to send
+\param MemoryOwnership Memory ownership flag for the buffer
+\param done Non-zero if all of the body has been submitted
 */
 int ILibWebClient_StreamRequestBody(
-                                     ILibWebClient_RequestToken token, 
-                                     char *body,
-                                     int bodyLength, 
-                                     enum ILibAsyncSocket_MemoryOwnership MemoryOwnership,
-                                     int done
-                                     )
+                                    ILibWebClient_RequestToken token, 
+                                    char *body,
+                                    int bodyLength, 
+                                    enum ILibAsyncSocket_MemoryOwnership MemoryOwnership,
+                                    int done
+                                    )
 {
     struct ILibWebClient_PipelineRequestToken *t = (struct ILibWebClient_PipelineRequestToken*)token;
     struct ILibWebRequest *wr;
@@ -2790,7 +2775,7 @@ int ILibWebClient_StreamRequestBody(
     char hex[16];
     int hexLen;
     int result = 0;
-    
+
     if(t!=NULL && t->wcdo!=NULL)
     {
         wr = (struct ILibWebRequest*)ILibQueue_PeekQueue(t->wcdo->RequestQueue);
@@ -2815,7 +2800,7 @@ int ILibWebClient_StreamRequestBody(
         {
             result = ILibAsyncSocket_Send(t->wcdo->SOCK,"0\r\n\r\n",5,ILibAsyncSocket_MemoryOwnership_STATIC);
         }
-        
+
         if(result==0 && wr->streamedState->OnSendOK != NULL && done==0)
         {
             //
@@ -2828,11 +2813,11 @@ int ILibWebClient_StreamRequestBody(
     return(result);
 }
 /*! \fn void ILibWebClient_Parse_ContentRange(char *contentRange, int *Start, int *End, int *TotalLength)
-    \brief Parses an HTTP/206 Partial Content, Content-Range header, to obtain the range that was returned.
-    \param contentRange The Content-Range header to parse. This can be obtained with a call to \a ILibGetHeaderLine
-    \param[out] Start Pointer to the int value where the Start byte position will be stored
-    \param[out] End Pointer to the int value where the End byte position will be stored
-    \param[out] TotalLength Pointer to the int value where the total available length will be stored
+\brief Parses an HTTP/206 Partial Content, Content-Range header, to obtain the range that was returned.
+\param contentRange The Content-Range header to parse. This can be obtained with a call to \a ILibGetHeaderLine
+\param[out] Start Pointer to the int value where the Start byte position will be stored
+\param[out] End Pointer to the int value where the End byte position will be stored
+\param[out] TotalLength Pointer to the int value where the total available length will be stored
 */
 void ILibWebClient_Parse_ContentRange(char *contentRange, int *Start, int *End, int *TotalLength)
 {
@@ -2842,8 +2827,8 @@ void ILibWebClient_Parse_ContentRange(char *contentRange, int *Start, int *End, 
     *Start = 0;
     *End = 0;
     *TotalLength = 0;
-    
-    
+
+
     pr = ILibParseString(contentRange,0,(int)strlen(contentRange)," ",1);
     //
     // bytes x-y/z
@@ -2916,13 +2901,14 @@ void ILibWebClient_Parse_ContentRange(char *contentRange, int *Start, int *End, 
         *TotalLength = -1;
     }
 }
+
 /*! \fn int ILibWebClient_Parse_Range(char *Range, long *Start, long *Length, long TotalLength)
-    \brief Parses the Range request header, to obtain the requested range
-    \param Range The Range header to parse. This can be obtained with a call to \a ILibGetHeaderLine
-    \param[out] Start Pointer to the long value where the Start byte position will be stored
-    \param[out] Length Pointer to the long value where the desired length will be stored.
-    \param TotalLength The total length of available content.
-    \returns 0 = Success, 1 = Failure
+\brief Parses the Range request header, to obtain the requested range
+\param Range The Range header to parse. This can be obtained with a call to \a ILibGetHeaderLine
+\param[out] Start Pointer to the long value where the Start byte position will be stored
+\param[out] Length Pointer to the long value where the desired length will be stored.
+\param TotalLength The total length of available content.
+\returns 0 = Success, 1 = Failure
 */
 enum ILibWebClient_Range_Result ILibWebClient_Parse_Range(char *Range, long *Start, long *Length, long TotalLength)
 {
@@ -2994,18 +2980,22 @@ enum ILibWebClient_Range_Result ILibWebClient_Parse_Range(char *Range, long *Sta
     }
     return(RetVal);
 }
+
 void ILibWebClient_SetUser(ILibWebClient_RequestManager manager, void *user)
 {
     ((struct ILibWebClientManager*)manager)->user = user;
 }
+
 void* ILibWebClient_GetUser(ILibWebClient_RequestManager manager)
 {
     return(((struct ILibWebClientManager*)manager)->user);
 }
+
 void* ILibWebClient_GetChain(ILibWebClient_RequestManager manager)
 {
     return(((struct ILibWebClientManager*)manager)->Chain);
 }
+
 void ILibWebClient_SetQosForNextRequest(ILibWebClient_RequestManager manager, enum ILibAsyncSocket_QOS_Priority priority)
 {
     struct ILibWebClientManager *rm = (struct ILibWebClientManager*)manager;

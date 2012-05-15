@@ -3294,18 +3294,18 @@ void *DMRCP_CreateControlPoint(void *Chain, void(*A)(struct UPnPDevice*),void(*R
     struct DMRCP_CP *cp = (struct DMRCP_CP*)malloc(sizeof(struct DMRCP_CP));
 
     memset(cp,0,sizeof(struct DMRCP_CP));
-    cp->Destroy = &DMRCP_StopCP;
-    cp->PostSelect = NULL;
-    cp->PreSelect = &DMRCP_CP_PreSelect;
-    cp->DiscoverSink = A;
-    cp->RemoveSink = R;
+    cp->Destroy         = &DMRCP_StopCP;
+    cp->PostSelect      = NULL;
+    cp->PreSelect       = &DMRCP_CP_PreSelect;
+    cp->DiscoverSink    = A;
+    cp->RemoveSink      = R;
 
     sem_init(&(cp->DeviceLock),0,1);
-    cp->WebServer = ILibWebServer_Create(Chain,5,0,&DMRCP_OnSessionSink,cp);
-    cp->SIDTable = ILibInitHashTree();
-    cp->DeviceTable_UDN = ILibInitHashTree();
-    cp->DeviceTable_URI = ILibInitHashTree();
-    cp->DeviceTable_Tokens = ILibInitHashTree();
+    cp->WebServer           = ILibWebServer_Create(Chain,5,0,&DMRCP_OnSessionSink,cp);
+    cp->SIDTable            = ILibInitHashTree();
+    cp->DeviceTable_UDN     = ILibInitHashTree();
+    cp->DeviceTable_URI     = ILibInitHashTree();
+    cp->DeviceTable_Tokens  = ILibInitHashTree();
 #ifdef UPNP_DEBUG
     ILibWebServer_Create(Chain,2,7575,&DMRCP_OnDebugSessionSink,cp);
 #endif

@@ -1,4 +1,29 @@
+#if defined(WIN32)
+#ifndef MICROSTACK_NO_STDAFX
+#include "stdafx.h"
+#endif
+#define _CRTDBG_MAP_ALLOC
+#include <TCHAR.h>
+#endif
+
+#if defined(WINSOCK2)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#elif defined(WINSOCK1)
+#include <winsock.h>
+#include <wininet.h>
+#endif
+
+#if defined(_POSIX)
+#include <pthread.h>
+#endif
+
 #include <stdio.h>
+
+#if defined(WIN32)
+#include <crtdbg.h>
+#endif
+
 #include "TestDMR.h"
 
 void *MicroStackChain;
@@ -104,6 +129,8 @@ void Common__CP_IPAddressListChanged();
 
 #if defined(_POSIX)
 
+#if defined(_POSIX)
+
 void ILib_IPAddressMonitor(void *data)
 {
     int length;
@@ -188,7 +215,7 @@ DWORD WINAPI DMR_CommandLoop(LPVOID args)
     {
         printf( "DMR_Program~# " );
         fgets( cmdLine, 1024, stdin );
-        ret = ( strcmp( cmdline, "exit\n" ) != 0 ) ? 0 : -1;
+        ret = ( strcmp( cmdLine, "exit\n" ) != 0 ) ? 0 : -1;
         UpdateUi();
         /*ret = paraseCmd( cmdLine );*/
     } while ( ret != -1 );
