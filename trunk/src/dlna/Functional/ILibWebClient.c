@@ -48,12 +48,10 @@ void WebClient_TrackUnLock(const char* MethodName, int Occurance, void *data)
 #define SEM_TRACK(x)
 #endif
 
-
 #include "ILibParsers.h"
 #include "ILibWebClient.h"
 #include "ILibWebServer.h"
 #include "ILibAsyncSocket.h"
-
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
 #include <crtdbg.h>
@@ -2260,16 +2258,12 @@ struct ILibWebClient_StreamedRequestState *state,
     }
     if(ILibHasEntry(wcm->DataTable,IPV4Address,IPV4AddressLength)!=0)
     {
-        //
         // Yes it does!
-        //
         wcdo = (struct ILibWebClientDataObject*)ILibGetEntry(wcm->DataTable,IPV4Address,IPV4AddressLength);
         request->requestToken->wcdo = wcdo;
         if(ILibQueue_IsEmpty(wcdo->RequestQueue)!=0)
         {
-            //
             // There are no pending requests however, so we can try to send this right away!
-            //
             ILibQueue_EnQueue(wcdo->RequestQueue,request);
 
             // Take out of Idle State
@@ -2278,18 +2272,14 @@ struct ILibWebClient_StreamedRequestState *state,
             ILibLifeTime_Remove(wcm->timer,wcdo);
             if(wcdo->DisconnectSent==0 && (wcdo->SOCK==NULL || ILibAsyncSocket_IsFree(wcdo->SOCK)))
             {
-                //
                 // If this was in our idleTable, then most likely the select doesn't know about
                 // it, so we need to force it to unblock
-                //
-                ILibQueue_EnQueue(wcm->backlogQueue,wcdo);    
+                ILibQueue_EnQueue(wcm->backlogQueue,wcdo);
                 ForceUnBlock=1;
             }
             else if(wcdo->SOCK!=NULL)
             {
-                //
                 // Socket is still there
-                //
                 if(wcdo->WaitForClose==0)
                 {
                     if(wcm->NextQOSPriority!=ILibAsyncSocket_QOS_NONE)
@@ -2310,17 +2300,13 @@ struct ILibWebClient_StreamedRequestState *state,
         }
         else
         {
-            //
             // There are still pending requests, so lets just queue this up
-            //
             ILibQueue_EnQueue(wcdo->RequestQueue,request);
         }
     }
     else
     {
-        // 
         // There is no previous connection, so we need to set it up
-        //
         wcdo = (struct ILibWebClientDataObject*)malloc(sizeof(struct ILibWebClientDataObject));
         request->requestToken->wcdo = wcdo;
         memset(wcdo,0,sizeof(struct ILibWebClientDataObject));
