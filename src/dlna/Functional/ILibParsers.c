@@ -1043,7 +1043,7 @@ void ILibStartChain(void *Chain)
         //
         // After calling the Destroy, we free the link
         //
-        Safefree(c->Object);
+        freesafe(c->Object);
         c = c->Next;
     }
 
@@ -5971,7 +5971,7 @@ time_t ILibTime_Parse(char *timeString)
     return(retval);
 }
 
-void Safefree(void *p)
+void freesafe(void *p)
 {
     if (p != NULL)
     {

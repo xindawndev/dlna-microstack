@@ -3044,7 +3044,7 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
               continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_SEND_socks[i]);
       }
-      Safefree(MediaServer_Object->NOTIFY_SEND_socks);
+      freesafe(MediaServer_Object->NOTIFY_SEND_socks);
       
       for(i=0;i<MediaServer_Object->AddressListLength;++i)
       {
@@ -3052,7 +3052,7 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
               continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_RECEIVE_socks[i]);
       }
-      Safefree(MediaServer_Object->NOTIFY_RECEIVE_socks);
+      freesafe(MediaServer_Object->NOTIFY_RECEIVE_socks);
       
       
       //

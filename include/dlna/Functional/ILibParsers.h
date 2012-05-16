@@ -943,6 +943,6 @@ void* dbg_malloc(int sz);
 void dbg_free(void* ptr);
 int dbg_GetCount();
 
-void Safefree(void * p);
+void freesafe(void * p);
 /* \} */   // End of ILibParser Group
 #endif

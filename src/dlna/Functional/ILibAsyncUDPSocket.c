@@ -141,7 +141,7 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
 #else
             close(newSocket);
 #endif
-            Safefree(data);
+            freesafe(data);
             return NULL;
         }
     }
@@ -159,7 +159,7 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
 #else
         close(newSocket);
 #endif
-        Safefree(data);
+        freesafe(data);
         return(NULL);
     }
 
