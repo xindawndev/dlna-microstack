@@ -5427,7 +5427,6 @@ void DMR_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
         HeadPtr = &(dataObject->HeadSubscriberPtr_RenderingControl);
     }
 
-
     if(*HeadPtr!=NULL)
     {
         NewSubscriber = *HeadPtr;
