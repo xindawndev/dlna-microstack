@@ -94,13 +94,13 @@ void (*DMRCP_EventCallback_ConnectionManager_SinkProtocolInfo)(struct UPnPServic
 void (*DMRCP_EventCallback_ConnectionManager_CurrentConnectionIDs)(struct UPnPService* Service,char* value);
 void (*DMRCP_EventCallback_RenderingControl_LastChange)(struct UPnPService* Service,char* value);
 
-
 struct InvokeStruct
 {
     struct UPnPService *Service;
     void *CallbackPtr;
     void *User;
 };
+
 struct UPnPServiceInfo
 {
     char* serviceType;
@@ -110,24 +110,24 @@ struct UPnPServiceInfo
     char* serviceId;
     struct UPnPServiceInfo *Next;
 };
+
 struct DMRCP__Stack
 {
     void *data;
     struct DMRCP__Stack *next;
 };
 
-
 void DMRCP_SetUser(void *token, void *user)
 {
     ((struct DMRCP_CP*)token)->User = user;
 }
+
 void* DMRCP_GetUser(void *token)
 {
     return(((struct DMRCP_CP*)token)->User);
 }
+
 void DMRCP_CP_ProcessDeviceRemoval(struct DMRCP_CP* CP, struct UPnPDevice *device);
-
-
 
 void DMRCP_DestructUPnPService(struct UPnPService *service)
 {
@@ -399,6 +399,7 @@ struct UPnPDevice* DMRCP_GetDeviceAtUDN(void *v_CP,char* UDN)
     ILibHashTree_UnLock(CP->DeviceTable_UDN);
     return(RetVal);
 }
+
 struct packetheader *DMRCP_BuildPacket(char* IP, int Port, char* Path, char* cmd)
 {
     struct packetheader *RetVal = ILibCreateEmptyPacket();
@@ -702,9 +703,7 @@ int DMRCP_GetErrorCode(char *buffer, int length)
     return(RetVal);
 }
 
-//
 // Internal method to parse the SCPD document
-//
 void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
 {
     struct UPnPAction *action;
@@ -724,9 +723,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
     rootXML = xml = ILibParseXML(buffer,0,length);
     if(ILibProcessXMLNodeList(xml)!=0)
     {
-        //
         // The XML Document was not well formed
-        //
         root->SCPDError=UPNP_ERROR_SCPD_NOT_WELL_FORMED;
         ILibDestructXMLNodeList(rootXML);
         return;
@@ -739,9 +736,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
     xml = xml->Next;
     while(xml!=NULL)
     {
-        //
         // Iterate all the actions in the actionList element
-        //
         if(xml->NameLength==10 && memcmp(xml->Name,"actionList",10)==0)
         {
             xml = xml->Next;
@@ -750,9 +745,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
             {
                 if(xml->NameLength==6 && memcmp(xml->Name,"action",6)==0)
                 {
-                    //
                     // Action element
-                    //
                     action = (struct UPnPAction*)malloc(sizeof(struct UPnPAction));
                     action->Name = NULL;
                     action->Next = service->Actions;
@@ -791,9 +784,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                 }
             }
         }
-        //
         // Iterate all the StateVariables in the state table
-        //
         if(xml->NameLength==17 && memcmp(xml->Name,"serviceStateTable",17)==0)
         {
             if(xml->Next->StartTag!=0)
@@ -804,9 +795,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                 {
                     if(xml->NameLength==13 && memcmp(xml->Name,"stateVariable",13)==0)
                     {
-                        //
                         // Initialize a new state variable
-                        //
                         sv = (struct UPnPStateVariable*)malloc(sizeof(struct UPnPStateVariable));
                         sv->AllowedValues = NULL;
                         sv->NumAllowedValues = 0;
@@ -824,9 +813,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                         {
                             if(xml->NameLength==4 && memcmp(xml->Name,"name",4)==0)
                             {
-                                //
                                 // Populate the name
-                                //
                                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                                 sv->Name = (char*)malloc(1+tempStringLength);
                                 memcpy(sv->Name,tempString,tempStringLength);
@@ -834,9 +821,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                             }
                             if(xml->NameLength==16 && memcmp(xml->Name,"allowedValueList",16)==0)
                             {
-                                //
                                 // This state variable defines an allowed value list
-                                //
                                 if(xml->Next->StartTag!=0)
                                 {
                                     avs = NULL;
@@ -844,9 +829,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                                     flg4 = 0;
                                     while(flg4==0)
                                     {
-                                        //
                                         // Iterate through all the allowed values, and reference them
-                                        //
                                         if(xml->NameLength==12 && memcmp(xml->Name,"allowedValue",12)==0)
                                         {
                                             av = (struct UPnPAllowedValue*)malloc(sizeof(struct UPnPAllowedValue));
@@ -892,9 +875,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                             }
                             if(xml->NameLength==17 && memcmp(xml->Name,"allowedValueRange",17)==0)
                             {
-                                //
                                 // The state variable defines a range
-                                //
                                 if(xml->Next->StartTag!=0)
                                 {
                                     xml = xml->Next;
@@ -905,9 +886,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                                         {
                                             if(memcmp(xml->Name,"minimum",7)==0)
                                             {
-                                                //
                                                 // Set the minimum range
-                                                //
                                                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                                                 sv->Min = (char*)malloc(1+tempStringLength);
                                                 memcpy(sv->Min,tempString,tempStringLength);
@@ -915,9 +894,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                                             }
                                             else if(memcmp(xml->Name,"maximum",7)==0)
                                             {
-                                                //
                                                 // Set the maximum range
-                                                //
                                                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                                                 sv->Max = (char*)malloc(1+tempStringLength);
                                                 memcpy(sv->Max,tempString,tempStringLength);
@@ -926,9 +903,7 @@ void DMRCP_ProcessSCPD(char* buffer, int length, struct UPnPService *service)
                                         }
                                         if(xml->NameLength==4 && memcmp(xml->Name,"step",4)==0)
                                         {
-                                            //
                                             // Set the stepping
-                                            //
                                             tempStringLength = ILibReadInnerXML(xml,&tempString);
                                             sv->Step = (char*)malloc(1+tempStringLength);
                                             memcpy(sv->Step,tempString,tempStringLength);
@@ -1028,32 +1003,24 @@ void DMRCP_FinishProcessingDevice(struct DMRCP_CP* CP, struct UPnPDevice *RootDe
         RetDevice = DMRCP_GetDevice1(RootDevice,i++);
         if(RetDevice!=NULL)
         {
-            //
             // Set Reserved to non-zero to indicate that we are passing
             // this instance up the stack to the app layer above. Add a reference
             // to the device while we're at it.
-            //
             RetDevice->Reserved=1;
             DMRCP_AddRef(RetDevice);
             if(CP->DiscoverSink!=NULL)
             {
-                //
                 // Notify the app layer above
-                //
                 CP->DiscoverSink(RetDevice);
             }
         }
     }while(RetDevice!=NULL);
-    //
     // Set a timed callback for the refresh cycle of the device. If the
     // device doesn't refresh by then, we'll remove this device.
-    //
     ILibLifeTime_Add(CP->LifeTimeMonitor,RootDevice,Timeout,(void*)&DMRCP_ExpiredDevice,NULL);
 }
 
-//
 // Internal HTTP Sink for fetching the SCPD document
-//
 void DMRCP_SCPD_Sink(
                      void *WebReaderToken,
                      int IsInterrupt,
@@ -1071,48 +1038,36 @@ struct packetheader *header,
     struct DMRCP_CP *CP = service->Parent->CP;
 
 
-    //
     // header==NULL if there was an error connecting to the device
     // StatusCode!=200 if there was an HTTP error in fetching the SCPD
     // done!=0 when the GET is complete
-    //
     if(!(header==NULL || !ILibWebClientIsStatusOk(header->StatusCode)) && done!=0)
     {
         DMRCP_ProcessSCPD(buffer,EndPointer, service);
 
-        //
         // Fetch the root device
-        //
         device = service->Parent;
         while(device->Parent!=NULL)
         {
             device = device->Parent;
         }
-        //
         // Decrement the counter indicating how many
         // SCPD documents are left to fetch
-        //
         --device->SCPDLeft;
 
-        //
         // Check to see that we have all the SCPD documents we were
         // looking for
-        //
         if(device->SCPDLeft==0)
         {
             if(device->SCPDError==0)
             {
-                //
                 // No errors, complete processing
-                //
                 DMRCP_FinishProcessingDevice(CP,device);
             }
             else if(IsInterrupt==0)
             {
-                //
                 // Errors occured, so free all the resources, of this 
                 // stale device
-                //
                 DMRCP_CP_ProcessDeviceRemoval(CP,device);
                 DMRCP_DestructUPnPDevice(device);
             }
@@ -1120,36 +1075,26 @@ struct packetheader *header,
     }
     else
     {
-        //
         // Errors happened while trying to fetch the SCPD
-        //
         if(done!=0 && (header==NULL || !ILibWebClientIsStatusOk(header->StatusCode)))
         {
-            //
             // Get the root device
-            //
             device = service->Parent;
             while(device->Parent!=NULL)
             {
                 device = device->Parent;
             }
 
-            //
             // Decrement the counter indicating how many
             // SCPD documents are left to fetch
-            //
             --device->SCPDLeft;
 
-            //
             // Set the flag indicating that an error has occured
-            //
             device->SCPDError=1;
             if(device->SCPDLeft==0 && IsInterrupt==0)
             {
-                //
                 // If all the SCPD requests have been attempted, free
                 // all the resources of this stale device
-                //
                 DMRCP_CP_ProcessDeviceRemoval(CP,device);
                 DMRCP_DestructUPnPDevice(device);
             }
@@ -1204,23 +1149,17 @@ void DMRCP_SCPD_Fetch(struct UPnPDevice *device)
 
     while(e_Device!=NULL)
     {
-        //
         // We need to recursively call this on all the embedded devices,
         // to insure all of those services are accounted for
-        //
         DMRCP_SCPD_Fetch(e_Device);
         e_Device = e_Device->Next;
     }
 
-    //
     // Iterate through all of the services contained in this device
-    //
     s = device->Services;
     while(s!=NULL)
     {
-        //
         // Parse the SCPD URL, and then build the request packet
-        //
         ILibParseUri(s->SCPDURL,&IP,&Port,&Path);
         DEBUGSTATEMENT(printf("SCPD: %s Port: %d Path: %s\r\n",IP,Port,Path));
         p = DMRCP_BuildPacket(IP,Port,Path,"GET");
@@ -1230,9 +1169,7 @@ void DMRCP_SCPD_Fetch(struct UPnPDevice *device)
         addr.sin_addr.s_addr = inet_addr(IP);
         addr.sin_port = htons(Port);
 
-        //
         // Actually make the HTTP Request
-        //
         ILibWebClient_PipelineRequest(
             ((struct DMRCP_CP*)device->CP)->HTTP,
             &addr,
@@ -1241,9 +1178,7 @@ void DMRCP_SCPD_Fetch(struct UPnPDevice *device)
             device,
             s);
 
-        //
         // Free the resources from our ILibParseURI() method call
-        //
         free(IP);
         free(Path);
         s = s->Next;
@@ -1399,7 +1334,6 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
 
     device->CustomTagTable = ILibInitHashTree();
 
-
     device->MaxVersion=1;
     device->CP = v_CP;
     device->CacheTime = Timeout;
@@ -1431,19 +1365,15 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
         {
             if(xml->Next->StartTag!=0)
             {
-                //
                 // Iterate through all the device elements contained in the
                 // deviceList element
-                //
                 xml = xml->Next;
                 flg2 = 0;
                 while(flg2==0)
                 {
                     if(xml->NameLength==6 && memcmp(xml->Name,"device",6)==0)
                     {
-                        //
                         // If this device contains other devices, then we can recursively call ourselves
-                        //
                         tempDevice = DMRCP_ProcessDeviceXML_device(xml,v_CP,BaseURL,Timeout, RecvAddr);
                         tempDevice->Parent = device;
                         tempDevice->Next = device->EmbeddedDevices;
@@ -1463,9 +1393,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
         } else
             if(xml->NameLength==3 && memcmp(xml->Name,"UDN",3)==0)
             {
-                //
                 // Copy the UDN out of the description document
-                //
                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                 if(tempStringLength>5)
                 {
@@ -1481,9 +1409,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
             } else
                 if(xml->NameLength==10 && memcmp(xml->Name,"deviceType",10) == 0)
                 {
-                    //
                     // Copy the device type out of the description document
-                    //
                     tempStringLength = ILibReadInnerXML(xml,&tempString);
 
                     device->DeviceType = (char*)malloc(tempStringLength+1);
@@ -1492,9 +1418,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                 } else
                     if(xml->NameLength==12 && memcmp(xml->Name,"friendlyName",12) == 0)
                     {
-                        //
                         // Copy the friendly name out of the description document
-                        //
                         tempStringLength = ILibReadInnerXML(xml,&tempString);
                         device->FriendlyName = (char*)malloc(1+tempStringLength);
                         memcpy(device->FriendlyName,tempString,tempStringLength);
@@ -1502,9 +1426,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                     } else
                         if(xml->NameLength==12 && memcmp(xml->Name,"manufacturer",12) == 0)
                         {
-                            //
                             // Copy the Manufacturer from the description document
-                            //
                             tempStringLength = ILibReadInnerXML(xml,&tempString);
                             device->ManufacturerName = (char*)malloc(1+tempStringLength);
                             memcpy(device->ManufacturerName,tempString,tempStringLength);
@@ -1512,9 +1434,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                         } else
                             if(xml->NameLength==15 && memcmp(xml->Name,"manufacturerURL",15) == 0)
                             {
-                                //
                                 // Copy the Manufacturer's URL from the description document
-                                //
                                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                                 device->ManufacturerURL = (char*)malloc(1+tempStringLength);
                                 memcpy(device->ManufacturerURL,tempString,tempStringLength);
@@ -1522,9 +1442,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                             } else
                                 if(xml->NameLength==16 && memcmp(xml->Name,"modelDescription",16) == 0)
                                 {
-                                    //
                                     // Copy the model meta data from the description document
-                                    //
                                     tempStringLength = ILibReadInnerXML(xml,&tempString);
                                     device->ModelDescription = (char*)malloc(1+tempStringLength);
                                     memcpy(device->ModelDescription,tempString,tempStringLength);
@@ -1532,9 +1450,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                                 } else
                                     if(xml->NameLength==9 && memcmp(xml->Name,"modelName",9) == 0)
                                     {
-                                        //
                                         // Copy the model meta data from the description document
-                                        //
                                         tempStringLength = ILibReadInnerXML(xml,&tempString);
                                         device->ModelName = (char*)malloc(1+tempStringLength);
                                         memcpy(device->ModelName,tempString,tempStringLength);
@@ -1542,9 +1458,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                                     } else
                                         if(xml->NameLength==11 && memcmp(xml->Name,"modelNumber",11) == 0)
                                         {
-                                            //
                                             // Copy the model meta data from the description document
-                                            //
                                             tempStringLength = ILibReadInnerXML(xml,&tempString);
                                             device->ModelNumber = (char*)malloc(1+tempStringLength);
                                             memcpy(device->ModelNumber,tempString,tempStringLength);
@@ -1552,9 +1466,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                                         } else
                                             if(xml->NameLength==8 && memcmp(xml->Name,"modelURL",8) == 0)
                                             {
-                                                //
                                                 // Copy the model meta data from the description document
-                                                //
                                                 tempStringLength = ILibReadInnerXML(xml,&tempString);
                                                 device->ModelURL = (char*)malloc(1+tempStringLength);
                                                 memcpy(device->ModelURL,tempString,tempStringLength);
@@ -1566,9 +1478,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                                                 } else
                                                     if(xml->NameLength==15 && memcmp(xml->Name,"presentationURL",15) == 0)
                                                     {
-                                                        //
                                                         // Copy the presentation URL from the description document
-                                                        //
                                                         tempStringLength = ILibReadInnerXML(xml,&tempString);
                                                         tempString[tempStringLength] = 0;
                                                         tpr = ILibParseString(tempString,0,tempStringLength,"://",3);
@@ -1634,9 +1544,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
 
                                                                 if(xml->NameLength==11 && memcmp(xml->Name,"serviceList",11)==0)
                                                                 {
-                                                                    //
                                                                     // Iterate through all the services contained in the serviceList element
-                                                                    //
                                                                     tempNode = xml;
                                                                     xml = xml->Next;
                                                                     while(xml!=NULL)
@@ -1674,9 +1582,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
                                                                             flg = 0;
                                                                             while(flg==0)
                                                                             {
-                                                                                //
                                                                                 // Fetch the URIs associated with this service
-                                                                                //
                                                                                 if(xml->NameLength==11 && memcmp(xml->Name,"serviceType",11)==0)
                                                                                 {
                                                                                     ServiceTypeLength = ILibReadInnerXML(xml,&ServiceType);
@@ -1819,9 +1725,7 @@ struct UPnPDevice* DMRCP_ProcessDeviceXML_device(struct ILibXMLNode *xml, void *
     return(device);
 }
 
-//
 // Internal method used to parse the Device Description XML Document
-//
 int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* LocationURL, int RecvAddr, int Timeout)
 {
     struct UPnPDevice *RootDevice = NULL;
@@ -1837,21 +1741,17 @@ int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* Locati
     char* tempString;
     int tempStringLength;
 
-    //
-    // Parse the XML, check that it's wellformed, and build the namespace lookup table
-    //
+    // Parse the XML, check that it's well formed, and build the namespace lookup table
     rootXML = ILibParseXML(buffer,0,BufferSize);
-    if(ILibProcessXMLNodeList(rootXML)!=0)
+    if(ILibProcessXMLNodeList(rootXML) != 0)
     {
         ILibDestructXMLNodeList(rootXML);
         return(1);
     }
     ILibXML_BuildNamespaceLookupTable(rootXML);
 
-    //
     // We need to figure out if this particular device uses
     // relative URLs using the URLBase element.
-    //
     xml = rootXML;
     xml = xml->Next;
     while(xml!=NULL)
@@ -1877,11 +1777,9 @@ int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* Locati
         xml = xml->Peer;
     }
 
-    //
     // If the URLBase was not specified, then we need force the
     // base url to be that of the base path that we used to fetch
     // the description document from.
-    //
 
     if(BaseURL==NULL)
     {
@@ -1895,10 +1793,8 @@ int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* Locati
 
     DEBUGSTATEMENT(printf("BaseURL: %s\r\n",BaseURL));
 
-    //
     // Now that we have the base path squared away, we can actually parse this thing!
     // Let's start by looking for the device element
-    //
     xml = rootXML;
     xml = xml->Next;
     while(xml!=NULL && xml->NameLength!=6 && memcmp(xml->Name,"device",6)!=0)
@@ -1913,10 +1809,8 @@ int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* Locati
         return(1);
     }
 
-    //
     // Process the Device Element. If the device element contains other devices,
     // it will be recursively called, so we don't need to worry
-    //
     RootDevice = DMRCP_ProcessDeviceXML_device(xml,v_CP,BaseURL,Timeout,RecvAddr);
     free(BaseURL);
     ILibDestructXMLNodeList(rootXML);
@@ -1926,35 +1820,26 @@ int DMRCP_ProcessDeviceXML(void *v_CP,char* buffer, int BufferSize, char* Locati
     RootDevice->LocationURL = (char*)malloc(strlen(LocationURL)+1);
     sprintf(RootDevice->LocationURL,"%s",LocationURL);
 
-    //
     // Now that we processed the device XML document, we need to fetch
     // and parse the service description documents.
-    //
     DMRCP_ProcessDevice(v_CP,RootDevice);
     RootDevice->SCPDLeft = 0;
     DMRCP_CalculateSCPD_FetchCount(RootDevice);
     if(RootDevice->SCPDLeft==0)
     {
-        //
         // If this device doesn't contain any services, than we don't
         // need to bother with fetching any SCPD documents
-        //
         DMRCP_FinishProcessingDevice(v_CP,RootDevice);
     }
     else
     {
-        //
         // Fetch the SCPD documents
-        //
         DMRCP_SCPD_Fetch(RootDevice);
     }
     return(0);
 }
 
-
-//
 // The internal sink for obtaining the Device Description Document
-//
 void DMRCP_HTTP_Sink_DeviceDescription(
                                        void *WebReaderToken,
                                        int IsInterrupt,
@@ -2136,21 +2021,15 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
         DEBUGSTATEMENT(printf("BinaryLight Hello\r\n"));
         DEBUGSTATEMENT(printf("LocationURL: %s\r\n",LocationURL));
 
-        //
         // Lock the table
-        //
         ILibHashTree_Lock(CP->DeviceTable_UDN);
 
-        //
         // We have never seen this location URL, nor have we ever seen this UDN before, 
         // so let's try and find it
-        //
-        if(ILibHasEntry(CP->DeviceTable_URI,LocationURL,(int)strlen(LocationURL))==0 && ILibHasEntry(CP->DeviceTable_UDN,UDN,(int)strlen(UDN))==0)
+        if(ILibHasEntry(CP->DeviceTable_URI, LocationURL, (int)strlen(LocationURL)) ==0 && ILibHasEntry(CP->DeviceTable_UDN, UDN, (int)strlen(UDN)) == 0)
         {
-            //
             // Parse the location uri of the device description document,
             // and build the request packet
-            //
             ILibParseUri(LocationURL,&IP,&Port,&Path);
             DEBUGSTATEMENT(printf("IP: %s Port: %d Path: %s\r\n",IP,Port,Path));
             p = DMRCP_BuildPacket(IP,Port,Path,"GET");
@@ -2160,7 +2039,7 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
             addr.sin_addr.s_addr = inet_addr(IP);
             addr.sin_port = htons(Port);
 
-            buffer = (char*)malloc((int)strlen(LocationURL)+1);
+            buffer = (char*)malloc((int)strlen(LocationURL) + 1);
             strcpy(buffer,LocationURL);
 
             customData = (struct CustomUserData*)malloc(sizeof(struct CustomUserData));
@@ -2172,17 +2051,12 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
             customData->UDN = (char*)malloc(strlen(UDN)+1);
             strcpy(customData->UDN,UDN);
 
-            //
             // Add these items into our table, so we don't try to find it multiple times
-            //
             ILibAddEntry(CP->DeviceTable_URI,LocationURL,(int)strlen(LocationURL),customData->UDN);
             ILibAddEntry(CP->DeviceTable_UDN,UDN,(int)strlen(UDN),NULL);
 
-            //
             // Make the HTTP request to fetch the Device Description Document
-            //
             RT = ILibWebClient_PipelineRequest(
-
                 ((struct DMRCP_CP*)cp)->HTTP,
                 &addr,
                 p,
@@ -2197,27 +2071,20 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
         }
         else
         {
-            //
-            // We have seen this device before, so thse packets are
+            // We have seen this device before, so these packets are
             // Periodic Notify Packets
 
-            //
             // Fetch the device, this packet is advertising
-            //
             device = (struct UPnPDevice*)ILibGetEntry(CP->DeviceTable_UDN,UDN,(int)strlen(UDN));
             if(device!=NULL && device->ReservedID==0 && m==UPnPSSDP_NOTIFY)
             {
-                //
                 // Get the root device
-                //
                 while(device->Parent!=NULL)
                 {
                     device = device->Parent;
                 }
 
-                //
                 // Is this device on the same IP Address?
-                //
                 if(strcmp(device->LocationURL,LocationURL)==0)
                 {
                     //Extend LifetimeMonitor duration
@@ -2228,11 +2095,8 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
                 }
                 else
                 {
-                    //
                     // Same device, different Interface
-                    // Wait up to 7 seconds to see if the old interface is still
-                    // valid.
-                    //
+                    // Wait up to 7 seconds to see if the old interface is still valid.
                     gettimeofday(&t,NULL);
                     if(t.tv_sec-device->Reserved2>10)
                     {
@@ -2262,30 +2126,21 @@ void DMRCP_SSDP_Sink(void *sender, char* UDN, int Alive, char* LocationURL, int 
         }
         device = (struct UPnPDevice*)ILibGetEntry(CP->DeviceTable_UDN,UDN,(int)strlen(UDN));
 
-        //
         // Find the device that is going away
-        //
         ILibHashTree_UnLock(CP->DeviceTable_UDN);
-
 
         if(device!=NULL)
         {
-            //
             // Get the root device
-            //
             while(device->Parent!=NULL)
             {
                 device = device->Parent;
             }
-            //
             // Remove the timed event, checking the refreshing of notify packets
-            //
             ILibLifeTime_Remove(((struct DMRCP_CP*)cp)->LifeTimeMonitor,device);
             DMRCP_CP_ProcessDeviceRemoval(CP,device);
-            //
             // If the app above subscribed to events, there will be extra references
             // that we can delete, otherwise, the device ain't ever going away
-            //
             i = device->ReferenceTiedToEvents;
             while(i!=0)
             {
@@ -2364,6 +2219,7 @@ void DMRCP_AVTransport_EventSink(char* buffer, int bufferlength, struct UPnPServ
 
     ILibDestructXMLNodeList(rootXML);
 }
+
 void DMRCP_ConnectionManager_EventSink(char* buffer, int bufferlength, struct UPnPService *service)
 {
     struct ILibXMLNode *xml,*rootXML;
@@ -2521,11 +2377,7 @@ void DMRCP_RenderingControl_EventSink(char* buffer, int bufferlength, struct UPn
     ILibDestructXMLNodeList(rootXML);
 }
 
-
-
-//
 // Internal HTTP Sink, called when an event is delivered
-//
 void DMRCP_OnEventSink(
 struct ILibWebServer_Session *sender,
     int InterruptFlag,
@@ -2542,7 +2394,6 @@ struct packetheader *header,
     struct packetheader_field_node *field = NULL;
     struct packetheader *resp;
 
-
     char *txt;
     if(header!=NULL && sender->User3==NULL && done==0)
     {
@@ -2552,23 +2403,18 @@ struct packetheader *header,
         {
             if(strcasecmp(txt,"100-Continue")==0)
             {
-                //
                 // Expect Continue
-                //
                 ILibWebServer_Send_Raw(sender,"HTTP/1.1 100 Continue\r\n\r\n",25,ILibAsyncSocket_MemoryOwnership_STATIC,0);
             }
             else
             {
-                //
                 // Don't understand
-                //
                 ILibWebServer_Send_Raw(sender,"HTTP/1.1 417 Expectation Failed\r\n\r\n",35,ILibAsyncSocket_MemoryOwnership_STATIC,1);
                 ILibWebServer_DisconnectSession(sender);
                 return;
             }
         }
     }
-
 
     if(done!=0)
     {
@@ -2586,16 +2432,12 @@ struct packetheader *header,
             {
                 if(strncasecmp(field->Field,"SID",3)==0)
                 {
-                    //
                     // We need to determine who this event is for, by looking
                     // at the subscription id
-                    //
                     sid = (char*)malloc(field->FieldDataLength+1);
                     sprintf(sid,"%s",field->FieldData);
 
-                    //
                     // Do we know about this SID?
-                    //
                     value = ILibGetEntry(((struct DMRCP_CP*)sender->User)->SIDTable,field->FieldData,field->FieldDataLength);
                     break;
                 }
@@ -2635,10 +2477,8 @@ struct packetheader *header,
     }
 }
 
-//
 // Internal sink called when our attempt to unregister for events
 // has gone through
-//
 void DMRCP_OnUnSubscribeSink(
                              void *WebReaderToken,
                              int IsInterrupt,
@@ -2668,11 +2508,8 @@ struct packetheader *header,
     }
 }
 
-
-//
 // Internal sink called when our attempt to register for events
 // has gone through
-//
 void DMRCP_OnSubscribeSink(
                            void *WebReaderToken,
                            int IsInterrupt,
@@ -2704,21 +2541,15 @@ struct packetheader *header,
                 {
                     if(field->FieldLength==3 && strncasecmp(field->Field,"SID",3)==0 && s->SubscriptionID==NULL)
                     {
-                        //
                         // Determine what subscription id was assigned to us
-                        //
                         s->SubscriptionID = (char*)malloc(1+field->FieldDataLength);
                         strcpy(s->SubscriptionID,field->FieldData);
-                        //
                         // Make a mapping from this SID to our service, to make our lives easier
-                        //
                         ILibAddEntry(cp->SIDTable,field->FieldData,field->FieldDataLength,s);
                     } else
                         if(field->FieldLength==7 && strncasecmp(field->Field,"TIMEOUT",7)==0)
                         {
-                            //
                             // Determine what refresh cycle the device wants us to enforce
-                            //
                             p = ILibParseString(field->FieldData,0,field->FieldDataLength,"-",1);
                             p->LastResult->data[p->LastResult->datalength] = '\0';
                             DMRCP_AddRef(s->Parent);
@@ -2736,9 +2567,7 @@ struct packetheader *header,
     }
 }
 
-//
 // Internal Method used to renew our event subscription with a device
-//
 void DMRCP_Renew(void *state)
 {
     struct UPnPService *service = (struct UPnPService*)state;
@@ -2750,9 +2579,7 @@ void DMRCP_Renew(void *state)
     char* TempString;
     struct sockaddr_in destaddr;
 
-    //
     // Determine where this renewal should go
-    //
     ILibParseUri(service->SubscriptionURL,&IP,&Port,&Path);
     p = ILibCreateEmptyPacket();
     ILibSetVersion(p,"1.1",3);
@@ -2774,9 +2601,7 @@ void DMRCP_Renew(void *state)
     destaddr.sin_addr.s_addr = inet_addr(IP);
     destaddr.sin_port = htons(Port);
 
-    //
     // Try to refresh our subscription
-    //
     ILibWebClient_SetQosForNextRequest(((struct DMRCP_CP*)service->Parent->CP)->HTTP,DMRCP_InvocationPriorityLevel);
     ILibWebClient_PipelineRequest(
         ((struct DMRCP_CP*)service->Parent->CP)->HTTP,
@@ -3006,7 +2831,6 @@ void DMRCP_OnSessionSink(struct ILibWebServer_Session *session, void *User)
     session->OnReceive = &DMRCP_OnEventSink;
     session->User = User;
 }
-
 
 #ifdef UPNP_DEBUG
 
@@ -7987,7 +7811,6 @@ void DMRCP_Invoke_AVTransport_Play(struct UPnPService *service,void (*CallbackPt
         return;
     }
 
-
     Speed = (char*)malloc(1+ILibXmlEscapeLength(unescaped_Speed));
     ILibXmlEscape(Speed,unescaped_Speed);
     buffer = (char*)malloc((int)strlen(service->ServiceType)+(int)strlen(Speed)+290);
@@ -8434,7 +8257,6 @@ void DMRCP_Invoke_ConnectionManager_GetCurrentConnectionIDs(struct UPnPService *
         free(invoke_data);
         return;
     }
-
 
     buffer = (char*)malloc((int)strlen(service->ServiceType)+278);
     SoapBodyTemplate = "%sGetCurrentConnectionIDs xmlns:u=\"%s\"></u:GetCurrentConnectionIDs%s";

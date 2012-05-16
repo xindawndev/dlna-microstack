@@ -18,19 +18,12 @@ struct packetheader;
 typedef void* DMR_MicroStackToken;
 typedef void* DMR_SessionToken;
 
-
-
-
 /* Complex Type Parsers */
-
 
 /* Complex Type Serializers */
 
-
-
 /* DMR_ Stack Management */
 DMR_MicroStackToken DMR_CreateMicroStack(void *Chain, const char* FriendlyName,const char* UDN, const char* SerialNumber, const int NotifyCycleSeconds, const unsigned short PortNum, int open2thirdparty);
-
 
 void DMR_IPAddressListChanged(DMR_MicroStackToken MicroStackToken);
 int DMR_GetLocalPortNumber(DMR_SessionToken token);

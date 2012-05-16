@@ -90,13 +90,14 @@ unsigned short RCS_GetMaxVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Max));        
+            return((unsigned short)atoi(SV->Max));
         }
         SV = SV->Next;
     }
 
     return(0);
 }
+
 unsigned short RCS_GetMinVolume(struct AVRenderer *r)
 {
     struct UPnPStateVariable *SV = r->RCS->Variables;
@@ -105,7 +106,7 @@ unsigned short RCS_GetMinVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Min));        
+            return((unsigned short)atoi(SV->Min));
         }
         SV = SV->Next;
     }
@@ -1926,7 +1927,6 @@ void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
 
     DMRCP_Invoke_ConnectionManager_GetProtocolInfo(AVR->CMS, &UPnPResponseSink_ConnectionManager_GetProtocolInfo,AVR);
 
-
     /*
     MRCP_Invoke_RenderingControl_GetHorizontalKeystone(tempService, &UPnPResponseSink_RenderingControl_GetHorizontalKeystone,NULL,250);
     MRCP_Invoke_RenderingControl_GetVolume(tempService, &UPnPResponseSink_RenderingControl_GetVolume,NULL,250,"Sample String");
@@ -2076,11 +2076,11 @@ void RCP_IPAddressChanged(void *RCP)
 void *CreateRendererCP(void *Chain)
 {
     /* Event callback function registration code */
-    DMRCP_EventCallback_RenderingControl_LastChange=&UPnPEventSink_RenderingControl_LastChange;
-    DMRCP_EventCallback_ConnectionManager_SourceProtocolInfo=&UPnPEventSink_ConnectionManager_SourceProtocolInfo;
-    DMRCP_EventCallback_ConnectionManager_SinkProtocolInfo=&UPnPEventSink_ConnectionManager_SinkProtocolInfo;
-    DMRCP_EventCallback_ConnectionManager_CurrentConnectionIDs=&UPnPEventSink_ConnectionManager_CurrentConnectionIDs;
-    DMRCP_EventCallback_AVTransport_LastChange=&UPnPEventSink_AVTransport_LastChange;
+    DMRCP_EventCallback_RenderingControl_LastChange             = &UPnPEventSink_RenderingControl_LastChange;
+    DMRCP_EventCallback_ConnectionManager_SourceProtocolInfo    = &UPnPEventSink_ConnectionManager_SourceProtocolInfo;
+    DMRCP_EventCallback_ConnectionManager_SinkProtocolInfo      = &UPnPEventSink_ConnectionManager_SinkProtocolInfo;
+    DMRCP_EventCallback_ConnectionManager_CurrentConnectionIDs  = &UPnPEventSink_ConnectionManager_CurrentConnectionIDs;
+    DMRCP_EventCallback_AVTransport_LastChange                  = &UPnPEventSink_AVTransport_LastChange;
 
     UPnP_CP = (struct AVR_Object*)malloc(sizeof(struct AVR_Object));
     UPnP_CP->CP = DMRCP_CreateControlPoint(Chain,&UPnPDeviceDiscoverSink,&UPnPDeviceRemoveSink);

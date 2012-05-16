@@ -2348,9 +2348,7 @@ struct HashNode* ILibFindEntry(void *hashtree, void *key, int keylength, int cre
 */
 int ILibHasEntry(void *hashtree, char* key, int keylength)
 {
-    //
     // This can be duplicated by calling Find entry, but setting the create flag to false
-    //
     return(ILibFindEntry(hashtree,key,keylength,0)!=NULL?1:0);
 }
 
