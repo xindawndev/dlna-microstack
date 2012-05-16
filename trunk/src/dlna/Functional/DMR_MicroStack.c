@@ -1494,10 +1494,6 @@ DMR__ActionHandler_RenderingControl_SetMute DMR_FP_RenderingControl_SetMute;
 */
 DMR__ActionHandler_RenderingControl_SetVolume DMR_FP_RenderingControl_SetVolume;
 
-
-
-
-
 struct DMR_DataObject;
 
 //
@@ -1751,16 +1747,16 @@ void DMR_Init(struct DMR_DataObject *state, void *chain, const int NotifyCycleSe
 void DMR_PostMX_Destroy(void *object)
 {
     struct MSEARCH_state *mss = (struct MSEARCH_state*)object;
-    Safefree(mss->ST);
-    Safefree(mss);
+    freesafe(mss->ST);
+    freesafe(mss);
 }
 
 void DMR_OnPostMX_MSEARCH_SendOK(ILibAsyncUDPSocket_SocketModule socketModule, void *user1, void *user2)
 {
     struct MSEARCH_state *mss = (struct MSEARCH_state*)user1;
     ILibChain_SafeRemove_SubChain(mss->Chain, mss->SubChain);
-    Safefree(mss->ST);
-    Safefree(mss);
+    freesafe(mss->ST);
+    freesafe(mss);
 }
 void DMR_PostMX_MSEARCH(void *object)
 {
@@ -1842,10 +1838,10 @@ void DMR_PostMX_MSEARCH(void *object)
     if(rcode==0)
     {
         ILibChain_SafeRemove_SubChain(mss->Chain, subChain);
-        Safefree(mss->ST);
-        Safefree(mss);
+        freesafe(mss->ST);
+        freesafe(mss);
     }
-    Safefree(b);
+    freesafe(b);
 }
 
 void DMR_ProcessMSEARCH(struct DMR_DataObject *upnp, struct packetheader *packet)
@@ -1920,7 +1916,7 @@ void DMR_ProcessMSEARCH(struct DMR_DataObject *upnp, struct packetheader *packet
             }
             else
             {
-                Safefree(ST);
+                freesafe(ST);
             }
         }
     }
@@ -5176,20 +5172,20 @@ struct SubscriberInfo* DMR_RemoveSubscriberInfo(struct SubscriberInfo **Head, in
 
 #define DMR_DestructSubscriberInfo(info)\
 {\
-    Safefree(info->Path);\
-    Safefree(info->SID);\
-    Safefree(info);\
+    freesafe(info->Path);\
+    freesafe(info->SID);\
+    freesafe(info);\
 }
 
 #define DMR_DestructEventObject(EvObject)\
 {\
-    Safefree(EvObject->PacketBody);\
-    Safefree(EvObject);\
+    freesafe(EvObject->PacketBody);\
+    freesafe(EvObject);\
 }
 
 #define DMR_DestructEventDataObject(EvData)\
 {\
-    Safefree(EvData);\
+    freesafe(EvData);\
 }
 void DMR_ExpireSubscriberInfo(struct DMR_DataObject *d, struct SubscriberInfo *info)
 {
@@ -5453,7 +5449,6 @@ void DMR_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
         NewSubscriber = (struct SubscriberInfo*)malloc(sizeof(struct SubscriberInfo));
         memset(NewSubscriber,0,sizeof(struct SubscriberInfo));
 
-
         //
         // The SID must be globally unique, so lets generate it using
         // a bunch of random hex characters
@@ -5494,8 +5489,8 @@ void DMR_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
         p = ILibParseString(URL,0,URLLength,"://",3);
         if(p->NumResults==1)
         {
-            Safefree(NewSubscriber);// maybe memory leak. add by leochen
-            Safefree(SID);// maybe memory leak. add by leochen
+            freesafe(NewSubscriber);// maybe memory leak. add by leochen
+            freesafe(SID);// maybe memory leak. add by leochen
             ILibWebServer_Send_Raw(session,"HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n",55,1,1);
             ILibDestructParserResults(p);
             return;
@@ -5539,13 +5534,13 @@ void DMR_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
         }
         ILibDestructParserResults(p);
         ILibDestructParserResults(p2);
-        Safefree(TempString2);
+        freesafe(TempString2);
 
 
         escapedURI = (char*)malloc(ILibHTTPEscapeLength(NewSubscriber->Path));
         escapedURILength = ILibHTTPEscape(escapedURI,NewSubscriber->Path);
 
-        Safefree(NewSubscriber->Path);
+        freesafe(NewSubscriber->Path);
         NewSubscriber->Path = escapedURI;
         NewSubscriber->PathLength = escapedURILength;
 
@@ -5591,7 +5586,7 @@ void DMR_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
             ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
 
             DMR_SendEvent_Body(dataObject,packetbody,packetbodyLength,NewSubscriber);
-            Safefree(packetbody);
+            freesafe(packetbody);
         }
     }
     else
@@ -5609,7 +5604,7 @@ void DMR_SubscribeEvents(char* path,int pathlength,char* Timeout,int TimeoutLeng
     ILibGetLong(Timeout,TimeoutLength,&TimeoutVal);
     memcpy(buffer,path,pathlength);
     buffer[pathlength] = '\0';
-    Safefree(buffer);
+    freesafe(buffer);
     if(TimeoutVal>DMR__MAX_SUBSCRIPTION_TIMEOUT) {TimeoutVal=DMR__MAX_SUBSCRIPTION_TIMEOUT;}
 
     if(pathlength==18 && memcmp(path+1,"AVTransport/event",17)==0)
@@ -5689,7 +5684,7 @@ void DMR_RenewEvents(char* path,int pathlength,char *_SID,int SIDLength, char* T
             LVL3DEBUG(printf("FAILED]\r\n\r\n");)
                 ILibWebServer_Send_Raw(ReaderObject,"HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n",55,1,1);
         }
-        Safefree(SID);
+        freesafe(SID);
 }
 
 void DMR_ProcessSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Session *session)
@@ -5828,7 +5823,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 
     LVL3DEBUG(errorPacketLength=ILibGetRawPacket(header,&errorPacket);)
         LVL3DEBUG(printf("%s\r\n",errorPacket);)
-        LVL3DEBUG(Safefree(errorPacket);)
+        LVL3DEBUG(freesafe(errorPacket);)
 
         if(header->DirectiveLength==4 && memcmp(header->Directive,"HEAD",4)==0)
         {
@@ -5909,7 +5904,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                 if(DMR__Device_MediaRenderer_Impl.AVTransport->SetAVTransportURI!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.AVTransport->SetAVTransportURI->Reserved,DMR__Device_MediaRenderer_Impl.AVTransport->SetAVTransportURI->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.AVTransport->SetPlayMode!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.AVTransport->SetPlayMode->Reserved,DMR__Device_MediaRenderer_Impl.AVTransport->SetPlayMode->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.AVTransport->Stop!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.AVTransport->Stop->Reserved,DMR__Device_MediaRenderer_Impl.AVTransport->Stop->Reserved2,0,0);}
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
                 buffer = ILibDecompressString((unsigned char*)DMR__StateVariableTable_AVTransport_Impl.Reserved,DMR__StateVariableTable_AVTransport_Impl.ReservedXL,DMR__StateVariableTable_AVTransport_Impl.ReservedUXL);
                 if(DMR__Device_MediaRenderer_Impl.AVTransport->StateVar_CurrentPlayMode!=NULL)
@@ -6330,7 +6325,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.AVTransport->StateVar_TransportPlaySpeed->Reserved3,DMR__Device_MediaRenderer_Impl.AVTransport->StateVar_TransportPlaySpeed->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.AVTransport->StateVar_TransportPlaySpeed->Reserved8,DMR__Device_MediaRenderer_Impl.AVTransport->StateVar_TransportPlaySpeed->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
                 }
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
             }
             else if(header->DirectiveObjLength==27 && memcmp((header->DirectiveObj)+1,"ConnectionManager/scpd.xml",26)==0)
@@ -6341,7 +6336,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                 if(DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionIDs!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionIDs->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionInfo!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetCurrentConnectionInfo->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.ConnectionManager->GetProtocolInfo!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetProtocolInfo->Reserved,DMR__Device_MediaRenderer_Impl.ConnectionManager->GetProtocolInfo->Reserved2,0,0);}
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
                 buffer = ILibDecompressString((unsigned char*)DMR__StateVariableTable_ConnectionManager_Impl.Reserved,DMR__StateVariableTable_ConnectionManager_Impl.ReservedXL,DMR__StateVariableTable_ConnectionManager_Impl.ReservedUXL);
                 if(DMR__Device_MediaRenderer_Impl.ConnectionManager->StateVar_A_ARG_TYPE_ProtocolInfo!=NULL)
@@ -6434,7 +6429,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1,DMR__Device_MediaRenderer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved1L,ILibAsyncSocket_MemoryOwnership_USER,0);
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8,DMR__Device_MediaRenderer_Impl.ConnectionManager->StateVar_CurrentConnectionIDs->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
                 }
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
             }
             else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"RenderingControl/scpd.xml",25)==0)
@@ -6452,7 +6447,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                 if(DMR__Device_MediaRenderer_Impl.RenderingControl->SetContrast!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.RenderingControl->SetContrast->Reserved,DMR__Device_MediaRenderer_Impl.RenderingControl->SetContrast->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.RenderingControl->SetMute!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.RenderingControl->SetMute->Reserved,DMR__Device_MediaRenderer_Impl.RenderingControl->SetMute->Reserved2,0,0);}
                 if(DMR__Device_MediaRenderer_Impl.RenderingControl->SetVolume!=NULL){DMR_StreamDescriptionDocument_SCPD(session,0,buffer,DMR__Device_MediaRenderer_Impl.RenderingControl->SetVolume->Reserved,DMR__Device_MediaRenderer_Impl.RenderingControl->SetVolume->Reserved2,0,0);}
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,1,0);
                 buffer = ILibDecompressString((unsigned char*)DMR__StateVariableTable_RenderingControl_Impl.Reserved,DMR__StateVariableTable_RenderingControl_Impl.ReservedXL,DMR__StateVariableTable_RenderingControl_Impl.ReservedUXL);
                 if(DMR__Device_MediaRenderer_Impl.RenderingControl->StateVar_Contrast!=NULL)
@@ -6606,7 +6601,7 @@ void DMR_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.RenderingControl->StateVar_A_ARG_TYPE_Channel->Reserved3,DMR__Device_MediaRenderer_Impl.RenderingControl->StateVar_A_ARG_TYPE_Channel->Reserved3L,ILibAsyncSocket_MemoryOwnership_USER,0);
                     ILibWebServer_StreamBody(session,buffer+DMR__Device_MediaRenderer_Impl.RenderingControl->StateVar_A_ARG_TYPE_Channel->Reserved8,DMR__Device_MediaRenderer_Impl.RenderingControl->StateVar_A_ARG_TYPE_Channel->Reserved8L,ILibAsyncSocket_MemoryOwnership_USER,0);
                 }
-                Safefree(buffer);
+                freesafe(buffer);
                 DMR_StreamDescriptionDocument_SCPD(session,0,NULL,0,0,0,1);
             }
 
@@ -6719,7 +6714,7 @@ void DMR_MasterPreSelect(void* object,void *socketset, void *writeset, void *err
                 continue;
             ILibChain_SafeRemove(DMR_Object->Chain,DMR_Object->NOTIFY_SEND_socks[i]);
         }
-        Safefree(DMR_Object->NOTIFY_SEND_socks);
+        freesafe(DMR_Object->NOTIFY_SEND_socks);
 
         for(i=0;i<DMR_Object->AddressListLength;++i)
         {
@@ -6727,11 +6722,11 @@ void DMR_MasterPreSelect(void* object,void *socketset, void *writeset, void *err
                 continue;
             ILibChain_SafeRemove(DMR_Object->Chain,DMR_Object->NOTIFY_RECEIVE_socks[i]);
         }
-        Safefree(DMR_Object->NOTIFY_RECEIVE_socks);
+        freesafe(DMR_Object->NOTIFY_RECEIVE_socks);
 
 
         // Fetch a current list of ip addresses
-        Safefree(DMR_Object->AddressList);
+        freesafe(DMR_Object->AddressList);
         DMR_Object->AddressListLength = ILibGetLocalIPAddressList(&(DMR_Object->AddressList));
 
 
@@ -6800,7 +6795,7 @@ void DMR_MasterPreSelect(void* object,void *socketset, void *writeset, void *err
 
 void DMR_FragmentedSendNotify_Destroy(void *data)
 {
-    Safefree(data);
+    freesafe(data);
 }
 void DMR_FragmentedSendNotify(void *data)
 {
@@ -6874,10 +6869,10 @@ void DMR_FragmentedSendNotify(void *data)
             break;
         }
     }
-    Safefree(packet);
+    freesafe(packet);
     if(FNS->packetNumber!=0)
     {
-        Safefree(FNS);
+        freesafe(FNS);
     }
 }
 void DMR_SendNotify(const struct DMR_DataObject *upnp)
@@ -6907,7 +6902,7 @@ void DMR_SendNotify(const struct DMR_DataObject *upnp)
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
         }
     }
-    Safefree(packet);
+    freesafe(packet);
 }
 
 #define DMR_BuildSsdpByeByePacket(outpacket,outlength,USN,USNex,NT,NTex,DeviceID)\
@@ -6957,7 +6952,7 @@ void DMR_SendByeBye(const struct DMR_DataObject *upnp)
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
         }
     }
-    Safefree(packet);
+    freesafe(packet);
 }
 
 /*! \fn DMR_Response_Error(const DMR_SessionToken DMR_Token, const int ErrorCode, const char* ErrorMsg)
@@ -7027,8 +7022,8 @@ void DMR_Response_AVTransport_GetCurrentTransportActions(const DMR_SessionToken 
     body = (char*)malloc(20+strlen(Actions));
     sprintf(body,"<Actions>%s</Actions>",Actions);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetCurrentTransportActions",body);
-    Safefree(body);
-    Safefree(Actions);
+    freesafe(body);
+    freesafe(Actions);
 }
 
 /*! \fn DMR_Response_AVTransport_GetDeviceCapabilities(const DMR_SessionToken DMR_Token, const char* unescaped_PlayMedia, const char* unescaped_RecMedia, const char* unescaped_RecQualityModes)
@@ -7051,10 +7046,10 @@ void DMR_Response_AVTransport_GetDeviceCapabilities(const DMR_SessionToken DMR_T
     body = (char*)malloc(80+strlen(PlayMedia)+strlen(RecMedia)+strlen(RecQualityModes));
     sprintf(body,"<PlayMedia>%s</PlayMedia><RecMedia>%s</RecMedia><RecQualityModes>%s</RecQualityModes>",PlayMedia,RecMedia,RecQualityModes);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetDeviceCapabilities",body);
-    Safefree(body);
-    Safefree(PlayMedia);
-    Safefree(RecMedia);
-    Safefree(RecQualityModes);
+    freesafe(body);
+    freesafe(PlayMedia);
+    freesafe(RecMedia);
+    freesafe(RecQualityModes);
 }
 
 /*! \fn DMR_Response_AVTransport_GetMediaInfo(const DMR_SessionToken DMR_Token, const unsigned int NrTracks, const char* unescaped_MediaDuration, const char* unescaped_CurrentURI, const char* unescaped_CurrentURIMetaData, const char* unescaped_NextURI, const char* unescaped_NextURIMetaData, const char* unescaped_PlayMedium, const char* unescaped_RecordMedium, const char* unescaped_WriteStatus)
@@ -7093,15 +7088,15 @@ void DMR_Response_AVTransport_GetMediaInfo(const DMR_SessionToken DMR_Token, con
     body = (char*)malloc(265+strlen(MediaDuration)+strlen(CurrentURI)+strlen(CurrentURIMetaData)+strlen(NextURI)+strlen(NextURIMetaData)+strlen(PlayMedium)+strlen(RecordMedium)+strlen(WriteStatus));
     sprintf(body,"<NrTracks>%u</NrTracks><MediaDuration>%s</MediaDuration><CurrentURI>%s</CurrentURI><CurrentURIMetaData>%s</CurrentURIMetaData><NextURI>%s</NextURI><NextURIMetaData>%s</NextURIMetaData><PlayMedium>%s</PlayMedium><RecordMedium>%s</RecordMedium><WriteStatus>%s</WriteStatus>",NrTracks,MediaDuration,CurrentURI,CurrentURIMetaData,NextURI,NextURIMetaData,PlayMedium,RecordMedium,WriteStatus);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetMediaInfo",body);
-    Safefree(body);
-    Safefree(MediaDuration);
-    Safefree(CurrentURI);
-    Safefree(CurrentURIMetaData);
-    Safefree(NextURI);
-    Safefree(NextURIMetaData);
-    Safefree(PlayMedium);
-    Safefree(RecordMedium);
-    Safefree(WriteStatus);
+    freesafe(body);
+    freesafe(MediaDuration);
+    freesafe(CurrentURI);
+    freesafe(CurrentURIMetaData);
+    freesafe(NextURI);
+    freesafe(NextURIMetaData);
+    freesafe(PlayMedium);
+    freesafe(RecordMedium);
+    freesafe(WriteStatus);
 }
 
 /*! \fn DMR_Response_AVTransport_GetPositionInfo(const DMR_SessionToken DMR_Token, const unsigned int Track, const char* unescaped_TrackDuration, const char* unescaped_TrackMetaData, const char* unescaped_TrackURI, const char* unescaped_RelTime, const char* unescaped_AbsTime, const int RelCount, const int AbsCount)
@@ -7133,12 +7128,12 @@ void DMR_Response_AVTransport_GetPositionInfo(const DMR_SessionToken DMR_Token, 
     body = (char*)malloc(212+strlen(TrackDuration)+strlen(TrackMetaData)+strlen(TrackURI)+strlen(RelTime)+strlen(AbsTime));
     sprintf(body,"<Track>%u</Track><TrackDuration>%s</TrackDuration><TrackMetaData>%s</TrackMetaData><TrackURI>%s</TrackURI><RelTime>%s</RelTime><AbsTime>%s</AbsTime><RelCount>%d</RelCount><AbsCount>%d</AbsCount>",Track,TrackDuration,TrackMetaData,TrackURI,RelTime,AbsTime,RelCount,AbsCount);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetPositionInfo",body);
-    Safefree(body);
-    Safefree(TrackDuration);
-    Safefree(TrackMetaData);
-    Safefree(TrackURI);
-    Safefree(RelTime);
-    Safefree(AbsTime);
+    freesafe(body);
+    freesafe(TrackDuration);
+    freesafe(TrackMetaData);
+    freesafe(TrackURI);
+    freesafe(RelTime);
+    freesafe(AbsTime);
 }
 
 /*! \fn DMR_Response_AVTransport_GetTransportInfo(const DMR_SessionToken DMR_Token, const char* unescaped_CurrentTransportState, const char* unescaped_CurrentTransportStatus, const char* unescaped_CurrentSpeed)
@@ -7161,10 +7156,10 @@ void DMR_Response_AVTransport_GetTransportInfo(const DMR_SessionToken DMR_Token,
     body = (char*)malloc(126+strlen(CurrentTransportState)+strlen(CurrentTransportStatus)+strlen(CurrentSpeed));
     sprintf(body,"<CurrentTransportState>%s</CurrentTransportState><CurrentTransportStatus>%s</CurrentTransportStatus><CurrentSpeed>%s</CurrentSpeed>",CurrentTransportState,CurrentTransportStatus,CurrentSpeed);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetTransportInfo",body);
-    Safefree(body);
-    Safefree(CurrentTransportState);
-    Safefree(CurrentTransportStatus);
-    Safefree(CurrentSpeed);
+    freesafe(body);
+    freesafe(CurrentTransportState);
+    freesafe(CurrentTransportStatus);
+    freesafe(CurrentSpeed);
 }
 
 /*! \fn DMR_Response_AVTransport_GetTransportSettings(const DMR_SessionToken DMR_Token, const char* unescaped_PlayMode, const char* unescaped_RecQualityMode)
@@ -7184,9 +7179,9 @@ void DMR_Response_AVTransport_GetTransportSettings(const DMR_SessionToken DMR_To
     body = (char*)malloc(55+strlen(PlayMode)+strlen(RecQualityMode));
     sprintf(body,"<PlayMode>%s</PlayMode><RecQualityMode>%s</RecQualityMode>",PlayMode,RecQualityMode);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:AVTransport:1","GetTransportSettings",body);
-    Safefree(body);
-    Safefree(PlayMode);
-    Safefree(RecQualityMode);
+    freesafe(body);
+    freesafe(PlayMode);
+    freesafe(RecQualityMode);
 }
 
 /*! \fn DMR_Response_AVTransport_Next(const DMR_SessionToken DMR_Token)
@@ -7275,8 +7270,8 @@ void DMR_Response_ConnectionManager_GetCurrentConnectionIDs(const DMR_SessionTok
     body = (char*)malloc(32+strlen(ConnectionIDs));
     sprintf(body,"<ConnectionIDs>%s</ConnectionIDs>",ConnectionIDs);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetCurrentConnectionIDs",body);
-    Safefree(body);
-    Safefree(ConnectionIDs);
+    freesafe(body);
+    freesafe(ConnectionIDs);
 }
 
 /*! \fn DMR_Response_ConnectionManager_GetCurrentConnectionInfo(const DMR_SessionToken DMR_Token, const int RcsID, const int AVTransportID, const char* unescaped_ProtocolInfo, const char* unescaped_PeerConnectionManager, const int PeerConnectionID, const char* unescaped_Direction, const char* unescaped_Status)
@@ -7305,11 +7300,11 @@ void DMR_Response_ConnectionManager_GetCurrentConnectionInfo(const DMR_SessionTo
     body = (char*)malloc(233+strlen(ProtocolInfo)+strlen(PeerConnectionManager)+strlen(Direction)+strlen(Status));
     sprintf(body,"<RcsID>%d</RcsID><AVTransportID>%d</AVTransportID><ProtocolInfo>%s</ProtocolInfo><PeerConnectionManager>%s</PeerConnectionManager><PeerConnectionID>%d</PeerConnectionID><Direction>%s</Direction><Status>%s</Status>",RcsID,AVTransportID,ProtocolInfo,PeerConnectionManager,PeerConnectionID,Direction,Status);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetCurrentConnectionInfo",body);
-    Safefree(body);
-    Safefree(ProtocolInfo);
-    Safefree(PeerConnectionManager);
-    Safefree(Direction);
-    Safefree(Status);
+    freesafe(body);
+    freesafe(ProtocolInfo);
+    freesafe(PeerConnectionManager);
+    freesafe(Direction);
+    freesafe(Status);
 }
 
 /*! \fn DMR_Response_ConnectionManager_GetProtocolInfo(const DMR_SessionToken DMR_Token, const char* unescaped_Source, const char* unescaped_Sink)
@@ -7329,9 +7324,9 @@ void DMR_Response_ConnectionManager_GetProtocolInfo(const DMR_SessionToken DMR_T
     body = (char*)malloc(31+strlen(Source)+strlen(Sink));
     sprintf(body,"<Source>%s</Source><Sink>%s</Sink>",Source,Sink);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:ConnectionManager:1","GetProtocolInfo",body);
-    Safefree(body);
-    Safefree(Source);
-    Safefree(Sink);
+    freesafe(body);
+    freesafe(Source);
+    freesafe(Sink);
 }
 
 /*! \fn DMR_Response_RenderingControl_GetBrightness(const DMR_SessionToken DMR_Token, const unsigned short CurrentBrightness)
@@ -7346,7 +7341,7 @@ void DMR_Response_RenderingControl_GetBrightness(const DMR_SessionToken DMR_Toke
     body = (char*)malloc(46);
     sprintf(body,"<CurrentBrightness>%u</CurrentBrightness>",CurrentBrightness);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:RenderingControl:1","GetBrightness",body);
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_Response_RenderingControl_GetContrast(const DMR_SessionToken DMR_Token, const unsigned short CurrentContrast)
@@ -7361,7 +7356,7 @@ void DMR_Response_RenderingControl_GetContrast(const DMR_SessionToken DMR_Token,
     body = (char*)malloc(42);
     sprintf(body,"<CurrentContrast>%u</CurrentContrast>",CurrentContrast);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:RenderingControl:1","GetContrast",body);
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_Response_RenderingControl_GetMute(const DMR_SessionToken DMR_Token, const int CurrentMute)
@@ -7376,7 +7371,7 @@ void DMR_Response_RenderingControl_GetMute(const DMR_SessionToken DMR_Token, con
     body = (char*)malloc(29);
     sprintf(body,"<CurrentMute>%d</CurrentMute>",(CurrentMute!=0?1:0));
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:RenderingControl:1","GetMute",body);
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_Response_RenderingControl_GetVolume(const DMR_SessionToken DMR_Token, const unsigned short CurrentVolume)
@@ -7391,7 +7386,7 @@ void DMR_Response_RenderingControl_GetVolume(const DMR_SessionToken DMR_Token, c
     body = (char*)malloc(38);
     sprintf(body,"<CurrentVolume>%u</CurrentVolume>",CurrentVolume);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:RenderingControl:1","GetVolume",body);
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_Response_RenderingControl_ListPresets(const DMR_SessionToken DMR_Token, const char* unescaped_CurrentPresetNameList)
@@ -7408,8 +7403,8 @@ void DMR_Response_RenderingControl_ListPresets(const DMR_SessionToken DMR_Token,
     body = (char*)malloc(48+strlen(CurrentPresetNameList));
     sprintf(body,"<CurrentPresetNameList>%s</CurrentPresetNameList>",CurrentPresetNameList);
     DMR_ResponseGeneric(DMR_Token,"urn:schemas-upnp-org:service:RenderingControl:1","ListPresets",body);
-    Safefree(body);
-    Safefree(CurrentPresetNameList);
+    freesafe(body);
+    freesafe(CurrentPresetNameList);
 }
 
 /*! \fn DMR_Response_RenderingControl_SelectPreset(const DMR_SessionToken DMR_Token)
@@ -7520,7 +7515,7 @@ void DMR_SendEvent(void *upnptoken, char* body, const int bodylength, const char
 
         if(DMR_Object==NULL)
         {
-            Safefree(body);
+            freesafe(body);
             return;
         }
         sem_wait(&(DMR_Object->EventLock));
@@ -7572,12 +7567,12 @@ void DMR_SetState_AVTransport_LastChange(DMR_MicroStackToken upnptoken, char* va
     char* valstr;
     valstr = (char*)malloc(ILibXmlEscapeLength(val)+1);
     ILibXmlEscape(valstr,val);
-    if (DMR_Object->AVTransport_LastChange != NULL) Safefree(DMR_Object->AVTransport_LastChange);
+    if (DMR_Object->AVTransport_LastChange != NULL) freesafe(DMR_Object->AVTransport_LastChange);
     DMR_Object->AVTransport_LastChange = valstr;
     body = (char*)malloc(30 + (int)strlen(valstr));
     bodylength = sprintf(body,"%s>%s</%s","LastChange",valstr,"LastChange");
     DMR_SendEvent(upnptoken,body,bodylength,"AVTransport");
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_SetState_ConnectionManager_SourceProtocolInfo(DMR_MicroStackToken upnptoken, char* val)
@@ -7594,12 +7589,12 @@ void DMR_SetState_ConnectionManager_SourceProtocolInfo(DMR_MicroStackToken upnpt
     char* valstr;
     valstr = (char*)malloc(ILibXmlEscapeLength(val)+1);
     ILibXmlEscape(valstr,val);
-    if (DMR_Object->ConnectionManager_SourceProtocolInfo != NULL) Safefree(DMR_Object->ConnectionManager_SourceProtocolInfo);
+    if (DMR_Object->ConnectionManager_SourceProtocolInfo != NULL) freesafe(DMR_Object->ConnectionManager_SourceProtocolInfo);
     DMR_Object->ConnectionManager_SourceProtocolInfo = valstr;
     body = (char*)malloc(46 + (int)strlen(valstr));
     bodylength = sprintf(body,"%s>%s</%s","SourceProtocolInfo",valstr,"SourceProtocolInfo");
     DMR_SendEvent(upnptoken,body,bodylength,"ConnectionManager");
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_SetState_ConnectionManager_SinkProtocolInfo(DMR_MicroStackToken upnptoken, char* val)
@@ -7616,12 +7611,12 @@ void DMR_SetState_ConnectionManager_SinkProtocolInfo(DMR_MicroStackToken upnptok
     char* valstr;
     valstr = (char*)malloc(ILibXmlEscapeLength(val)+1);
     ILibXmlEscape(valstr,val);
-    if (DMR_Object->ConnectionManager_SinkProtocolInfo != NULL) Safefree(DMR_Object->ConnectionManager_SinkProtocolInfo);
+    if (DMR_Object->ConnectionManager_SinkProtocolInfo != NULL) freesafe(DMR_Object->ConnectionManager_SinkProtocolInfo);
     DMR_Object->ConnectionManager_SinkProtocolInfo = valstr;
     body = (char*)malloc(42 + (int)strlen(valstr));
     bodylength = sprintf(body,"%s>%s</%s","SinkProtocolInfo",valstr,"SinkProtocolInfo");
     DMR_SendEvent(upnptoken,body,bodylength,"ConnectionManager");
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_SetState_ConnectionManager_CurrentConnectionIDs(DMR_MicroStackToken upnptoken, char* val)
@@ -7638,12 +7633,12 @@ void DMR_SetState_ConnectionManager_CurrentConnectionIDs(DMR_MicroStackToken upn
     char* valstr;
     valstr = (char*)malloc(ILibXmlEscapeLength(val)+1);
     ILibXmlEscape(valstr,val);
-    if (DMR_Object->ConnectionManager_CurrentConnectionIDs != NULL) Safefree(DMR_Object->ConnectionManager_CurrentConnectionIDs);
+    if (DMR_Object->ConnectionManager_CurrentConnectionIDs != NULL) freesafe(DMR_Object->ConnectionManager_CurrentConnectionIDs);
     DMR_Object->ConnectionManager_CurrentConnectionIDs = valstr;
     body = (char*)malloc(50 + (int)strlen(valstr));
     bodylength = sprintf(body,"%s>%s</%s","CurrentConnectionIDs",valstr,"CurrentConnectionIDs");
     DMR_SendEvent(upnptoken,body,bodylength,"ConnectionManager");
-    Safefree(body);
+    freesafe(body);
 }
 
 /*! \fn DMR_SetState_RenderingControl_LastChange(DMR_MicroStackToken upnptoken, char* val)
@@ -7660,15 +7655,13 @@ void DMR_SetState_RenderingControl_LastChange(DMR_MicroStackToken upnptoken, cha
     char* valstr;
     valstr = (char*)malloc(ILibXmlEscapeLength(val)+1);
     ILibXmlEscape(valstr,val);
-    if (DMR_Object->RenderingControl_LastChange != NULL) Safefree(DMR_Object->RenderingControl_LastChange);
+    if (DMR_Object->RenderingControl_LastChange != NULL) freesafe(DMR_Object->RenderingControl_LastChange);
     DMR_Object->RenderingControl_LastChange = valstr;
     body = (char*)malloc(30 + (int)strlen(valstr));
     bodylength = sprintf(body,"%s>%s</%s","LastChange",valstr,"LastChange");
     DMR_SendEvent(upnptoken,body,bodylength,"RenderingControl");
-    Safefree(body);
+    freesafe(body);
 }
-
-
 
 void DMR_DestroyMicroStack(void *object)
 {
@@ -7678,18 +7671,18 @@ void DMR_DestroyMicroStack(void *object)
 
     sem_destroy(&(upnp->EventLock));
 
-    Safefree(upnp->AVTransport_LastChange);
-    Safefree(upnp->ConnectionManager_SourceProtocolInfo);
-    Safefree(upnp->ConnectionManager_SinkProtocolInfo);
-    Safefree(upnp->ConnectionManager_CurrentConnectionIDs);
-    Safefree(upnp->RenderingControl_LastChange);
+    freesafe(upnp->AVTransport_LastChange);
+    freesafe(upnp->ConnectionManager_SourceProtocolInfo);
+    freesafe(upnp->ConnectionManager_SinkProtocolInfo);
+    freesafe(upnp->ConnectionManager_CurrentConnectionIDs);
+    freesafe(upnp->RenderingControl_LastChange);
 
 
-    Safefree(upnp->AddressList);
-    Safefree(upnp->NOTIFY_SEND_socks);
-    Safefree(upnp->NOTIFY_RECEIVE_socks);
-    Safefree(upnp->UUID);
-    Safefree(upnp->Serial);
+    freesafe(upnp->AddressList);
+    freesafe(upnp->NOTIFY_SEND_socks);
+    freesafe(upnp->NOTIFY_RECEIVE_socks);
+    freesafe(upnp->UUID);
+    freesafe(upnp->Serial);
 
     sinfo = upnp->HeadSubscriberPtr_AVTransport;
     while(sinfo!=NULL)
@@ -7712,9 +7705,8 @@ void DMR_DestroyMicroStack(void *object)
         DMR_DestructSubscriberInfo(sinfo);
         sinfo = sinfo2;
     }
-
-
 }
+
 int DMR_GetLocalPortNumber(DMR_SessionToken token)
 {
     return(ILibWebServer_GetPortNumber(((struct ILibWebServer_Session*)token)->Parent));
@@ -7799,7 +7791,6 @@ DMR_MicroStackToken DMR_CreateMicroStack(void *Chain, const char* FriendlyName,c
     if(DMR__Device_MediaRenderer_Impl.ModelURL == NULL) {DMR__Device_MediaRenderer_Impl.ModelURL = "http://www.pptv.com";}
     if(DMR__Device_MediaRenderer_Impl.ProductCode == NULL) {DMR__Device_MediaRenderer_Impl.ProductCode = "DMR-PPTV-X1";}
 
-
     /* Complete State Reset */
     memset(RetVal,0,sizeof(struct DMR_DataObject));
 
@@ -7856,14 +7847,12 @@ void DMR_StreamDescriptionDocument(struct ILibWebServer_Session *session, int in
         return;
     }
 
-    //
     // Device
-    //
     ILibWebServer_StreamHeader_Raw(session,200,"OK",responseHeader,1);
 
     xString2 = ILibDecompressString((unsigned char*)DMR__Device_MediaRenderer_Impl.Reserved,DMR__Device_MediaRenderer_Impl.ReservedXL,DMR__Device_MediaRenderer_Impl.ReservedUXL);
     xString = ILibString_Replace(xString2,(int)strlen(xString2),"http://255.255.255.255:255/",27,"%s",2);
-    Safefree(xString2);
+    freesafe(xString2);
     tempStringLength = (int)(strlen(xString)+strlen(DMR__Device_MediaRenderer_Impl.Manufacturer)+strlen(DMR__Device_MediaRenderer_Impl.ManufacturerURL)+strlen(DMR__Device_MediaRenderer_Impl.ModelDescription)+strlen(DMR__Device_MediaRenderer_Impl.ModelName)+strlen(DMR__Device_MediaRenderer_Impl.ModelNumber)+strlen(DMR__Device_MediaRenderer_Impl.ModelURL)+strlen(DMR__Device_MediaRenderer_Impl.ProductCode)+strlen(DMR__Device_MediaRenderer_Impl.FriendlyName)+strlen(DMR__Device_MediaRenderer_Impl.UDN)+strlen(DMR__Device_MediaRenderer_Impl.Serial));
     tempString = (char*)malloc(tempStringLength);
     tempStringLength = sprintf(tempString,xString,
@@ -7876,7 +7865,7 @@ void DMR_StreamDescriptionDocument(struct ILibWebServer_Session *session, int in
         DMR__Device_MediaRenderer_Impl.ModelURL,
         DMR__Device_MediaRenderer_Impl.Serial,
         DMR__Device_MediaRenderer_Impl.UDN);
-    Safefree(xString);
+    freesafe(xString);
     ILibWebServer_StreamBody(session,tempString,tempStringLength-19,ILibAsyncSocket_MemoryOwnership_CHAIN,0);
 
     //
