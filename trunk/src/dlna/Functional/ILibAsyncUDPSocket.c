@@ -121,10 +121,8 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
     {
         do
         {
-            //
             // Choose a random port from 50000 to 65500, which is what IANA says to use
             // for non standard ports
-            //
             if (++count >= 20) break;
             local.sin_port =  htons((unsigned short)(localPortStartRange + ((unsigned short)rand() % (localPortEndRange-localPortStartRange))));
         }

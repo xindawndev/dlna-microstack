@@ -560,7 +560,6 @@ void ILibAsyncSocket_ConnectTimeout(void *socketModule)
 {
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
 
-
     sem_wait(&(module->SendLock));
     /* Connection Timeout */
 #if defined(_WIN32_WCE) || defined(WIN32)
@@ -598,7 +597,6 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
     struct sockaddr_in addr;
     struct ILibAsyncSocketModule *module = (struct ILibAsyncSocketModule*)socketModule;
 
-
     if(module==NULL){return;}
 
     module->RemoteIPAddress = remoteInterface;
@@ -616,10 +614,7 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
 
     addr.sin_port = htons((unsigned short)remotePortNumber);
 
-
-    //
     // If there isn't a socket already allocated, we need to allocate one
-    //
     if(module->internalSocket==-1)
     {
 #if defined(WIN32) || defined(_WIN32_WCE)
@@ -629,17 +624,13 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
 #endif
     }
 
-    //
     // Initialise the buffer pointers, since no data is in them yet.
-    //
     module->FinConnect = 0;
     module->BeginPointer = 0;
     module->EndPointer = 0;
 
-    //
     // Set the socket to non-blocking mode, because we need to play nice
     // and share the MicroStack thread
-    //
 #if defined(_WIN32_WCE) || defined(WIN32)
     flags = 1;
     ioctlsocket(module->internalSocket,FIONBIO,&flags);
@@ -648,27 +639,21 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
     fcntl(module->internalSocket,F_SETFL,O_NONBLOCK|flags);
 #endif
 
-    //
     // Turn on keep-alives for the socket
-    //
     flags = 1;
 #if !defined(__SYMBIAN32__) //ToDo: Add support
     setsockopt(module->internalSocket,SOL_SOCKET,SO_KEEPALIVE,(char*)&flags,sizeof(flags));
 #endif
 
-    //
     // Connect the socket, and force the chain to unblock, since the select statement
     // doesn't have us in the fdset yet.
-    //
 #if !defined(__SYMBIAN32__)
     connect(module->internalSocket,(struct sockaddr*)&addr,sizeof(addr));
 #else
     ILibSocketWrapper_connect(module->internalSocket,(struct sockaddr*)&addr);
 #endif
-    //
     // Sometimes a Connection attempt can fail, without triggering the FD_SET. We will force
     // a failure after 30 seconds.
-    //
     ILibLifeTime_Add(module->TimeoutTimer,module,30,&ILibAsyncSocket_ConnectTimeout,NULL);
     ILibForceUnBlockChain(module->Chain);
 }

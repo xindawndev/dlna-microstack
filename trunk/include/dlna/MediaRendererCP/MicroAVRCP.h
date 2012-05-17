@@ -16,24 +16,24 @@
 
 enum PlayStateEnum
 {
-    AVRCP_PLAYING=0,                        // 播放
-    AVRCP_STOPPED,                          // 停止
-    AVRCP_PAUSED,                           // 暂停
-    AVRCP_RECORDING,
-    AVRCP_TRANSITIONING,                    // 传输
-    AVRCP_NO_MEDIA,
-    AVRCP_UNKNOWN
+    AVRCP_PLAYING=0,                        // 播放中
+    AVRCP_STOPPED,                          // 已停止
+    AVRCP_PAUSED,                           // 已暂停
+    AVRCP_RECORDING,                        // 录制中
+    AVRCP_TRANSITIONING,                    // 传输中
+    AVRCP_NO_MEDIA,                         // 无文件
+    AVRCP_UNKNOWN                           // 未知
 };
 
 enum PlayModeEnum
 {
-    AVRCP_INVALID       =0x0000000,
-    AVRCP_NORMAL        =0x0000001,
-    AVRCP_REPEAT_ALL    =0x0000002,
-    AVRCP_REPEAT_ONE    =0x0000004,
-    AVRCP_RANDOM        =0x0000008,
-    AVRCP_SHUFFLE       =0x0000010,
-    AVRCP_INTRO         =0x0000020
+    AVRCP_INVALID       =0x0000000,         // 无效
+    AVRCP_NORMAL        =0x0000001,         // 正常播放
+    AVRCP_REPEAT_ALL    =0x0000002,         // 重复所有
+    AVRCP_REPEAT_ONE    =0x0000004,         // 单个重复
+    AVRCP_RANDOM        =0x0000008,         // 随机播放
+    AVRCP_SHUFFLE       =0x0000010,         // 
+    AVRCP_INTRO         =0x0000020          // 
 };
 
 struct AVRenderer
@@ -110,14 +110,11 @@ struct AVRendererConnection
     char **PlayMedia;
     int PlayMediaLength;
 
-
     int ChannelCount;
     char **Channel;
     char *Volume;
     int *Mute;
 };
-
-#endif
 
 void LockRendererCP(void *token);
 void UnLockRendererCP(void *token);
@@ -165,3 +162,5 @@ void RCP_GetPosition(struct AVRendererConnection *connection,void *Tag,void (*Ge
 void RCP_AddRef(struct AVRenderer *r);
 void RCP_Release(struct AVRenderer *r);
 void RCP_IPAddressChanged(void *RCP);
+
+#endif

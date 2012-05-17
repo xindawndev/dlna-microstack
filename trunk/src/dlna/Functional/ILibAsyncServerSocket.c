@@ -123,9 +123,7 @@ void ILibAsyncServerSocket_PreSelect(void * socketModule, void *readset, void *w
         fcntl(module->ListenSocket,F_SETFL,O_NONBLOCK|flags);
 #endif
 
-        //
         // Put the socket in Listen, and add it to the fdset for the Select loop
-        //
         module->listening = 1;
 #if defined(__SYMBIAN32__)
         ILibSocketWrapper_listen(module->ListenSocket,4);
