@@ -2292,7 +2292,7 @@ void RCP_SetMute(struct AVRendererConnection *connection, char *Channel, int Mut
     s->connection = connection;
     s->Tag = Tag;
 
-    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);    
+    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);
 }
 
 void RCP_Stop(struct AVRendererConnection *connection,void *Tag, void (*StopSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))

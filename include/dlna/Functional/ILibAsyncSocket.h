@@ -34,18 +34,18 @@ enum ILibAsyncSocket_SendStatus
 {
     ILibAsyncSocket_ALL_DATA_SENT                    = 0, /*!< All of the data has already been sent */
     ILibAsyncSocket_NOT_ALL_DATA_SENT_YET            = 1, /*!< Not all of the data could be sent, but is queued to be sent as soon as possible */
-    ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR        = -4 /*!< A send operation was attmepted on a closed socket */
+    ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR      = -4 /*!< A send operation was attmepted on a closed socket */
 };
 
 enum ILibAsyncSocket_QOS_Priority
 {
-    ILibAsyncSocket_QOS_NONE                = 0,
-    ILibAsyncSocket_QOS_BEST_EFFORT            = 1,
-    ILibAsyncSocket_QOS_BACKGROUND            = 2,
-    ILibAsyncSocket_QOS_EXCELLENT_EFFORT    = 3,
-    ILibAsyncSocket_QOS_AUDIO_VIDEO            = 4,
-    ILibAsyncSocket_QOS_VOICE                = 5,
-    ILibAsyncSocket_QOS_CONTROL                = 6
+    ILibAsyncSocket_QOS_NONE                        = 0,
+    ILibAsyncSocket_QOS_BEST_EFFORT                 = 1,
+    ILibAsyncSocket_QOS_BACKGROUND                  = 2,
+    ILibAsyncSocket_QOS_EXCELLENT_EFFORT            = 3,
+    ILibAsyncSocket_QOS_AUDIO_VIDEO                 = 4,
+    ILibAsyncSocket_QOS_VOICE                       = 5,
+    ILibAsyncSocket_QOS_CONTROL                     = 6
 };
 
 /*! \enum ILibAsyncSocket_MemoryOwnership
@@ -120,9 +120,6 @@ typedef void(*ILibAsyncSocket_OnSendOK)(ILibAsyncSocket_SocketModule socketModul
     \param newOffset The new offset differential. Simply add this value to your existing pointers, to obtain the correct pointer into the resized buffer.
 */
 typedef void(*ILibAsyncSocket_OnBufferReAllocated)(ILibAsyncSocket_SocketModule AsyncSocketToken, void *user, ptrdiff_t newOffset);
-
-
-
 
 void ILibAsyncSocket_SetReAllocateNotificationCallback(ILibAsyncSocket_SocketModule AsyncSocketToken, ILibAsyncSocket_OnBufferReAllocated Callback);
 void * ILibAsyncSocket_GetUser(ILibAsyncSocket_SocketModule socketModule);
