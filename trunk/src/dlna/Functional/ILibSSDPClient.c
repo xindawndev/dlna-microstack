@@ -303,7 +303,7 @@ void ILibSSDP_IPAddressListChanged(void *SSDPToken)
     free(buffer);
 
     // 产生一个[10, 20)秒的随机值
-    u = (double) rand() / (RAND_MAX + 1) * (20 - 10) + 10;
+    u = (int)((double) rand() / (RAND_MAX + 1) * (20 - 10) + 10);
     ILibLifeTime_Add( RetVal->IP_SSDP_Mointor, SSDPToken, u, (void*)&ILibSSDP_IPAddressListChanged, NULL );
 }
 void ILibSSDPClientModule_PreSelect(void* object,void *readset, void *writeset, void *errorset, int* blocktime)

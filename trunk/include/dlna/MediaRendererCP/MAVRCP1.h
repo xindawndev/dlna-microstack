@@ -3,9 +3,6 @@
 
 #include <stdlib.h>
 
-/* av render handle define */
-typedef void * AVRHandle;
-
 /* av render info */
 struct _tAVRInfo
 {
@@ -74,14 +71,14 @@ struct _tRenderStateInfo
     int *Mute;
 };
 
-/* callback functions declared                                          */
-typedef void (* Callback_AVRenderSink)(AVRHandle avhandle, char * udn, char * friendlyname);
-typedef void (* Callback_AVRenderUpdateSink)(AVRHandle avhandle, char * udn, char * friendlyname, struct _tRenderStateInfo renderstate);
+/* callback functions declared */
+typedef void (* Callback_AVRenderSink)( char * udn, char * friendlyname);
+typedef void (* Callback_AVRenderUpdateSink)( char * udn, char * friendlyname, struct _tRenderStateInfo renderstate);
 
-typedef void (* Callback_CommonSink)(AVRHandle avhandle, int ErrorCode);
-typedef void (* Callback_GetDevCapSink)(AVRHandle avhandle, int ErrorCode, char* PlayMedia, char* RecMedia, char* RecQualityModes);
-typedef void (* Callback_GetMediaInfoSink)(AVRHandle avhandle, int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
-typedef void (* Callback_GetPositionSink)(AVRHandle avhandle, int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
+typedef void (* Callback_CommonSink)( int ErrorCode);
+typedef void (* Callback_GetDevCapSink)( int ErrorCode, char* PlayMedia, char* RecMedia, char* RecQualityModes);
+typedef void (* Callback_GetMediaInfoSink)( int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
+typedef void (* Callback_GetPositionSink)( int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
 
 /* callback functions define */
 extern Callback_AVRenderSink           avrender_add         ;
@@ -106,34 +103,32 @@ extern Callback_GetPositionSink        getposition_callback ;
 /************************************************************************/
 /* Interface                                                            */
 /************************************************************************/
-void PrintDmrList( AVRHandle avhandle );
-char * GetDlnaDoc( AVRHandle avhandle, char * udn );
-char * GetDlnaCap( AVRHandle avhandle, char * udn );
-void GetDevCap( AVRHandle avhandle, char * udn );
-int SupportPlayMode( AVRHandle avhandle, char * udn, enum _ePlayModeEnum playmode );
-int SupportVolume( AVRHandle avhandle, char * udn );
-int SupportMute( AVRHandle avhandle, char * udn );
-void Play( AVRHandle avhandle, char * udn );
-void Seek( AVRHandle avhandle, char * udn, int pos );
-void Stop( AVRHandle avhandle, char * udn );
-void Pause( AVRHandle avhandle, char * udn );
-void Next( AVRHandle avhandle, char * udn );
-void Prev( AVRHandle avhandle, char * udn );
-void SetUri( AVRHandle avhandle, char * udn, char * uri );
+void PrintDmrList();
+char * GetDlnaDoc( char * udn );
+char * GetDlnaCap( char * udn );
+void GetDevCap( char * udn );
+int SupportPlayMode( char * udn, enum _ePlayModeEnum playmode );
+int SupportVolume( char * udn );
+int SupportMute( char * udn );
+void Play( char * udn );
+void Seek( char * udn, int pos );
+void Stop( char * udn );
+void Pause( char * udn );
+void Next( char * udn );
+void Prev( char * udn );
+void SetUri( char * udn, char * uri );
 #if defined(INCLUDE_FEATURE_VOLUME)
-void SetVolume( AVRHandle avhandle, char * udn, int vol );
-void SetMute( AVRHandle avhandle, char * udn, int ismute );
+void SetVolume( char * udn, int vol );
+void SetMute( char * udn, int ismute );
 #endif
-void SetPlayMode( AVRHandle avhandle, char * udn, enum _ePlayModeEnum playmode );
-void GetMediaInfo( AVRHandle avhandle, char * udn );
-void GetPosition( AVRHandle avhandle, char * udn );
+void SetPlayMode( char * udn, enum _ePlayModeEnum playmode );
+void GetMediaInfo( char * udn );
+void GetPosition( char * udn );
 
 /************************************************************************/
 /* Interface                                                            */
 /************************************************************************/
-AVRHandle createAVRCP(int threadpool_size);
-int startAVRCP(AVRHandle avhandle);
-void stopAVRCP(AVRHandle avhandle);
-void destoryAVRCP(AVRHandle avhandle);
+int startAVRCP(int threadpool_size);
+void stopAVRCP();
 
 #endif // __MAVRCP_H__
