@@ -16,24 +16,24 @@
 
 enum PlayStateEnum
 {
-    AVRCP_PLAYING=0,                        // 播放中
-    AVRCP_STOPPED,                          // 已停止
-    AVRCP_PAUSED,                           // 已暂停
-    AVRCP_RECORDING,                        // 录制中
-    AVRCP_TRANSITIONING,                    // 传输中
-    AVRCP_NO_MEDIA,                         // 无文件
-    AVRCP_UNKNOWN                           // 未知
+    MAVRCP_PLAYING=0,                        // 播放中
+    MAVRCP_STOPPED,                          // 已停止
+    MAVRCP_PAUSED,                           // 已暂停
+    MAVRCP_RECORDING,                        // 录制中
+    MAVRCP_TRANSITIONING,                    // 传输中
+    MAVRCP_NO_MEDIA,                         // 无文件
+    MAVRCP_UNKNOWN                           // 未知
 };
 
 enum PlayModeEnum
 {
-    AVRCP_INVALID       =0x0000000,         // 无效
-    AVRCP_NORMAL        =0x0000001,         // 正常播放
-    AVRCP_REPEAT_ALL    =0x0000002,         // 重复所有
-    AVRCP_REPEAT_ONE    =0x0000004,         // 单个重复
-    AVRCP_RANDOM        =0x0000008,         // 随机播放
-    AVRCP_SHUFFLE       =0x0000010,         // 
-    AVRCP_INTRO         =0x0000020          // 
+    MAVRCP_INVALID       =0x0000000,         // 无效
+    MAVRCP_NORMAL        =0x0000001,         // 正常播放
+    MAVRCP_REPEAT_ALL    =0x0000002,         // 重复所有
+    MAVRCP_REPEAT_ONE    =0x0000004,         // 单个重复
+    MAVRCP_RANDOM        =0x0000008,         // 随机播放
+    MAVRCP_SHUFFLE       =0x0000010,         // 
+    MAVRCP_INTRO         =0x0000020          // 
 };
 
 struct AVRenderer

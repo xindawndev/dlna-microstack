@@ -2438,19 +2438,19 @@ struct CdsObject* CDS_DeserializeDidlToObjectEx(struct ILibXMLNode *node, struct
                     switch (newObj->MediaClass & CDS_CLASS_MASK_MAJOR)
                     {
                         case CDS_CLASS_MASK_MAJOR_AUDIOITEM:
-                            if(ILibTime_ParseEx(innerXml,&(newObj->TypeMajor.AudioItem.Date))!=0)
+                            if(ILibTime_ParseEx(innerXml,(time_t *)&(newObj->TypeMajor.AudioItem.Date))!=0)
                             {
                                 error = 1;
                             }
                             break;
                         case CDS_CLASS_MASK_MAJOR_IMAGEITEM:
-                            if(ILibTime_ParseEx(innerXml,&(newObj->TypeMajor.ImageItem.Date))!=0)
+                            if(ILibTime_ParseEx(innerXml,(time_t *)&(newObj->TypeMajor.ImageItem.Date))!=0)
                             {
                                 error = 1;
                             }
                             break;
                         case CDS_CLASS_MASK_MAJOR_VIDEOITEM:
-                            if(ILibTime_ParseEx(innerXml,&(newObj->TypeMajor.VideoItem.Date))!=0)
+                            if(ILibTime_ParseEx(innerXml,(time_t *)&(newObj->TypeMajor.VideoItem.Date))!=0)
                             {
                                 error = 1;
                             }

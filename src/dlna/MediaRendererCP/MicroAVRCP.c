@@ -223,6 +223,7 @@ void ProcessRCS_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
         }
         if(StateChanged!=0 && r->StateChanged!=NULL)
         {
+            r->Tag = UPnP_CP;
             r->StateChanged(r,c);
         }
     }
@@ -533,6 +534,7 @@ void ProcessAVT_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
         }
         if(StateChanged!=0 && r->StateChanged!=NULL)
         {
+            r->Tag = UPnP_CP;
             r->StateChanged(r,c);
         }
     }

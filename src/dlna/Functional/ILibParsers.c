@@ -2022,10 +2022,10 @@ void ILibDestroyHashTree(void *tree)
         //
         n = c->Next;
         if(c->KeyValue!=NULL) {free(c->KeyValue);}
-        free(c);
+        freesafe(c);
         c = n;
     }
-    free(r);
+    freesafe(r);
 }
 
 /*! \fn ILibHashTree_GetEnumerator(void *tree)
