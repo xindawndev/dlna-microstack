@@ -518,6 +518,7 @@ void GetPosition( char * udn )
 void OnRenderStateChanged( struct AVRenderer * sender,struct AVRendererConnection * Connection )
 {
     struct _tRenderStateInfo renderstate;
+    int i;
     memset( (void *)&renderstate, 0, sizeof(struct _tRenderStateInfo) );
 
     sem_wait( &(mavrcp.avrender_lock) );
