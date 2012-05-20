@@ -36,8 +36,27 @@ PROJECT_HEADER_DIRECTORY	:= \
 
 PROJECT_COMMON_HEADERS  	:=
 
-PROJECT_INTERNAL_INCLUDES	:= \
-				$(sort $(patsubst $(ROOT_SOURCE_DIRECTORY)%,%,$(dir $(wildcard $(addsuffix /*.h,$(addprefix $(ROOT_SOURCE_DIRECTORY)$(LOCAL_NAME)/,* */* */*/* */*/*/* */*/*/*/*))))))
+##PROJECT_INTERNAL_INCLUDES	:= $(PROJECT_INTERNAL_INCLUDES) dlna \
+				$(sort $(patsubst $(ROOT_INCLUDE_DIRECTORY)%,%,$(dir $(wildcard $(addsuffix /*.h,$(addprefix $(ROOT_INCLUDE_DIRECTORY)$(LOCAL_NAME)/,* */* */*/* */*/*/* */*/*/*/*))))))
+
+PROJECT_INTERNAL_INCLUDES	:= $(PROJECT_INTERNAL_INCLUDES) dlna \
+				../include/dlna/CdsObjects \
+				../include/dlna/DmsIntegration \
+				../include/dlna/DmsIntegration/FileSystemEnumerator \
+				../include/dlna/DownloadController \
+				../include/dlna/FileAbstractionFiles \
+				../include/dlna/Functional \
+				../include/dlna/HttpFiles \
+				../include/dlna/MediaRenderer \
+				../include/dlna/MediaRendererCP \
+				../include/dlna/MediaServerAbstraction \
+				../include/dlna/MediaServerBrowser \
+				../include/dlna/PlaySingleUri \
+				../include/dlna/PlaylistTrackManager \
+				../include/dlna/ProtocolInfoParser \
+				../include/dlna/PushController \
+				../include/dlna/StringUtils \
+				../include/dlna/UploadController
 
 ## 额外包含目录（多个，相对于包含根目录ROOT_INCLUDE_DIRECTORY）
 
