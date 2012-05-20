@@ -305,10 +305,6 @@
 				Name="MediaRendererCP"
 				>
 				<File
-					RelativePath="..\..\..\src\dlna\MediaRendererCP\MAVRCP1.c"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\include\dlna\MediaRendererCP\MAVRCP1.h"
 					>
 				</File>
@@ -536,6 +532,10 @@
 			<Filter
 				Name="MediaRendererCP"
 				>
+				<File
+					RelativePath="..\..\..\src\dlna\MediaRendererCP\MAVRCP1.c"
+					>
+				</File>
 				<File
 					RelativePath="..\..\..\src\dlna\MediaRendererCP\MicroAVRCP.c"
 					>
