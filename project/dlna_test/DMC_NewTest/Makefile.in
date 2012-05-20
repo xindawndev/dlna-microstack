@@ -4,7 +4,7 @@ PROJECT_TYPE			:= bin
 
 ## 生成目标名称（完整文件名称要根据类型PROJECT_TYPE、配置LOCAL_CONFIG、版本PROJECT_VERSION增加前缀、后缀）
 
-PROJECT_TARGET			:= DMR_Test
+PROJECT_TARGET			:= DMC_NewTest
 
 ## 项目版本号（只要前三位，最后一位自动生成）
 
@@ -43,19 +43,17 @@ PROJECT_INTERNAL_INCLUDES	:= \
 ## 额外包含目录（多个，相对于包含根目录ROOT_INCLUDE_DIRECTORY）
 
 PROJECT_EXTERNAL_INCLUDES	:= \
-				dlna \
-				dlna/Functional \
-				dlna/MediaRendererCP \
-				dlna/CdsObjects \
-				dlna/ProtocolInfoParser \
-				dlna/DownloadController \
-				dlna/UploadController \
-				dlna/PushController \
-				dlna/MediaServerBrowser \
-				dlna/MediaRenderer \
-				dlna/HttpFiles \
-				dlna/DmsIntegration \
-				dlna_test/DMR \
+				../include/dlna \
+				../include/dlna/MediaRendererCP \
+				../include/dlna/CdsObjects \
+				../include/dlna/ProtocolInfoParser \
+				../include/dlna/DownloadController \
+				../include/dlna/UploadController \
+				../include/dlna/PushController \
+				../include/dlna/MediaServerBrowser \
+				../include/dlna/MediaRenderer \
+				../include/dlna/HttpFiles \
+				../include/dlna/DmsIntegration \
 				$(PROJECT_EXTERNAL_INCLUDES)
 
 ## 该项目特点的编译选项

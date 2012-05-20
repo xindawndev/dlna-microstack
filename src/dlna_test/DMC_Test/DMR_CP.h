@@ -37,7 +37,7 @@ void OnPlaySink( struct AVRendererConnection * avrc, int ErrorCode, void * tag )
 
     if ( !ErrorCode )
     {
-        printf( "OnPlaySink: Success!\n", ErrorCode );
+        printf( "OnPlaySink: Success!\n" );
         printf( "ProtocolInfo:%s\n", avrc->ProtocolInfo );	
         printf( "MediaUri:%s\n", avrc->MediaUri );	
         printf( "TrackUri:%s\n", avrc->TrackUri );
@@ -50,7 +50,7 @@ void OnSeekSink(struct UPnPService *sender,int ErrorCode,void *user, void *Tag)
 
     if ( !ErrorCode )
     {
-        printf( "OnSeekSink: Success!\n", ErrorCode );
+        printf( "OnSeekSink: Success!\n" );
     }
 }
 
@@ -60,7 +60,7 @@ void OnStopSink( struct AVRendererConnection * avrc, int ErrorCode, void * tag )
 
     if ( !ErrorCode )
     {
-        printf( "OnStopSink: Success!\n", ErrorCode );
+        printf( "OnStopSink: Success!\n" );
     }
 }
 
@@ -70,7 +70,7 @@ void OnPauseSink( struct AVRendererConnection * avrc, int ErrorCode, void * tag 
 
     if ( !ErrorCode )
     {
-        printf( "OnPauseSink: Success!\n", ErrorCode );
+        printf( "OnPauseSink: Success!\n" );
     }
 }
 
@@ -80,7 +80,7 @@ void OnNextSink( struct AVRendererConnection * avrc, int ErrorCode, void * tag )
 
     if ( !ErrorCode )
     {
-        printf( "OnNextSink: Success!\n", ErrorCode );
+        printf( "OnNextSink: Success!\n" );
     }
 }
 
@@ -90,7 +90,7 @@ void OnPrevSink( struct AVRendererConnection * avrc, int ErrorCode, void * tag )
 
     if ( !ErrorCode )
     {
-        printf( "OnPrevSink: Success!\n", ErrorCode );
+        printf( "OnPrevSink: Success!\n" );
     }
 }
 
@@ -99,7 +99,7 @@ void OnSetUriSink( struct AVRendererConnection * avrc, int ErrorCode, void * tag
     printf( "SetUriSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetUriSink: Success!\n", ErrorCode );
+        printf( "OnSetUriSink: Success!\n" );
     }
 }
 
@@ -108,7 +108,7 @@ void OnSetVolumeSink( struct AVRendererConnection * avrc, int ErrorCode, void * 
     printf( "OnSetVolumeSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetVolumeSink: Success!\n", ErrorCode );
+        printf( "OnSetVolumeSink: Success!\n" );
     }
 }
 
@@ -117,7 +117,7 @@ void OnSetMuteSink( struct AVRendererConnection * avrc, int ErrorCode, void * ta
     printf( "OnSetMuteSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetMuteSink: Success!\n", ErrorCode );
+        printf( "OnSetMuteSink: Success!\n" );
     }
 }
 
@@ -126,7 +126,7 @@ void OnSetPlayModeSink( struct AVRendererConnection * avrc, int ErrorCode, void 
     printf( "OnSetPlayModeSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetPlayModeSink: Success!\n", ErrorCode );
+        printf( "OnSetPlayModeSink: Success!\n" );
     }
 }
 
@@ -135,7 +135,7 @@ void OnGetMediaInfoSink( struct AVRendererConnection * avrc,int ErrorCode, int n
     printf( "OnGetMediaInfoSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnGetMediaInfoSink: Success!\n", ErrorCode );
+        printf( "OnGetMediaInfoSink: Success!\n" );
         printf( "NrTracks = %d, MediaDuration = %d, CurUrl = %s, NextUrl = %s\n", nrTracks, mediaDuration, curUrI, nextURI );
     }
 }
@@ -145,7 +145,7 @@ void OnGetPositionSink(struct AVRendererConnection * avrc, int ErrorCode, int Re
     printf( "OnGetPositionSink:ErrorCode:%d\n", ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnGetPositionSink: Success!\n", ErrorCode );
+        printf( "OnGetPositionSink: Success!\n" );
         printf( "RelativeSeconds = %d, AbsoluteSeconds = %d, RelativeCounter = %d, AbsoluteCounter = %d\n", RelativeSeconds, AbsoluteSeconds, RelativeCounter, AbsoluteCounter );
     }
 }

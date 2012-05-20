@@ -127,7 +127,6 @@ const char* ProtocolInfoList[] = {
 
 void Common__CP_IPAddressListChanged();
 
-#if defined(_POSIX)
 
 #if defined(_POSIX)
 
