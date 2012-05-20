@@ -160,7 +160,6 @@ int ILibTime_ParseEx(char *timeString, time_t *val);
 time_t ILibTime_Parse(char *timeString);
 char* ILibTime_Serialize(time_t timeVal);
 
-
 typedef void* ILibReaderWriterLock;
 ILibReaderWriterLock ILibReaderWriterLock_Create();
 ILibReaderWriterLock ILibReaderWriterLock_CreateEx(void *chain);
@@ -518,7 +517,6 @@ then the lifetime of the underlying string, you must copy the string.
     \{
 */
 
-
 //
 // Parses an XML string. Returns a tree of ILibXMLNode elements.
 //
@@ -823,7 +821,6 @@ int ILibGetLong(char *TestValue, int TestValueLength, long* NumericValue);
 int ILibGetULong(const char *TestValue, const int TestValueLength, unsigned long* NumericValue);
 int ILibFragmentText(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength, char **RetVal);
 int ILibFragmentTextLength(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength);
-
 
 /* Base64 handling methods */
 int ILibBase64Encode(unsigned char* input, const int inputlen, unsigned char** output);

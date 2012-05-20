@@ -12,7 +12,7 @@
 #if defined(WIN32) || defined(_WIN32_WCE)
 #include <STDDEF.H>
 #elif defined(_POSIX)
-#if defined(__APPLE__)
+#if defined(__APPLE__) 
     #include <malloc/malloc.h>
 #else
     #include <malloc.h>
