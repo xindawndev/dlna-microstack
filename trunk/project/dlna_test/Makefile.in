@@ -5,4 +5,7 @@ LOCAL_TYPE		:= dirs
 ## 子目录列表（如果为空，将自动搜索子目录）
 
 DIRECTORY_SUBS    	:= $(DIRECTORY_SUBS) \
-					   dlna_test \
+		 	dlna_test \
+			DMC_Test \
+			DMC_NewTest \
+			DMR_Test
