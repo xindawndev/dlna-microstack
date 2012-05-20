@@ -6,10 +6,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test_projects", "test_projects", "{6C024A72-22C7-4385-8F53-C4037327E65E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DMC_NewTest", "scripts\DMC_NewTest.vcproj", "{D38811C8-605A-4866-B7D3-DFEEC9E071D8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{856E3377-8CCD-40CE-9CE9-EFE563B9271C} = {856E3377-8CCD-40CE-9CE9-EFE563B9271C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DMC_Test", "scripts\DMC_Test.vcproj", "{60AB7181-8FE5-410B-B3A5-B1B6BF46CD34}"
+	ProjectSection(ProjectDependencies) = postProject
+		{856E3377-8CCD-40CE-9CE9-EFE563B9271C} = {856E3377-8CCD-40CE-9CE9-EFE563B9271C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DMR_Test", "scripts\DMR_Test.vcproj", "{6A9CD58F-B90A-4D2F-B281-232671902212}"
+	ProjectSection(ProjectDependencies) = postProject
+		{856E3377-8CCD-40CE-9CE9-EFE563B9271C} = {856E3377-8CCD-40CE-9CE9-EFE563B9271C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
