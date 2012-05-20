@@ -1,6 +1,6 @@
 ## 该项目默认的配置类型
 
-LOCAL_CONFIG			:= $(LOCAL_CONFIG) dynamic debug multi --enable-build_version --combine_static_lib=yes --publish=private:public
+LOCAL_CONFIG			:= $(LOCAL_CONFIG) dynamic debug multi --combine_static_lib=yes --publish=private:public
 
 ## 项目类型
 
@@ -8,7 +8,7 @@ PROJECT_TYPE			:= lib
 
 ## 生成目标名称（完整文件名称要根据类型PROJECT_TYPE、配置LOCAL_CONFIG、版本PROJECT_VERSION增加前缀、后缀）
 
-PROJECT_TARGET			:= ppbox
+PROJECT_TARGET			:= cppdynamiclib
 
 ## 项目版本号（只要前三位，最后一位自动生成）
 
@@ -16,7 +16,7 @@ PROJECT_VERSION			:=
 
 ## 项目版本定义文件
 
-PROJECT_VERSION_HEADER		:= ppbox/ppbox/Define.h
+#PROJECT_VERSION_HEADER		:= ppbox/ppbox/Define.h
 
 ## 指定源文件目录（该项目源文件的总目录，相对于源文件根目录ROOT_SOURCE_DIRECTORY，默认为LOCAL_NAME）
 
@@ -36,11 +36,11 @@ PROJECT_HEADER_DIRECTORY	:= .
 
 ## 项目预编译头文件
 
-PROJECT_COMMON_HEADERS  	:= ppbox/ppbox/Common.h
+#PROJECT_COMMON_HEADERS  	:= ppbox/ppbox/Common.h
 
 ## 额外包含目录（多个，相对于包含根目录ROOT_INCLUDE_DIRECTORY）
 
-PROJECT_EXTERNAL_INCLUDES	:= server_mod
+#PROJECT_EXTERNAL_INCLUDES	:= server_mod
 
 ## 该项目特点的编译选项
 
@@ -53,22 +53,10 @@ PROJECT_LINK_FLAGS		:= $(PROJECT_LINK_FLAGS)
 ## 该项目依赖的其他项目
 
 PROJECT_DEPENDS			:= \
-				/ppbox/httpd \
-				/ppbox/download \
-				/ppbox/rtspd \
-				/ppbox/httpd \
-				/ppbox/mux \
-				/ppbox/demux \
-				/ppbox/dac \
-				/ppbox/vod \
-				/ppbox/peer \
-				/ppbox/live \
-				/ppbox/certify \
-				/ppbox/common \
 				$(PROJECT_DEPENDS)
 
 ## 该项目特定的引用库
 
 PROJECT_DEPEND_LIBRARYS		:= $(PROJECT_DEPEND_LIBRARYS)
 
-PROJECT_VERSION_SCRIPT		:= Ppbox.map
+#PROJECT_VERSION_SCRIPT		:= Ppbox.map
