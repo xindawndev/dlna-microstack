@@ -776,6 +776,11 @@ int startAVRCP(int threadpool_size)
 #else
     pthread_create(&t,NULL,&start_chain,NULL);
 #endif
+    while (1)
+    {
+        PrintDmrList();
+        system("pause");
+    }
 
     return 0;
 }
@@ -788,6 +793,7 @@ void stopAVRCP()
     struct _tDmrInfo * Val = NULL;
 
     ILibStopChain(mavrcp.avrender_stackchain);
+    ILibThreadPool_Destroy(mavrcp.avrender_threadpool);
 
     freesafe(mavrcp.avrender_ip_addr_list);
     sem_destroy(&(mavrcp.avrender_lock));
@@ -806,4 +812,5 @@ void stopAVRCP()
 
     ILibHashTree_UnLock( mavrcp.avrender_list );
     ILibDestroyHashTree( mavrcp.avrender_list );
+    mavrcp.avrender_ip_addr_list = NULL;
 }
