@@ -4,15 +4,6 @@
 #include "ILibThreadPool.h"
 #include "MicroAVRCP.h"
 #include "DMRCP_ControlPoint.h"
-#if defined(WIN32)
-#   if defined(WINSOCK2)
-#       include <ws2tcpip.h>
-#       include <winsock2.h>
-#   elif defined(WINSOCK1)
-#       include <winsock.h>
-#       include <wininet.h>
-#endif
-#endif
 
 struct _tDmrInfo
 {
@@ -28,18 +19,10 @@ struct _tMAVRCP
     void * avrender_stackchain;
     void * avrender_threadpool;
     void * avrender_rendercp;
-#if defined(WIN32)
-    HANDLE ILib_IPAddressMonitorTerminator;
-    HANDLE ILib_IPAddressMonitorThread;
-    DWORD ILib_MonitorSocketReserved;
-    WSAOVERLAPPED ILib_MonitorSocketStateObject;
-    SOCKET ILib_MonitorSocket;
-#else
     void * avrender_ip_monitor_timer;
 
     int avrender_ip_addr_len;
     int * avrender_ip_addr_list;
-#endif
 } mavrcp;
 
 /* callback functions define */
@@ -716,29 +699,6 @@ void* pool_thread(void *args)
 }
 #endif
 
-#if defined(WIN32)
-
-void CALLBACK ILib_IPAddressMonitor(
-                                    IN DWORD dwError,
-                                    IN DWORD cbTransferred,
-                                    IN LPWSAOVERLAPPED lpOverlapped,
-                                    IN DWORD dwFlags
-                                    )
-{
-    RCP_IPAddressChanged(mavrcp.avrender_rendercp);
-
-    WSAIoctl(mavrcp.ILib_MonitorSocket,SIO_ADDRESS_LIST_CHANGE,NULL,0,NULL,0,&mavrcp.ILib_MonitorSocketReserved,&mavrcp.ILib_MonitorSocketStateObject,&ILib_IPAddressMonitor);
-}
-
-DWORD WINAPI ILib_IPAddressMonitorLoop(LPVOID args)
-{
-    mavrcp.ILib_MonitorSocket = socket(AF_INET,SOCK_DGRAM,0);
-    WSAIoctl(mavrcp.ILib_MonitorSocket,SIO_ADDRESS_LIST_CHANGE,NULL,0,NULL,0,&mavrcp.ILib_MonitorSocketReserved,&mavrcp.ILib_MonitorSocketStateObject,&ILib_IPAddressMonitor);
-    while(WaitForSingleObjectEx(mavrcp.ILib_IPAddressMonitorTerminator,INFINITE,TRUE)!=WAIT_OBJECT_0);
-    return 0;
-}
-
-#else
 void IPAddressMonitor(void *data)
 {
     int length;
@@ -760,7 +720,6 @@ void IPAddressMonitor(void *data)
 
     ILibLifeTime_Add(mavrcp.avrender_ip_monitor_timer, data, 4, (void *)&IPAddressMonitor, NULL);
 }
-#endif
 
 #if defined(WIN32)
 
@@ -786,7 +745,7 @@ int startAVRCP(int threadpool_size)
 {
     int count;
 #if defined(WIN32)
-    DWORD ptid = 0, ptid2;
+    DWORD ptid = 0;
 #else
     pthread_t t;
 #endif
@@ -810,14 +769,10 @@ int startAVRCP(int threadpool_size)
 
     RendererAdded = &OnAddMediaRenderer;
     RendererRemoved = &OnRemoveMediaRenderer;
-#if defined(WIN32)
-    mavrcp.ILib_IPAddressMonitorTerminator = CreateEvent(NULL,TRUE,FALSE,NULL);
-    mavrcp.ILib_IPAddressMonitorThread = CreateThread(NULL,0,&ILib_IPAddressMonitorLoop,NULL,0,&ptid2);
-#else
+
     mavrcp.avrender_ip_monitor_timer = ILibCreateLifeTime(mavrcp.avrender_stackchain);
     mavrcp.avrender_ip_addr_len = ILibGetLocalIPAddressList(&(mavrcp.avrender_ip_addr_list));
     ILibLifeTime_Add(mavrcp.avrender_ip_monitor_timer, NULL, 4, (void*)&IPAddressMonitor,NULL);
-#endif
 
 #if defined(WIN32)
     CreateThread(NULL, 0, &start_chain, NULL, 0, &ptid);
