@@ -787,7 +787,7 @@ void stopAVRCP()
 {
     void * dmr_enum = NULL;
     char Key[128] = { 0 };
-    int Len = 128, i = 0;
+    int Len = 128;
     struct _tDmrInfo * Val = NULL;
 
     ILibStopChain(mavrcp.avrender_stackchain);
