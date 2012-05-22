@@ -55,7 +55,6 @@
 #include <pthread.h>
 #endif /* WIN32 */
 
-
 #include "ILibParsers.h"
 #include "ILibWebServer.h"
 #include "ILibAsyncSocket.h"
@@ -69,7 +68,6 @@
 /* Forward references. */
 struct _DMR;
 typedef struct _DMR *DMR;
-
 
 /** \brief This is a function pointer definition for the event \ref _DMR::Event_SetAVTransportURI. */
 typedef int (*DMRCallback_SetAVTransportURI)(DMR instance, void* session, char* uri, struct CdsObject* data);

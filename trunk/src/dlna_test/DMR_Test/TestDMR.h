@@ -1,10 +1,9 @@
 #ifndef _TESTDMR_H_
 #define _TESTDMR_H_
 
-#include <DMRCommon.h>
 #include <DMR.h>
 
-extern struct _tDMRInfo DMRInfo;
+extern struct _tDMRInfo g_dmrInfo;
 
 char * BuildProtocolInfo(const char* infoList[]);
 void UpdateUi();
