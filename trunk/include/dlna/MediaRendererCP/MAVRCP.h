@@ -3,9 +3,6 @@
 
 #include <stdlib.h>
 
-/* av render handle define */
-typedef void * AVRHandle;
-
 /* av render info */
 struct _tAVRInfo
 {
@@ -15,25 +12,25 @@ struct _tAVRInfo
 
 enum _ePlayStateEnum
 {
-    AVRCP_PLAYING=0,                        // 播放中
-    AVRCP_STOPPED,                          // 已停止
-    AVRCP_PAUSED,                           // 已暂停
-    AVRCP_RECORDING,                        // 录制中
-    AVRCP_TRANSITIONING,                    // 传输中
-    AVRCP_NO_MEDIA,                         // 无文件
-    AVRCP_UNKNOWN                           // 未知
+    MAVRCP_PLAYING=0,                        // 播放中
+    MAVRCP_STOPPED,                          // 已停止
+    MAVRCP_PAUSED,                           // 已暂停
+    MAVRCP_RECORDING,                        // 录制中
+    MAVRCP_TRANSITIONING,                    // 传输中
+    MAVRCP_NO_MEDIA,                         // 无文件
+    MAVRCP_UNKNOWN                           // 未知
 };
 
 /* play mode enum */
 enum _ePlayModeEnum
 {
-    AVRCP_INVALID       =0x0000000,         // 无效
-    AVRCP_NORMAL        =0x0000001,         // 正常播放
-    AVRCP_REPEAT_ALL    =0x0000002,         // 重复所有
-    AVRCP_REPEAT_ONE    =0x0000004,         // 单个重复
-    AVRCP_RANDOM        =0x0000008,         // 随机播放
-    AVRCP_SHUFFLE       =0x0000010,         // 
-    AVRCP_INTRO         =0x0000020          // 
+    MAVRCP_INVALID       =0x0000000,         // 无效
+    MAVRCP_NORMAL        =0x0000001,         // 正常播放
+    MAVRCP_REPEAT_ALL    =0x0000002,         // 重复所有
+    MAVRCP_REPEAT_ONE    =0x0000004,         // 单个重复
+    MAVRCP_RANDOM        =0x0000008,         // 随机播放
+    MAVRCP_SHUFFLE       =0x0000010,         // 
+    MAVRCP_INTRO         =0x0000020          // 
 };
 
 /* render state info */
@@ -74,14 +71,14 @@ struct _tRenderStateInfo
     int *Mute;
 };
 
-/* callback functions declared                                          */
-typedef void (* Callback_AVRenderSink)(AVRHandle avhandle, char * udn, char * friendlyname);
-typedef void (* Callback_AVRenderUpdateSink)(AVRHandle avhandle, char * udn, char * friendlyname, struct _tRenderStateInfo renderstate);
+/* callback functions declared */
+typedef void (* Callback_AVRenderSink)( char * udn, char * friendlyname);
+typedef void (* Callback_AVRenderUpdateSink)( char * udn, char * friendlyname, struct _tRenderStateInfo renderstate);
 
-typedef void (* Callback_CommonSink)(AVRHandle avhandle, int ErrorCode);
-typedef void (* Callback_GetDevCapSink)(AVRHandle avhandle, int ErrorCode, char* PlayMedia, char* RecMedia, char* RecQualityModes);
-typedef void (* Callback_GetMediaInfoSink)(AVRHandle avhandle, int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
-typedef void (* Callback_GetPositionSink)(AVRHandle avhandle, int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
+typedef void (* Callback_CommonSink)( int ErrorCode);
+typedef void (* Callback_GetDevCapSink)( int ErrorCode, char* PlayMedia, char* RecMedia, char* RecQualityModes);
+typedef void (* Callback_GetMediaInfoSink)( int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
+typedef void (* Callback_GetPositionSink)( int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
 
 /* callback functions define */
 extern Callback_AVRenderSink           avrender_add         ;
@@ -106,34 +103,32 @@ extern Callback_GetPositionSink        getposition_callback ;
 /************************************************************************/
 /* Interface                                                            */
 /************************************************************************/
-void PrintDmrList( AVRHandle avhandle );
-char * GetDlnaDoc( AVRHandle avhandle, char * udn );
-char * GetDlnaCap( AVRHandle avhandle, char * udn );
-void GetDevCap( AVRHandle avhandle, char * udn );
-int SupportPlayMode( AVRHandle avhandle, char * udn, enum _ePlayModeEnum playmode );
-int SupportVolume( AVRHandle avhandle, char * udn );
-int SupportMute( AVRHandle avhandle, char * udn );
-void Play( AVRHandle avhandle, char * udn );
-void Seek( AVRHandle avhandle, char * udn, int pos );
-void Stop( AVRHandle avhandle, char * udn );
-void Pause( AVRHandle avhandle, char * udn );
-void Next( AVRHandle avhandle, char * udn );
-void Prev( AVRHandle avhandle, char * udn );
-void SetUri( AVRHandle avhandle, char * udn, char * uri );
+void printDmrList();
+char * getDlnaDoc( char * udn );
+char * getDlnaCap( char * udn );
+void getDevCap( char * udn );
+int supportPlayMode( char * udn, enum _ePlayModeEnum playmode );
+int supportVolume( char * udn );
+int supportMute( char * udn );
+void play( char * udn );
+void seek( char * udn, int pos );
+void stop( char * udn );
+void pause( char * udn );
+void next( char * udn );
+void prev( char * udn );
+void setUri( char * udn, char * uri );
 #if defined(INCLUDE_FEATURE_VOLUME)
-void SetVolume( AVRHandle avhandle, char * udn, int vol );
-void SetMute( AVRHandle avhandle, char * udn, int ismute );
+void setVolume( char * udn, int vol );
+void setMute( char * udn, int ismute );
 #endif
-void SetPlayMode( AVRHandle avhandle, char * udn, enum _ePlayModeEnum playmode );
-void GetMediaInfo( AVRHandle avhandle, char * udn );
-void GetPosition( AVRHandle avhandle, char * udn );
+void setPlayMode( char * udn, enum _ePlayModeEnum playmode );
+void getMediaInfo( char * udn );
+void getPosition( char * udn );
 
 /************************************************************************/
 /* Interface                                                            */
 /************************************************************************/
-AVRHandle createAVRCP(int threadpool_size);
-int startAVRCP(AVRHandle avhandle);
-void stopAVRCP(AVRHandle avhandle);
-void destoryAVRCP(AVRHandle avhandle);
+int startAVRCP(int threadpool_size);
+void stopAVRCP();
 
 #endif // __MAVRCP_H__

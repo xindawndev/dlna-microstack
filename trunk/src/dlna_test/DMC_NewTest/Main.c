@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "MAVRCP1.h"
+#include "MAVRCP.h"
 
 #if defined(WIN32)
 #include <windows.h>

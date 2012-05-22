@@ -305,7 +305,7 @@
 				Name="MediaRendererCP"
 				>
 				<File
-					RelativePath="..\..\..\include\dlna\MediaRendererCP\MAVRCP1.h"
+					RelativePath="..\..\..\include\dlna\MediaRendererCP\MAVRCP.h"
 					>
 				</File>
 				<File
@@ -533,7 +533,7 @@
 				Name="MediaRendererCP"
 				>
 				<File
-					RelativePath="..\..\..\src\dlna\MediaRendererCP\MAVRCP1.c"
+					RelativePath="..\..\..\src\dlna\MediaRendererCP\MAVRCP.c"
 					>
 				</File>
 				<File
