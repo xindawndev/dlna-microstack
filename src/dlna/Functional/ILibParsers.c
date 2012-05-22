@@ -3597,7 +3597,11 @@ unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *Th
 #ifdef WIN32
         if (setsockopt((SOCKET)*TheSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&ra, sizeof(ra)) < 0)
 #elif !defined(__SYMBIAN32__)
+#if defined(__APPLE__)
+        if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEPORT, (char*)&ra, sizeof(ra)) < 0)
+#else
         if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&ra, sizeof(ra)) < 0)
+#endif
 #else
         if(ILibSocketWrapper_SetReuseAddr((int)*TheSocket,1)<0)
 #endif

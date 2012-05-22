@@ -112,7 +112,11 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
     local.sin_port = htons(localPortStartRange);
 
 #if !defined(__SYMBIAN32__)
+#if defined(__APPLE__)
+    if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEPORT, (char*)&ra, sizeof(ra)) < 0)
+#else
     rv=setsockopt(newSocket, SOL_SOCKET, SO_REUSEADDR,(char*)&ra, sizeof(ra));
+#endif
 #else
     rv=ILibSocketWrapper_SetReuseAddr(newSocket,1);
 #endif
