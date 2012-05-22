@@ -9,22 +9,21 @@ struct _tDmrInfo
 {
     void * dmr_token;
     void * render;
-} DmrInfo;
+} ;
 
 struct _tMAVRCP
 {
-    int mavrcp_start;
-    sem_t mavrcp_lock;
-    void * mavrcp_dmr_tables;
+    void * avrender_list;
+    sem_t avrender_lock;
 
-    void * mavrcp_stackchain;
-    void * mavrcp_threadpool;
-    void * mavrcp_rendercp;
+    void * avrender_stackchain;
+    void * avrender_threadpool;
+    void * avrender_rendercp;
+    void * avrender_ip_monitor_timer;
 
-    void * mavrcp_ip_monitor_timer;
-    int mavrcp_ip_addr_len;
-    int * mavrcp_ip_addr_list;
-};
+    int avrender_ip_addr_len;
+    int * avrender_ip_addr_list;
+} mavrcp;
 
 /* callback functions define */
 Callback_AVRenderSink           avrender_add            = NULL;
@@ -65,7 +64,7 @@ void OnGetDevCapSink(struct AVRendererConnection * avrc,int ErrorCode, void *Tag
 
     if ( getdevcap_callback != NULL )
     {
-        getdevcap_callback(Tag, ErrorCode, PlayMedia, RecMedia, RecQualityModes);
+        getdevcap_callback(ErrorCode, PlayMedia, RecMedia, RecQualityModes);
     }
 }
 
@@ -75,7 +74,7 @@ void OnPlaySink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag )
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnPlaySink: Success!\n", ErrorCode );
+        printf( "OnPlaySink: Success!\n" );
         printf( "ProtocolInfo:%s\n", avrc->ProtocolInfo );	
         printf( "MediaUri:%s\n", avrc->MediaUri );	
         printf( "TrackUri:%s\n", avrc->TrackUri );
@@ -84,7 +83,7 @@ void OnPlaySink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag )
 
     if ( play_callback != NULL )
     {
-        play_callback(Tag, ErrorCode);
+        play_callback(ErrorCode);
     }
 }
 
@@ -94,13 +93,13 @@ void OnSeekSink(struct AVRendererConnection * avrc,int ErrorCode, void *Tag)
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSeekSink: Success!\n", ErrorCode );
+        printf( "OnSeekSink: Success!\n" );
     }
 #endif
 
     if ( seek_callback != NULL )
     {
-        seek_callback(Tag, ErrorCode);
+        seek_callback(ErrorCode);
     }
 }
 
@@ -110,13 +109,13 @@ void OnStopSink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag )
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnStopSink: Success!\n", ErrorCode );
+        printf( "OnStopSink: Success!\n" );
     }
 #endif
 
     if ( stop_callback != NULL )
     {
-        stop_callback(Tag, ErrorCode);
+        stop_callback(ErrorCode);
     }
 }
 
@@ -126,13 +125,13 @@ void OnPauseSink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag 
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnPauseSink: Success!\n", ErrorCode );
+        printf( "OnPauseSink: Success!\n" );
     }
 #endif
 
     if ( pause_callback != NULL )
     {
-        pause_callback(Tag, ErrorCode);
+        pause_callback(ErrorCode);
     }
 }
 
@@ -142,13 +141,13 @@ void OnNextSink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag )
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnNextSink: Success!\n", ErrorCode );
+        printf( "OnNextSink: Success!\n" );
     }
 #endif
 
     if ( next_callback != NULL )
     {
-        next_callback(Tag, ErrorCode);
+        next_callback(ErrorCode);
     }
 }
 
@@ -158,13 +157,13 @@ void OnPrevSink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag )
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnPrevSink: Success!\n", ErrorCode );
+        printf( "OnPrevSink: Success!\n" );
     }
 #endif
 
     if ( prev_callback != NULL )
     {
-        prev_callback(Tag, ErrorCode);
+        prev_callback(ErrorCode);
     }
 }
 
@@ -174,13 +173,13 @@ void OnSetUriSink( struct AVRendererConnection * avrc, int ErrorCode, void * Tag
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetUriSink: Success!\n", ErrorCode );
+        printf( "OnSetUriSink: Success!\n" );
     }
 #endif
 
     if ( seturi_callback != NULL )
     {
-        seturi_callback(Tag, ErrorCode);
+        seturi_callback(ErrorCode);
     }
 }
 
@@ -191,13 +190,13 @@ void OnSetVolumeSink( struct AVRendererConnection * avrc, int ErrorCode, void * 
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetVolumeSink: Success!\n", ErrorCode );
+        printf( "OnSetVolumeSink: Success!\n" );
     }
 #endif
 
     if ( setvol_callback != NULL )
     {
-        setvol_callback(Tag, ErrorCode);
+        setvol_callback(ErrorCode);
     }
 }
 
@@ -207,13 +206,13 @@ void OnSetMuteSink( struct AVRendererConnection * avrc, int ErrorCode, void * Ta
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetMuteSink: Success!\n", ErrorCode );
+        printf( "OnSetMuteSink: Success!\n" );
     }
 #endif
 
     if ( setmute_callback != NULL )
     {
-        setmute_callback(Tag, ErrorCode);
+        setmute_callback(ErrorCode);
     }
 }
 #endif
@@ -224,13 +223,13 @@ void OnSetPlayModeSink( struct AVRendererConnection * avrc, int ErrorCode, void 
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnSetPlayModeSink: Success!\n", ErrorCode );
+        printf( "OnSetPlayModeSink: Success!\n" );
     }
 #endif
 
     if ( setplaymode_callback != NULL )
     {
-        setplaymode_callback(Tag, ErrorCode);
+        setplaymode_callback(ErrorCode);
     }
 }
 
@@ -240,14 +239,14 @@ void OnGetMediaInfoSink( struct AVRendererConnection * avrc,int ErrorCode, int n
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnGetMediaInfoSink: Success!\n", ErrorCode );
+        printf( "OnGetMediaInfoSink: Success!\n" );
         printf( "NrTracks = %d, MediaDuration = %d, CurUrl = %s, NextUrl = %s\n", nrTracks, mediaDuration, curUrI, nextURI );
     }
 #endif
 
     if ( getmediainfo_callback != NULL )
     {
-        getmediainfo_callback(Tag, ErrorCode, nrTracks, mediaDuration, curUrI, nextURI);
+        getmediainfo_callback(ErrorCode, nrTracks, mediaDuration, curUrI, nextURI);
     }
 }
 
@@ -257,54 +256,48 @@ void OnGetPositionSink(struct AVRendererConnection * avrc, int ErrorCode, int Re
     printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
     if ( !ErrorCode )
     {
-        printf( "OnGetPositionSink: Success!\n", ErrorCode );
+        printf( "OnGetPositionSink: Success!\n" );
         printf( "RelativeSeconds = %d, AbsoluteSeconds = %d, RelativeCounter = %d, AbsoluteCounter = %d\n", RelativeSeconds, AbsoluteSeconds, RelativeCounter, AbsoluteCounter );
     }
 #endif
 
     if ( getposition_callback != NULL )
     {
-        getposition_callback(Tag, ErrorCode, RelativeSeconds, AbsoluteSeconds, RelativeCounter, AbsoluteCounter);
+        getposition_callback(ErrorCode, RelativeSeconds, AbsoluteSeconds, RelativeCounter, AbsoluteCounter);
     }
 }
 
 /************************************************************************/
 /* Interface                                                            */
 /************************************************************************/
-struct _tDmrInfo * _getDmrInfo( AVRHandle avhandle, char * udn )
+struct _tDmrInfo * _getDmrInfo( char * udn )
 {
     struct _tDmrInfo * ret_val = NULL;
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)avhandle;
-    if (p_mavrcp == NULL)
-        return NULL;
 
     if ( NULL == udn )
         return NULL;
 
-    if ( p_mavrcp->mavrcp_dmr_tables == NULL )
+    if ( mavrcp.avrender_list == NULL )
         return NULL;
 
-    ILibHashTree_Lock( p_mavrcp->mavrcp_dmr_tables );
-    ret_val = (struct _tDmrInfo *)ILibGetEntry(p_mavrcp->mavrcp_dmr_tables, (void *)udn, strlen(udn));
-    ILibHashTree_UnLock( p_mavrcp->mavrcp_dmr_tables );
+    ILibHashTree_Lock( mavrcp.avrender_list );
+    ret_val = (struct _tDmrInfo *)ILibGetEntry(mavrcp.avrender_list, (void *)udn, strlen(udn));
+    ILibHashTree_UnLock( mavrcp.avrender_list );
 
     return ret_val;
 }
 
-void PrintDmrList( AVRHandle avhandle )
+void printDmrList()
 {
     char Key[128] = { 0 };
     int Len = 128, i = 0;
     struct _tDmrInfo * Val = NULL;
     void * dmr_enum = NULL;
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)avhandle;
-    if (p_mavrcp == NULL)
-        return;
 
-    if ( p_mavrcp->mavrcp_dmr_tables == NULL ) return;
-    ILibHashTree_Lock( p_mavrcp->mavrcp_dmr_tables );
+    if ( mavrcp.avrender_list == NULL ) return;
+    ILibHashTree_Lock( mavrcp.avrender_list );
 
-    dmr_enum = ILibHashTree_GetEnumerator( p_mavrcp->mavrcp_dmr_tables );
+    dmr_enum = ILibHashTree_GetEnumerator( mavrcp.avrender_list );
     if ( dmr_enum == NULL ) return;
     while ( !ILibHashTree_MoveNext( dmr_enum ) )
     {
@@ -313,12 +306,12 @@ void PrintDmrList( AVRHandle avhandle )
     }
     ILibHashTree_DestroyEnumerator( dmr_enum );
 
-    ILibHashTree_UnLock( p_mavrcp->mavrcp_dmr_tables );
+    ILibHashTree_UnLock( mavrcp.avrender_list );
 }
 
-char * GetDlnaDoc( AVRHandle avhandle, char * udn)
+char * getDlnaDoc( char * udn)
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -328,9 +321,9 @@ char * GetDlnaDoc( AVRHandle avhandle, char * udn)
     return RCP_GetDLNADOC( Val->render );
 }
 
-char * GetDlnaCap( AVRHandle avhandle, char * udn )
+char * getDlnaCap( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -339,21 +332,20 @@ char * GetDlnaCap( AVRHandle avhandle, char * udn )
     return RCP_GetDLNACAP( Val->render );
 }
 
-void GetDevCap( AVRHandle avhandle, char * udn )
+void getDevCap( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
-    char * ret = NULL;
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_GetDeviceCap( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnGetDevCapSink );
+    RCP_GetDeviceCap( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetDevCapSink );
 }
 
-int SupportPlayMode( AVRHandle avhandle, char * udn, enum PlayModeEnum playmode )
+int supportPlayMode( char * udn, enum _ePlayModeEnum playmode )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -362,9 +354,9 @@ int SupportPlayMode( AVRHandle avhandle, char * udn, enum PlayModeEnum playmode 
     return RCP_SupportPlayMode( Val->render, playmode );
 }
 
-int SupportVolume( AVRHandle avhandle, char * udn )
+int supportVolume( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -373,9 +365,9 @@ int SupportVolume( AVRHandle avhandle, char * udn )
     return RCP_SupportVolume( Val->render );
 }
 
-int SupportMute( AVRHandle avhandle, char * udn )
+int supportMute( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -384,87 +376,87 @@ int SupportMute( AVRHandle avhandle, char * udn )
     return RCP_SupportMute( Val->render );
 }
 
-void Play( AVRHandle avhandle, char * udn )
+void play( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Play( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnPlaySink );
+    RCP_Play( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPlaySink );
 }
 
-void Seek( AVRHandle avhandle, char * udn, int pos )
+void seek( char * udn, int pos )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Seek( ((struct AVRenderer *)(Val->render))->Connection, pos, avhandle, OnSeekSink );
+    RCP_Seek( ((struct AVRenderer *)(Val->render))->Connection, pos, NULL, OnSeekSink );
 }
 
-void Stop( AVRHandle avhandle, char * udn )
+void stop( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Stop( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnStopSink );
+    RCP_Stop( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnStopSink );
 }
 
-void Pause( AVRHandle avhandle, char * udn )
+void pause( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Pause( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnPauseSink );
+    RCP_Pause( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPauseSink );
 }
 
-void Next( AVRHandle avhandle, char * udn )
+void next( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Next( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnNextSink );
+    RCP_Next( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnNextSink );
 }
 
-void Prev( AVRHandle avhandle, char * udn )
+void prev( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_Prev( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnPrevSink );
+    RCP_Prev( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPrevSink );
 }
 
-void SetUri( AVRHandle avhandle, char * udn, char * uri )
+void setUri( char * udn, char * uri )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_SetUri( ((struct AVRenderer *)(Val->render))->Connection, uri, avhandle, OnSetUriSink );
+    RCP_SetUri( ((struct AVRenderer *)(Val->render))->Connection, uri, NULL, OnSetUriSink );
 }
 
 #if defined(INCLUDE_FEATURE_VOLUME)
-void SetVolume( AVRHandle avhandle, char * udn, int vol )
+void setVolume( char * udn, int vol )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
@@ -473,49 +465,49 @@ void SetVolume( AVRHandle avhandle, char * udn, int vol )
     RCP_SetVolume( ((struct AVRenderer *)(Val->render))->Connection, "Master", ( char )( vol ), NULL, OnSetVolumeSink );
 }
 
-void SetMute( AVRHandle avhandle, char * udn, int ismute )
+void setMute( char * udn, int ismute )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_SetMute( ((struct AVRenderer *)(Val->render))->Connection, "Master", ismute, avhandle, OnSetMuteSink );
+    RCP_SetMute( ((struct AVRenderer *)(Val->render))->Connection, "Master", ismute, NULL, OnSetMuteSink );
 }
 #endif
 
-void SetPlayMode( AVRHandle avhandle, char * udn, enum PlayModeEnum playmode )
+void setPlayMode( char * udn, enum _ePlayModeEnum playmode )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_SetPlayMode( ((struct AVRenderer *)(Val->render))->Connection, playmode, avhandle, OnSetPlayModeSink );
+    RCP_SetPlayMode( ((struct AVRenderer *)(Val->render))->Connection, playmode, NULL, OnSetPlayModeSink );
 }
 
-void GetMediaInfo( AVRHandle avhandle, char * udn )
+void getMediaInfo( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_GetMediaInfo( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnGetMediaInfoSink );
+    RCP_GetMediaInfo( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetMediaInfoSink );
 }
 
-void GetPosition( AVRHandle avhandle, char * udn )
+void getPosition( char * udn )
 {
-    struct _tDmrInfo * Val = _getDmrInfo( avhandle, udn );
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
     {
         printf( "You choice a invalid device!\n" );
         return;
     }
-    RCP_GetPosition( ((struct AVRenderer *)(Val->render))->Connection, avhandle, OnGetPositionSink );
+    RCP_GetPosition( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetPositionSink );
 }
 
 /************************************************************************/
@@ -523,17 +515,12 @@ void GetPosition( AVRHandle avhandle, char * udn )
 /************************************************************************/
 void OnRenderStateChanged( struct AVRenderer * sender,struct AVRendererConnection * Connection )
 {
-    int i;
     struct _tRenderStateInfo renderstate;
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)RCPToken_GetTag(sender->Tag);
-
+    int i;
     memset( (void *)&renderstate, 0, sizeof(struct _tRenderStateInfo) );
 
-    sem_wait( &(p_mavrcp->mavrcp_lock) );
+    sem_wait( &(mavrcp.avrender_lock) );
 #if defined(_DEBUG) || defined(DEBUG)
-    //printf("/************************************************************************/\n");
-    //printf("========%s: %x\n", __FUNCTION__, (int)p_mavrcp);
-    //printf("/************************************************************************/\n");
 
     printf( "%s State changed                                       Begin\n", sender->FriendlyName );
     printf( "ProtocolInfo = %s\n", Connection->ProtocolInfo );
@@ -649,21 +636,16 @@ void OnRenderStateChanged( struct AVRenderer * sender,struct AVRendererConnectio
     renderstate.Channel                                 =Connection->Channel;
     renderstate.Volume                                  =Connection->Volume;
     renderstate.Mute                                    =Connection->Mute;
-    sem_post( &(p_mavrcp->mavrcp_lock ) );
+    sem_post( &(mavrcp.avrender_lock) );
     if (avrender_update != NULL)
     {
-        avrender_update(p_mavrcp, sender->device->UDN, sender->device->FriendlyName, renderstate);
+        avrender_update(sender->device->UDN, sender->device->FriendlyName, renderstate);
     }
 }
 
 void OnAddMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRenderer)
 {
     struct _tDmrInfo * dmr = NULL;
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)RCPToken_GetTag(mediaRendererToken);
-
-    printf("/************************************************************************/\n");
-    printf("========%s: %x\n", __FUNCTION__, (int)p_mavrcp);
-    printf("/************************************************************************/\n");
 
     dmr = ( struct _tDmrInfo * )malloc( sizeof( struct _tDmrInfo ) );
     if ( dmr == NULL )
@@ -676,27 +658,25 @@ void OnAddMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRender
     dmr->render = mediaRenderer;
     mediaRenderer->StateChanged = OnRenderStateChanged;
 
-    ILibAddEntry( p_mavrcp->mavrcp_dmr_tables, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ), ( void * )dmr );
+    ILibAddEntry( mavrcp.avrender_list, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ), ( void * )dmr );
     printf( "Add AVRender %s[%s]\n", mediaRenderer->FriendlyName, mediaRenderer->device->UDN );
     if ( avrender_add != NULL )
     {
-        avrender_add((void *)p_mavrcp, mediaRenderer->device->UDN, mediaRenderer->device->FriendlyName);
+        avrender_add(mediaRenderer->device->UDN, mediaRenderer->device->FriendlyName);
     }
 }
 
 void OnRemoveMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRenderer)
 {
     void * dmrinfo = NULL;
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)RCPToken_GetTag(mediaRendererToken);
-
-    dmrinfo = ILibGetEntry( p_mavrcp->mavrcp_dmr_tables, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
-    ILibDeleteEntry( p_mavrcp->mavrcp_dmr_tables, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
+    dmrinfo = ILibGetEntry( mavrcp.avrender_list, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
+    ILibDeleteEntry( mavrcp.avrender_list, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
     free( dmrinfo );
 
     printf( "Remove AVRender %s[%s]...\n", mediaRenderer->FriendlyName, mediaRenderer->device->UDN );
     if ( avrender_del != NULL )
     {
-        avrender_del((void *)p_mavrcp, mediaRenderer->device->UDN, mediaRenderer->device->FriendlyName);
+        avrender_del(mediaRenderer->device->UDN, mediaRenderer->device->FriendlyName);
     }
 }
 
@@ -705,14 +685,14 @@ void OnRemoveMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRen
 /************************************************************************/
 
 /* thread pool add */
-#if defined(_POSIX)
-void* pool_thread(void *args)
+#if defined(WIN32)
+DWORD WINAPI pool_thread(void *args)
 {
     ILibThreadPool_AddThread(args);
     return (0);
 }
 #else
-DWORD WINAPI pool_thread(void *args)
+void* pool_thread(void *args)
 {
     ILibThreadPool_AddThread(args);
     return (0);
@@ -724,123 +704,111 @@ void IPAddressMonitor(void *data)
     int length;
     int *list;
 
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)data;
     length = ILibGetLocalIPAddressList(&list);
-    if (length != p_mavrcp->mavrcp_ip_addr_len || memcmp((void *)list, (void *)p_mavrcp->mavrcp_ip_addr_list, sizeof(int)*length) != 0)
+    if (length != mavrcp.avrender_ip_addr_len || memcmp((void *)list, (void *)mavrcp.avrender_ip_addr_list, sizeof(int)*length) != 0)
     {
-        RCP_IPAddressChanged(p_mavrcp->mavrcp_rendercp);
+        RCP_IPAddressChanged(mavrcp.avrender_rendercp);
 
-        free(p_mavrcp->mavrcp_ip_addr_list);
-        p_mavrcp->mavrcp_ip_addr_list = list;
-        p_mavrcp->mavrcp_ip_addr_len = length;
+        freesafe(mavrcp.avrender_ip_addr_list);
+        mavrcp.avrender_ip_addr_list = list;
+        mavrcp.avrender_ip_addr_len = length;
     }
     else
     {
         free(list);
     }
 
-    ILibLifeTime_Add(p_mavrcp->mavrcp_ip_monitor_timer, data, 4, (void *)&IPAddressMonitor, NULL);
+    ILibLifeTime_Add(mavrcp.avrender_ip_monitor_timer, data, 4, (void *)&IPAddressMonitor, NULL);
 }
 
-AVRHandle createAVRCP(int threadpool_size)
+#if defined(WIN32)
+
+DWORD WINAPI start_chain(void *args)
 {
-    int count;
-#if defined(_POSIX)
-    pthread_t t;
+    ILibStartChain(mavrcp.avrender_stackchain);
+
+    return (0);
+}
+
 #else
-    DWORD ptid = 0, ptid2 = 0;
+
+void* start_chain(void *args)
+{
+    ILibStartChain(mavrcp.avrender_stackchain);
+
+    return (0);
+}
+
 #endif
 
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)malloc(sizeof(struct _tMAVRCP));
-    memset(p_mavrcp, 0, sizeof(struct _tMAVRCP));
+int startAVRCP(int threadpool_size)
+{
+    int count;
+#if defined(WIN32)
+    DWORD ptid = 0;
+#else
+    pthread_t t;
+#endif
 
-    p_mavrcp->mavrcp_start = 0;
-    sem_init(&(p_mavrcp->mavrcp_lock), 0, 1);
-    p_mavrcp->mavrcp_dmr_tables = ILibInitHashTree();
+    sem_init(&(mavrcp.avrender_lock), 0, 1);
+    mavrcp.avrender_list = ILibInitHashTree();
 
-    p_mavrcp->mavrcp_stackchain = ILibCreateChain();
-    p_mavrcp->mavrcp_threadpool = ILibThreadPool_Create();
+    mavrcp.avrender_stackchain = ILibCreateChain();
+    mavrcp.avrender_threadpool = ILibThreadPool_Create();
 
     for( count = 0; count < threadpool_size; ++count )
     {
 #if defined(WIN32)
-        CreateThread(NULL, 0, &pool_thread, p_mavrcp->mavrcp_threadpool, 0, &ptid);
+        CreateThread(NULL, 0, &pool_thread, mavrcp.avrender_threadpool, 0, &ptid);
 #else
-        pthread_create(&t,NULL,&pool_thread,p_mavrcp->mavrcp_threadpool);
+        pthread_create(&t,NULL,&pool_thread,mavrcp.avrender_threadpool);
 #endif
     }
 
-    p_mavrcp->mavrcp_rendercp = CreateRendererCP(p_mavrcp->mavrcp_stackchain);
-    RCPToken_SetTag((void *)p_mavrcp->mavrcp_rendercp, (void *)p_mavrcp);
+    mavrcp.avrender_rendercp = CreateRendererCP(mavrcp.avrender_stackchain);
 
     RendererAdded = &OnAddMediaRenderer;
     RendererRemoved = &OnRemoveMediaRenderer;
 
-    return (AVRHandle)(p_mavrcp);
-}
+    mavrcp.avrender_ip_monitor_timer = ILibCreateLifeTime(mavrcp.avrender_stackchain);
+    mavrcp.avrender_ip_addr_len = ILibGetLocalIPAddressList(&(mavrcp.avrender_ip_addr_list));
+    ILibLifeTime_Add(mavrcp.avrender_ip_monitor_timer, NULL, 4, (void*)&IPAddressMonitor,NULL);
 
-#if defined(_POSIX)
-void* start_chain(void *args)
-{
-    ILibStartChain(args);
-    return (0);
-}
+#if defined(WIN32)
+    CreateThread(NULL, 0, &start_chain, NULL, 0, &ptid);
 #else
-DWORD WINAPI start_chain(void *args)
-{
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)args;
-    p_mavrcp->mavrcp_start = 1;
-
-    ILibStartChain(p_mavrcp->mavrcp_stackchain);
-    p_mavrcp->mavrcp_start = 0;
-    return (0);
-}
+    pthread_create(&t,NULL,&start_chain,NULL);
 #endif
-
-int startAVRCP(AVRHandle avhandle)
-{
-#if defined(_POSIX)
-    pthread_t t;
-#else
-    DWORD ptid = 0;
-#endif
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)avhandle;
-    if (p_mavrcp == NULL) return -1;
-
-    p_mavrcp->mavrcp_ip_monitor_timer = ILibCreateLifeTime(p_mavrcp->mavrcp_stackchain);
-    p_mavrcp->mavrcp_ip_addr_len = ILibGetLocalIPAddressList(&(p_mavrcp->mavrcp_ip_addr_list));
-    ILibLifeTime_Add(p_mavrcp->mavrcp_ip_monitor_timer, p_mavrcp, 4, (void*)&IPAddressMonitor,NULL);
-
-//#if defined(_POSIX)
-//    pthread_create(&t,NULL,&start_chain,p_mavrcp);
-//#else
-//    CreateThread(NULL, 0, &start_chain, p_mavrcp, 0, &ptid);
-//#endif
-    start_chain(p_mavrcp);
 
     return 0;
 }
 
-void stopAVRCP(AVRHandle avhandle)
+void stopAVRCP()
 {
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)avhandle;
-    if (p_mavrcp == NULL) return;
-    if (!p_mavrcp->mavrcp_start) return;
-    ILibStopChain(p_mavrcp->mavrcp_stackchain);
-    p_mavrcp->mavrcp_start = 0;
-    freesafe(p_mavrcp->mavrcp_ip_addr_list);
-}
+    void * dmr_enum = NULL;
+    char Key[128] = { 0 };
+    int Len = 128, i = 0;
+    struct _tDmrInfo * Val = NULL;
 
-void destoryAVRCP(AVRHandle avhandle)
-{
-    struct _tMAVRCP * p_mavrcp = (struct _tMAVRCP *)avhandle;
-    if (p_mavrcp == NULL) return;
-    if (p_mavrcp->mavrcp_start)
+    ILibStopChain(mavrcp.avrender_stackchain);
+    ILibThreadPool_Destroy(mavrcp.avrender_threadpool);
+
+    freesafe(mavrcp.avrender_ip_addr_list);
+    sem_destroy(&(mavrcp.avrender_lock));
+
+    if ( mavrcp.avrender_list == NULL ) return;
+    ILibHashTree_Lock( mavrcp.avrender_list );
+
+    dmr_enum = ILibHashTree_GetEnumerator( mavrcp.avrender_list );
+    if ( dmr_enum == NULL ) return;
+    while ( !ILibHashTree_MoveNext( dmr_enum ) )
     {
-        stopAVRCP(avhandle);
+        ILibHashTree_GetValue( dmr_enum, (char **)&Key, &Len, ( ( void ** )( &Val ) ) );
+        freesafe(Val);
     }
-    sem_destroy(&(p_mavrcp->mavrcp_lock));
-    ILibDestroyHashTree( p_mavrcp->mavrcp_dmr_tables );
+    ILibHashTree_DestroyEnumerator( dmr_enum );
 
-    freesafe(p_mavrcp);
+    ILibHashTree_UnLock( mavrcp.avrender_list );
+    ILibDestroyHashTree( mavrcp.avrender_list );
+    mavrcp.avrender_ip_addr_list = NULL;
 }
