@@ -104,26 +104,26 @@ extern Callback_GetPositionSink        getposition_callback ;
 /* Interface                                                            */
 /************************************************************************/
 void printDmrList();
-char * getDlnaDoc( char * udn );
-char * getDlnaCap( char * udn );
-void getDevCap( char * udn );
-int supportPlayMode( char * udn, enum _ePlayModeEnum playmode );
-int supportVolume( char * udn );
-int supportMute( char * udn );
-void play( char * udn );
-void seek( char * udn, int pos );
-void stop( char * udn );
-void pause( char * udn );
-void next( char * udn );
-void prev( char * udn );
-void setUri( char * udn, char * uri );
+char * dmrGetDlnaDoc( char * udn );
+char * dmrGetDlnaCap( char * udn );
+void dmrGetDevCap( char * udn );
+int dmrSupportPlayMode( char * udn, enum _ePlayModeEnum playmode );
+int dmrSupportVolume( char * udn );
+int dmrSupportMute( char * udn );
+void dmrPlay( char * udn );
+void dmrSeek( char * udn, int pos );
+void dmrStop( char * udn );
+void dmrPause( char * udn );
+void dmrNext( char * udn );
+void dmrPrev( char * udn );
+void dmrSetUri( char * udn, char * uri );
 #if defined(INCLUDE_FEATURE_VOLUME)
-void setVolume( char * udn, int vol );
-void setMute( char * udn, int ismute );
+void dmrSetVolume( char * udn, int vol );
+void dmrSetMute( char * udn, int ismute );
 #endif
-void setPlayMode( char * udn, enum _ePlayModeEnum playmode );
-void getMediaInfo( char * udn );
-void getPosition( char * udn );
+void dmrSetPlayMode( char * udn, enum _ePlayModeEnum playmode );
+void dmrGetMediaInfo( char * udn );
+void dmrGetPosition( char * udn );
 
 /************************************************************************/
 /* Interface                                                            */

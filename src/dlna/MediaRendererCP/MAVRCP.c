@@ -309,7 +309,7 @@ void printDmrList()
     ILibHashTree_UnLock( mavrcp.avrender_list );
 }
 
-char * getDlnaDoc( char * udn)
+char * dmrGetDlnaDoc( char * udn)
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -321,7 +321,7 @@ char * getDlnaDoc( char * udn)
     return RCP_GetDLNADOC( Val->render );
 }
 
-char * getDlnaCap( char * udn )
+char * dmrGetDlnaCap( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -332,7 +332,7 @@ char * getDlnaCap( char * udn )
     return RCP_GetDLNACAP( Val->render );
 }
 
-void getDevCap( char * udn )
+void dmrGetDevCap( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -343,7 +343,7 @@ void getDevCap( char * udn )
     RCP_GetDeviceCap( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetDevCapSink );
 }
 
-int supportPlayMode( char * udn, enum _ePlayModeEnum playmode )
+int dmrSupportPlayMode( char * udn, enum _ePlayModeEnum playmode )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -354,7 +354,7 @@ int supportPlayMode( char * udn, enum _ePlayModeEnum playmode )
     return RCP_SupportPlayMode( Val->render, playmode );
 }
 
-int supportVolume( char * udn )
+int dmrSupportVolume( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -365,7 +365,7 @@ int supportVolume( char * udn )
     return RCP_SupportVolume( Val->render );
 }
 
-int supportMute( char * udn )
+int dmrSupportMute( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -376,7 +376,7 @@ int supportMute( char * udn )
     return RCP_SupportMute( Val->render );
 }
 
-void play( char * udn )
+void dmrPlay( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -387,7 +387,7 @@ void play( char * udn )
     RCP_Play( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPlaySink );
 }
 
-void seek( char * udn, int pos )
+void dmrSeek( char * udn, int pos )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -398,7 +398,7 @@ void seek( char * udn, int pos )
     RCP_Seek( ((struct AVRenderer *)(Val->render))->Connection, pos, NULL, OnSeekSink );
 }
 
-void stop( char * udn )
+void dmrStop( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -409,7 +409,7 @@ void stop( char * udn )
     RCP_Stop( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnStopSink );
 }
 
-void pause( char * udn )
+void dmrPause( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -420,7 +420,7 @@ void pause( char * udn )
     RCP_Pause( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPauseSink );
 }
 
-void next( char * udn )
+void dmrNext( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -431,7 +431,7 @@ void next( char * udn )
     RCP_Next( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnNextSink );
 }
 
-void prev( char * udn )
+void dmrPrev( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -442,7 +442,7 @@ void prev( char * udn )
     RCP_Prev( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnPrevSink );
 }
 
-void setUri( char * udn, char * uri )
+void dmrSetUri( char * udn, char * uri )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -454,7 +454,7 @@ void setUri( char * udn, char * uri )
 }
 
 #if defined(INCLUDE_FEATURE_VOLUME)
-void setVolume( char * udn, int vol )
+void dmrSetVolume( char * udn, int vol )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -465,7 +465,7 @@ void setVolume( char * udn, int vol )
     RCP_SetVolume( ((struct AVRenderer *)(Val->render))->Connection, "Master", ( char )( vol ), NULL, OnSetVolumeSink );
 }
 
-void setMute( char * udn, int ismute )
+void dmrSetMute( char * udn, int ismute )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -477,7 +477,7 @@ void setMute( char * udn, int ismute )
 }
 #endif
 
-void setPlayMode( char * udn, enum _ePlayModeEnum playmode )
+void dmrSetPlayMode( char * udn, enum _ePlayModeEnum playmode )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -488,7 +488,7 @@ void setPlayMode( char * udn, enum _ePlayModeEnum playmode )
     RCP_SetPlayMode( ((struct AVRenderer *)(Val->render))->Connection, playmode, NULL, OnSetPlayModeSink );
 }
 
-void getMediaInfo( char * udn )
+void dmrGetMediaInfo( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
@@ -499,7 +499,7 @@ void getMediaInfo( char * udn )
     RCP_GetMediaInfo( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetMediaInfoSink );
 }
 
-void getPosition( char * udn )
+void dmrGetPosition( char * udn )
 {
     struct _tDmrInfo * Val = _getDmrInfo( udn );
     if ( Val == NULL )
