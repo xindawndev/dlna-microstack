@@ -330,7 +330,7 @@ void* ILibCreateSSDPClientModule(void *chain, char* DeviceURN, int DeviceURNLeng
     // Populate the Prefix portion of the URN, for matching purposes
     RetVal->DeviceURN_Prefix                            = RetVal->DeviceURN;
     pr = ILibParseString(RetVal->DeviceURN,0,RetVal->DeviceURNLength,":",1);
-    RetVal->DeviceURN_PrefixLength          = (int)((pr->LastResult->data)-(RetVal->DeviceURN));
+    RetVal->DeviceURN_PrefixLength                      = (int)((pr->LastResult->data)-(RetVal->DeviceURN));
     pr->LastResult->data[pr->LastResult->datalength]    = 0;
     RetVal->BaseDeviceVersionNumber                     = atoi(pr->LastResult->data);
     ILibDestructParserResults(pr);

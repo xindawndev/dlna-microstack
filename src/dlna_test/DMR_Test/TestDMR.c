@@ -38,7 +38,7 @@ struct _tDMRInfo
 #endif
 };
 
-struct _tDMRInfo DMRInfo;
+struct _tDMRInfo g_dmrInfo;
 
 /**********/
 
@@ -83,25 +83,25 @@ char * BuildProtocolInfo(const char* infoList[])
 void UpdateUi()
 {
     printf( "----------------------------------------------------------Begin\n" );
-    printf( "|PlayState: %d\n", DMRInfo.playState );
-    printf( "|PlayMode: %d\n", DMRInfo.playMode );
-    printf( "|TrackUrl: %s\n", DMRInfo.trackUrl ? DMRInfo.trackUrl: "" );
-    printf( "|TransportUrl: %s\n", DMRInfo.transportUrl ? DMRInfo.transportUrl: "" );
-    printf( "|TrackDuration: %ld\n", DMRInfo.trackDuration );
-    printf( "|TrackNumber: %d\n", DMRInfo.trackNumber );
-    printf( "|TrackCount: %d\n", DMRInfo.trackCount );
-    printf( "|Stop: %s\n", DMRInfo.isstop ? "true" : "false" );
-    printf( "|Pause: %s\n", DMRInfo.ispause ? "true" : "false" );
+    printf( "|PlayState: %d\n", g_dmrInfo.playState );
+    printf( "|PlayMode: %d\n", g_dmrInfo.playMode );
+    printf( "|TrackUrl: %s\n", g_dmrInfo.trackUrl ? g_dmrInfo.trackUrl: "" );
+    printf( "|TransportUrl: %s\n", g_dmrInfo.transportUrl ? g_dmrInfo.transportUrl: "" );
+    printf( "|TrackDuration: %ld\n", g_dmrInfo.trackDuration );
+    printf( "|TrackNumber: %d\n", g_dmrInfo.trackNumber );
+    printf( "|TrackCount: %d\n", g_dmrInfo.trackCount );
+    printf( "|Stop: %s\n", g_dmrInfo.isstop ? "true" : "false" );
+    printf( "|Pause: %s\n", g_dmrInfo.ispause ? "true" : "false" );
 
 #if defined(USE_PLAYLISTS)
 #endif
 #if defined(INCLUDE_FEATURE_DISPLAY)
-    printf( "|Contrast: %d\n", DMRInfo.contrast );
-    printf( "|Brightness: %d\n", DMRInfo.brightness );
+    printf( "|Contrast: %d\n", g_dmrInfo.contrast );
+    printf( "|Brightness: %d\n", g_dmrInfo.brightness );
 #endif
 #if defined(INCLUDE_FEATURE_VOLUME)
-    printf( "|Volume: %d\n", DMRInfo.volume );
-    printf( "|Mute: %s\n", DMRInfo.mute ? "true" : "false" );
+    printf( "|Volume: %d\n", g_dmrInfo.volume );
+    printf( "|Mute: %s\n", g_dmrInfo.mute ? "true" : "false" );
 #endif
     printf( "----------------------------------------------------------End\n" );
 }
@@ -117,21 +117,21 @@ int _verifyMetadate( struct CdsObject * data )
 
 void _clearTrackUri( DMR instance, int update_dmr )
 {
-    String_Destroy( DMRInfo.trackUrl );
-    DMRInfo.trackUrl = NULL;
+    String_Destroy( g_dmrInfo.trackUrl );
+    g_dmrInfo.trackUrl = NULL;
 
-    CDS_ObjRef_Release( DMRInfo.currentTrackMetadata );
-    DMRInfo.currentTrackMetadata = NULL;
+    CDS_ObjRef_Release( g_dmrInfo.currentTrackMetadata );
+    g_dmrInfo.currentTrackMetadata = NULL;
 
-    DMRInfo.trackDuration = 0;
-    DMRInfo.trackNumber = 0;
+    g_dmrInfo.trackDuration = 0;
+    g_dmrInfo.trackNumber = 0;
 
     if ( update_dmr != 0 )
     {
-        DMR_StateChange_CurrentTrackURI( instance, DMRInfo.trackUrl);
-        DMR_StateChange_CurrentTrackMetaData( instance, DMRInfo.currentTrackMetadata );
-        DMR_StateChange_CurrentTrackDuration( instance, DMRInfo.trackDuration );
-        DMR_StateChange_CurrentTrack( instance, DMRInfo.trackNumber );
+        DMR_StateChange_CurrentTrackURI( instance, g_dmrInfo.trackUrl);
+        DMR_StateChange_CurrentTrackMetaData( instance, g_dmrInfo.currentTrackMetadata );
+        DMR_StateChange_CurrentTrackDuration( instance, g_dmrInfo.trackDuration );
+        DMR_StateChange_CurrentTrack( instance, g_dmrInfo.trackNumber );
     }
 }
 
@@ -139,67 +139,67 @@ void _clearTransportUri( DMR instance,  int update_dmr )
 {
     _clearTrackUri( instance, update_dmr );
 
-    String_Destroy( DMRInfo.transportUrl );
-    DMRInfo.transportUrl = NULL;
+    String_Destroy( g_dmrInfo.transportUrl );
+    g_dmrInfo.transportUrl = NULL;
 
-    CDS_ObjRef_Release( DMRInfo.currentAVTransportMetadata );
-    DMRInfo.currentAVTransportMetadata = NULL;
+    CDS_ObjRef_Release( g_dmrInfo.currentAVTransportMetadata );
+    g_dmrInfo.currentAVTransportMetadata = NULL;
 
-    DMRInfo.playState = DMR_PS_NoMedia;
-    DMRInfo.trackCount = 0;
+    g_dmrInfo.playState = DMR_PS_NoMedia;
+    g_dmrInfo.trackCount = 0;
 
     #ifdef USE_PLAYLISTS
-    if ( DMRInfo.trackManager != NULL )
+    if ( g_dmrInfo.trackManager != NULL )
     {
-        DMRInfo.trackManager->Destory( DMRInfo.trackManager );
-        DMRInfo.trackManager = NULL;
+        g_dmrInfo.trackManager->Destory( g_dmrInfo.trackManager );
+        g_dmrInfo.trackManager = NULL;
     }
     #endif
 
     if ( update_dmr != 0 )
     {
-        DMR_StateChange_AVTransportURI( instance, DMRInfo.transportUrl );
-        DMR_StateChange_AVTransportURIMetaData( instance, DMRInfo.currentAVTransportMetadata );
-        DMR_StateChange_TransportPlayState( instance, DMRInfo.playState );
-        DMR_StateChange_NumberOfTracks( instance, DMRInfo.trackCount );
+        DMR_StateChange_AVTransportURI( instance, g_dmrInfo.transportUrl );
+        DMR_StateChange_AVTransportURIMetaData( instance, g_dmrInfo.currentAVTransportMetadata );
+        DMR_StateChange_TransportPlayState( instance, g_dmrInfo.playState );
+        DMR_StateChange_NumberOfTracks( instance, g_dmrInfo.trackCount );
     }
 }
 
 int Callback_SetAVTransportURI(DMR instance, void* session, char* uri, struct CdsObject* data)
 {
     printf( "\n%d:%s(%s)\n", __LINE__, __FUNCTION__, uri ? uri : "" );
-    if ( DMRInfo.playState == DMR_PS_Paused || DMRInfo.playState == DMR_PS_Playing || DMRInfo.playState == DMR_PS_Transitioning )
-    {
-        CDS_ObjRef_Add( data );
-        return 715; // 忙
-    }
+    //if ( g_dmrInfo.playState == DMR_PS_Paused || g_dmrInfo.playState == DMR_PS_Playing || g_dmrInfo.playState == DMR_PS_Transitioning )
+    //{
+    //    CDS_ObjRef_Add( data );
+    //    return 715; // 忙
+    //}
 
-    if ( data != NULL && _verifyMetadate( data ) == 0 )
-    {
-        CDS_ObjRef_Release( data );
-        return 402; // 无效参数
-    }
+    //if ( data != NULL && _verifyMetadate( data ) == 0 )
+    //{
+    //    CDS_ObjRef_Release( data );
+    //    return 402; // 无效参数
+    //}
 
-    if ( uri == NULL )
-    {
-        _clearTransportUri( instance, 1 );
+    //if ( uri == NULL )
+    //{
+    //    _clearTransportUri( instance, 1 );
 
-        if ( data != NULL )
-        {
-            CDS_ObjRef_Release( data );
-        }
+    //    if ( data != NULL )
+    //    {
+    //        CDS_ObjRef_Release( data );
+    //    }
 
-        UpdateUi();
-    }
-    else if ( DMRInfo.transportUrl == NULL || strcmp( DMRInfo.transportUrl, uri ) != 0 )
-    {
-        BOOL changeState = TRUE;
-        DMR_PlayState oldState = DMRInfo.playState;
-        struct DLNAProtocolInfo * protocolInfo = NULL;
-        long contentLength = -1;
-        URIType type = UT_Unknown;
-        BOOL supportsByteRange = FALSE;
-    }
+    //    UpdateUi();
+    //}
+    //else if ( DMRInfo.transportUrl == NULL || strcmp( DMRInfo.transportUrl, uri ) != 0 )
+    //{
+    //    BOOL changeState = TRUE;
+    //    DMR_PlayState oldState = DMRInfo.playState;
+    //    struct DLNAProtocolInfo * protocolInfo = NULL;
+    //    long contentLength = -1;
+    //    URIType type = UT_Unknown;
+    //    BOOL supportsByteRange = FALSE;
+    //}
     return 0;
 }
 
@@ -212,8 +212,8 @@ int Callback_GetAVProtocolInfo(DMR instance, void* session, char** protocolInfo)
 int Callback_SetPlayMode(DMR instance, void* session, DMR_MediaPlayMode playMode)
 {
     printf( "\n%d:%s(%d)\n", __LINE__, __FUNCTION__, playMode );
-    DMRInfo.playMode = playMode;
-    DMR_StateChange_CurrentPlayMode( instance, DMRInfo.playMode );
+    g_dmrInfo.playMode = playMode;
+    DMR_StateChange_CurrentPlayMode( instance, g_dmrInfo.playMode );
 
     return 0;
 }
@@ -221,10 +221,10 @@ int Callback_SetPlayMode(DMR instance, void* session, DMR_MediaPlayMode playMode
 int Callback_Stop(DMR instance, void* session)
 {
     printf( "\n%d:%s()\n", __LINE__, __FUNCTION__ );
-    if ( DMRInfo.playState == DMR_PS_Playing || DMRInfo.playState == DMR_PS_Paused )
+    if ( g_dmrInfo.playState == DMR_PS_Playing || g_dmrInfo.playState == DMR_PS_Paused )
     {
         // RenderStop();
-        DMRInfo.isstop = TRUE;
+        g_dmrInfo.isstop = TRUE;
     }
 
     return 0;
@@ -246,16 +246,16 @@ BOOL _isImageClass( unsigned int mediaClass )
 int Callback_Play(DMR instance, void* session, char* playSpeed)
 {
     printf( "\n%d:%s(%s)\n", __LINE__, __FUNCTION__, playSpeed ? playSpeed : "" );
-    if (DMRInfo.playState == DMR_PS_Stopped || DMRInfo.playState == DMR_PS_Paused )
+    if (g_dmrInfo.playState == DMR_PS_Stopped || g_dmrInfo.playState == DMR_PS_Paused )
     {
         DMR_StateChange_TransportPlaySpeed( instance, "1" );
-        if ( DMRInfo.playState == DMR_PS_Paused )
+        if ( g_dmrInfo.playState == DMR_PS_Paused )
         {
             // RendererPause();
         }
         else
         {
-            if ( DMRInfo.playMode == DMR_MPM_Intro )
+            if ( g_dmrInfo.playMode == DMR_MPM_Intro )
             {
                 // RendererPlay( DMRInfo.trackUrl, INTRO_MILLISECONDS, GetTransferModeFromURL( DMRInfo.trackUrl, NULL ) );
             }
@@ -263,11 +263,11 @@ int Callback_Play(DMR instance, void* session, char* playSpeed)
             {
                 int image = 0;
 #ifdef USE_PLAYLISTS
-				if ( DMRInfo.trackManager == NULL )
+				if ( g_dmrInfo.trackManager == NULL )
 				{
-					if ( DMRInfo.currentTrackMetadata != NULL )
+					if ( g_dmrInfo.currentTrackMetadata != NULL )
 					{
-						if ( _isImageClass( DMRInfo.currentTrackMetadata->MediaClass ) == 1 )
+						if ( _isImageClass( g_dmrInfo.currentTrackMetadata->MediaClass ) == 1 )
 						{
 							image = 1;
 						}
@@ -275,23 +275,23 @@ int Callback_Play(DMR instance, void* session, char* playSpeed)
 				}
 				else
 				{
-					if ( DMRInfo.trackManager->TrackMetaData != NULL )
+					if ( g_dmrInfo.trackManager->TrackMetaData != NULL )
 					{
-						if ( _isImageClass( DMRInfo.trackManager->TrackMetaData->MediaClass ) == 1 )
+						if ( _isImageClass( g_dmrInfo.trackManager->TrackMetaData->MediaClass ) == 1 )
 						{
 							image = 1;
 						}
 					}
 				}
 
-				if ( DMRInfo.trackManager != NULL && DMRInfo.trackManager->TrackNumber < 0 )
+				if ( g_dmrInfo.trackManager != NULL && g_dmrInfo.trackManager->TrackNumber < 0 )
 				{
 					return 716;
 				}
 #else /* USE_PLAYLISTS */
-				if( DMRInfo.currentTrackMetadata != NULL )
+				if( g_dmrInfo.currentTrackMetadata != NULL )
 				{
-					if ( _isImageClass( DMRInfo.currentTrackMetadata->MediaClass ) == 1 )
+					if ( _isImageClass( g_dmrInfo.currentTrackMetadata->MediaClass ) == 1 )
 					{
 						image = 1;
 					}
@@ -314,11 +314,11 @@ int Callback_Play(DMR instance, void* session, char* playSpeed)
 int Callback_Pause(DMR instance, void* session)
 {
     printf( "\n%d:%s()\n", __LINE__, __FUNCTION__ );
-    if ( DMRInfo.playState == DMR_PS_Playing )
+    if ( g_dmrInfo.playState == DMR_PS_Playing )
     {
         DMR_StateChange_TransportPlaySpeed( instance, "1" );
         //RenderPause();
-        DMRInfo.ispause = TRUE;
+        g_dmrInfo.ispause = TRUE;
     }
     return 0;
 }
@@ -351,7 +351,7 @@ int Callback_Next(DMR instance, void* session)
 {
     printf( "\n%d:%s()\n", __LINE__, __FUNCTION__ );
 #ifdef USE_PLAYLISTS
-	if ( DMRInfo.trackManager != NULL )
+	if ( g_dmrInfo.trackManager != NULL )
 	{
 		BOOL replay = FALSE;
 		if ( /*RenderIsPlaying() == */TRUE )
@@ -359,7 +359,7 @@ int Callback_Next(DMR instance, void* session)
 			//RenderStop();
 			replay = TRUE;
 		}
-		PlayListManager_Next( DMRInfo.trackManager, TRUE );
+		PlayListManager_Next( g_dmrInfo.trackManager, TRUE );
 		if ( replay == TRUE )
 		{
 			//int duration = GetTrackDuration( DMRInfo.trackManager->TrackUrl, DMRInfo.trackManager->TrackMetaData);
@@ -382,7 +382,7 @@ int Callback_Previous(DMR instance, void* session)
 {
     printf( "\n%d:%s()\n", __LINE__, __FUNCTION__ );
 #ifdef USE_PLAYLISTS
-	if ( DMRInfo.trackManager != NULL )
+	if ( g_dmrInfo.trackManager != NULL )
 	{
 		BOOL replay = FALSE;
 		if ( /*RenderIsPlaying() ==*/ TRUE )
@@ -390,7 +390,7 @@ int Callback_Previous(DMR instance, void* session)
 			//RenderStop();
 			replay = TRUE;
 		}
-		PlayListManager_Prev( DMRInfo.trackManager, TRUE );
+		PlayListManager_Prev( g_dmrInfo.trackManager, TRUE );
 		if ( replay == TRUE )
 		{
 			//int duration = GetTrackDuration( DMRInfo.trackManager->TrackUrl, DMRInfo.trackManager->TrackMetaData );
@@ -433,7 +433,7 @@ int Callback_SelectPreset(DMR instance, void* session, char* presetName)
  int Callback_SetVolume(DMR instance, void* session, unsigned char volume)
  {
      printf( "\n%d:%s(%d)\n", __LINE__, __FUNCTION__, (int)volume );
-     DMRInfo.volume = (int)volume;
+     g_dmrInfo.volume = (int)volume;
 
 	DMR_StateChange_Volume( instance, volume );
 
@@ -444,7 +444,7 @@ int Callback_SelectPreset(DMR instance, void* session, char* presetName)
  int Callback_SetMute(DMR instance, void* session, BOOL mute)
  {
      printf( "\n%d:%s(%s)\n", __LINE__, __FUNCTION__, mute ? "true" : "false" );
-    DMRInfo.mute = mute;
+    g_dmrInfo.mute = mute;
 
 	DMR_StateChange_Mute( instance, mute );
 
@@ -459,7 +459,7 @@ int Callback_SelectPreset(DMR instance, void* session, char* presetName)
  int Callback_SetContrast(DMR instance, void* session, unsigned char contrast)
  {
      printf( "\n%d:%s(%d)\n", __LINE__, __FUNCTION__, (int)contrast );
-     DMRInfo.contrast = (int)contrast;
+     g_dmrInfo.contrast = (int)contrast;
 
 	DMR_StateChange_Contrast( instance, contrast );
 
@@ -470,7 +470,7 @@ int Callback_SelectPreset(DMR instance, void* session, char* presetName)
  int Callback_SetBrightness(DMR instance, void* session, unsigned char brightness)
  {
      printf( "\n%d:%s(%d)\n", __LINE__, __FUNCTION__, (int)brightness );
-     DMRInfo.brightness = (int)brightness;
+     g_dmrInfo.brightness = (int)brightness;
 
      DMR_StateChange_Brightness( instance, brightness );
 
