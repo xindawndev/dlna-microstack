@@ -4,6 +4,9 @@
 #include "ILibThreadPool.h"
 #include "MicroAVRCP.h"
 #include "DMRCP_ControlPoint.h"
+#if defined(_POSIX)
+#include <pthread.h>
+#endif
 
 struct _tDmrInfo
 {
