@@ -389,7 +389,12 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
 #if defined(MSG_NOSIGNAL)
             bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL);
 #else
+#if defined(WIN32)
             bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
+#else
+            signal(SIGPIPE, SIG_IGN);
+            bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
+#endif
 #endif
 #endif
         }
@@ -404,7 +409,12 @@ enum ILibAsyncSocket_SendStatus ILibAsyncSocket_SendTo(ILibAsyncSocket_SocketMod
 #if defined(MSG_NOSIGNAL)
             bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL,(struct sockaddr*)&dest,destlen);
 #else
+#if defined(WIN32)
             bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
+#else
+            signal(SIGPIPE, SIG_IGN);
+            bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
+#endif
 #endif
 #endif
         }
@@ -1113,7 +1123,10 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
                 bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL);
 #elif defined(__SYMBIAN32__)
                 bytesSent = ILibSocketWrapper_send(module->internalSocket, module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent);
+#elif defined(WIN32)
+                bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
 #else
+                signal(SIGPIPE, SIG_IGN);
                 bytesSent = send(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0);
 #endif
             }
@@ -1126,7 +1139,10 @@ void ILibAsyncSocket_PostSelect(void* socketModule,int slct, void *readset, void
                 bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,MSG_NOSIGNAL,(struct sockaddr*)&dest,destlen);
 #elif defined(__SYMBIAN32__)
                 bytesSent = ILibSocketWrapper_sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,(struct sockaddr*)&dest);
+#elif defined(WIN32)
+                bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
 #else
+                signal(SIGPIPE, SIG_IGN);
                 bytesSent = sendto(module->internalSocket,module->PendingSend_Head->buffer+module->PendingSend_Head->bytesSent,module->PendingSend_Head->bufferSize-module->PendingSend_Head->bytesSent,0,(struct sockaddr*)&dest,destlen);
 #endif
             }
