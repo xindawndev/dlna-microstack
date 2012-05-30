@@ -3,6 +3,7 @@
 
 #include "MediaServerCP_ControlPoint.h"
 #include "MediaServerControlPoint.h"
+#include "CdsDidlSerializer.h"
 #include "CdsObject.h"
 
 static void * dmsinfos = NULL;
@@ -20,10 +21,10 @@ struct CdsObject * getCdsObj( char * objid )
     struct CdsObject * object = NULL;
     struct CdsObject * obj = NULL;
 
-    if ( !resxml ) return;
+    if ( !resxml ) return NULL;
     ResultXmlLength = ILibTrimString( &resxml, (int)strlen(resxml) );
     resxml[ResultXmlLength] = 0;
-    if ( ResultXmlLength == 0 ) return;
+    if ( ResultXmlLength == 0 ) return NULL;
 
     root = ILibParseXML(resxml, 0, ResultXmlLength);
     if(root != NULL)
@@ -74,10 +75,10 @@ struct CdsResource * getCdsRes( char * objid )
     struct CdsObject * object = NULL;
     struct CdsResource * res = NULL;
 
-    if ( !resxml ) return;
+    if ( !resxml ) return NULL;
     ResultXmlLength = ILibTrimString( &resxml, (int)strlen(resxml) );
     resxml[ResultXmlLength] = 0;
-    if ( ResultXmlLength == 0 ) return;
+    if ( ResultXmlLength == 0 ) return NULL;
 
     root = ILibParseXML(resxml, 0, ResultXmlLength);
     if(root != NULL)

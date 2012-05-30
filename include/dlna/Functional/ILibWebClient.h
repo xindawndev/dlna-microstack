@@ -108,8 +108,9 @@ typedef void(*ILibWebClient_OnDisconnect)(ILibWebClient_StateObject sender, ILib
     \brief This is the number of times, an HTTP connection will be attempted, before it fails.
     \par
     This module utilizes an exponential backoff algorithm. That is, it will retry immediately, then it will retry after 1 second, then 2, then 4, etc.
+    modify by leochen: retry connect just one time
 */
-#define HTTP_CONNECT_RETRY_COUNT 4
+#define HTTP_CONNECT_RETRY_COUNT 0
 
 /*! \def INITIAL_BUFFER_SIZE
     \brief This initial size of the receive buffer
