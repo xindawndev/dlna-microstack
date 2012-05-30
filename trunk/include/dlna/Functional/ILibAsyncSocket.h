@@ -30,6 +30,11 @@
 */
 #define MEMORYCHUNKSIZE 4096
 
+/*
+add by leochen set connect timeout
+*/
+#define CONNECTTIME 5
+
 enum ILibAsyncSocket_SendStatus
 {
     ILibAsyncSocket_ALL_DATA_SENT                    = 0, /*!< All of the data has already been sent */

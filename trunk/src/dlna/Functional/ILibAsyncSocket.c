@@ -664,7 +664,7 @@ void ILibAsyncSocket_ConnectTo(void* socketModule, int localInterface, int remot
 #endif
     // Sometimes a Connection attempt can fail, without triggering the FD_SET. We will force
     // a failure after 30 seconds.
-    ILibLifeTime_Add(module->TimeoutTimer,module,30,&ILibAsyncSocket_ConnectTimeout,NULL);
+    ILibLifeTime_Add(module->TimeoutTimer,module,CONNECTTIME,&ILibAsyncSocket_ConnectTimeout,NULL);
     ILibForceUnBlockChain(module->Chain);
 }
 

@@ -1,18 +1,23 @@
 #ifndef _DMR_CP_H_
 #define _DMR_CP_H_
 
+extern "C" {
 #include "MicroAVRCP.h"
-
 #include "DMRCP_ControlPoint.h"
+};
+
+#include <map>
+#include <string>
 
 struct _tDmrInfo
 {
+    int index;
     void * dmr_token;
     void * render;
 } DmrInfo;
 
-static void * dmrinfos = NULL;
-static int g_dmr_flag = 0;
+static std::map<std::string, struct _tDmrInfo *> dmrinfos;
+static int g_dmr_count = 0;
 
 /************************************************************************/
 /* Callback Functions                                                   */
@@ -44,7 +49,7 @@ void OnPlaySink( struct AVRendererConnection * avrc, int ErrorCode, void * tag )
     }
 }
 
-void OnSeekSink(struct UPnPService *sender,int ErrorCode,void *user, void *Tag)
+void OnSeekSink(struct AVRendererConnection *sender,int ErrorCode, void *Tag)
 {
     printf( "OnSeekSink:ErrorCode:%d\n", ErrorCode );
 
@@ -161,48 +166,35 @@ struct _tDmrInfo * _getDmrInfo( int id )
     struct _tDmrInfo * Val = NULL;
     void * dmr_enum = NULL;
 
-    if ( dmrinfos == NULL ) return NULL;
+    if ( dmrinfos.empty() ) return NULL;
 
-    ILibHashTree_Lock( dmrinfos );
-    dmr_enum = ILibHashTree_GetEnumerator( dmrinfos );
-    if ( dmr_enum == NULL ) return NULL;
-
-    while ( !ILibHashTree_MoveNext( dmr_enum ) )
+    std::map<std::string, struct _tDmrInfo * >::iterator iter;
+    for (iter = dmrinfos.begin(); iter != dmrinfos.end(); ++iter)
     {
-        ILibHashTree_GetValue( dmr_enum, &Key, &Len, ( ( void ** )( &Val ) ) );
-        if ( id == i++ )
+        if (iter->second->index == id)
         {
-            found = 1;
-            break;
+            return iter->second;
         }
     }
 
-    ILibHashTree_DestroyEnumerator( dmr_enum );
+    return NULL;
 
-    ILibHashTree_UnLock( dmrinfos );
-    return ( found != 0 ) ? Val : NULL;
 }
 
 void PrintDmrList()
 {
     char Key[128] = { 0 };
-    int Len = 128, i = 0;
+    int Len = 128;
     struct _tDmrInfo * Val = NULL;
     void * dmr_enum = NULL;
 
-    if ( dmrinfos == NULL ) return;
-    ILibHashTree_Lock( dmrinfos );
+    if ( dmrinfos.empty() ) return;
 
-    dmr_enum = ILibHashTree_GetEnumerator( dmrinfos );
-    if ( dmr_enum == NULL ) return;
-    while ( !ILibHashTree_MoveNext( dmr_enum ) )
+    std::map<std::string, struct _tDmrInfo * >::iterator iter;
+    for (iter = dmrinfos.begin(); iter != dmrinfos.end(); ++iter)
     {
-        ILibHashTree_GetValue( dmr_enum, &Key, &Len, ( ( void ** )( &Val ) ) );
-        printf( "\t%d. %s [%s]\n", i++, ((struct AVRenderer*)(Val->render))->FriendlyName, ((struct AVRenderer*)(Val->render))->device->UDN );
+        printf( "\t%d. %s [%s]\n", iter->second->index, ((struct AVRenderer*)(iter->second->render))->FriendlyName, ((struct AVRenderer*)(iter->second->render))->device->UDN );
     }
-    ILibHashTree_DestroyEnumerator( dmr_enum );
-
-    ILibHashTree_UnLock( dmrinfos );
 }
 
 void GetDlnaDoc( int arg1 )
@@ -251,7 +243,7 @@ void SupportPlayMode( int arg1, int arg2 )
         printf( "You choiced a invalid device!\n" );
         return;
     }
-    printf( "%s\n", RCP_SupportPlayMode( Val->render, arg2 ) ? "Support this mode!" : "Not support!" );
+    printf( "%s\n", RCP_SupportPlayMode( (struct AVRenderer *)Val->render, (enum PlayModeEnum)arg2 ) ? "Support this mode!" : "Not support!" );
 }
 
 void SupportVolume( int arg1 )
@@ -262,7 +254,7 @@ void SupportVolume( int arg1 )
         printf( "You choiced a invalid device!\n" );
         return;
     }
-    printf( "%s\n", RCP_SupportVolume( Val->render ) ? "Support volume!" : "Not support volume!" );
+    printf( "%s\n", RCP_SupportVolume( (struct AVRenderer *)Val->render ) ? "Support volume!" : "Not support volume!" );
 }
 
 void SupportMute( int arg1 )
@@ -273,7 +265,7 @@ void SupportMute( int arg1 )
         printf( "You choiced a invalid device!\n" );
         return;
     }
-    printf( "%s\n", RCP_SupportMute( Val->render ) ? "Support mute!" : "Not support mute!" );
+    printf( "%s\n", RCP_SupportMute( (struct AVRenderer *)Val->render ) ? "Support mute!" : "Not support mute!" );
 }
 
 void Play( int arg1 )
@@ -383,7 +375,7 @@ void SetPlayMode( int arg1, int arg2 )
         printf( "You choiced a invalid device!\n" );
         return;
     }
-    RCP_SetPlayMode( ((struct AVRenderer *)(Val->render))->Connection, arg2, NULL, OnSetPlayModeSink );
+    RCP_SetPlayMode( ((struct AVRenderer *)(Val->render))->Connection, (enum PlayModeEnum)arg2, NULL, OnSetPlayModeSink );
 }
 
 void GetMediaInfo( int arg1 )
@@ -510,43 +502,41 @@ void OnRenderStateChanged( struct AVRenderer * sender,struct AVRendererConnectio
     //sem_post( gsem );
 }
 
+void deleteKey(std::string const & key)
+{
+    if (dmrinfos.empty()) return;
+    std::map<std::string, struct _tDmrInfo * >::iterator iter;
+    for (iter = dmrinfos.begin(); iter != dmrinfos.end(); ++iter)
+    {
+        if (iter->first == key)
+        {
+            free(iter->second);
+            dmrinfos.erase(iter);
+            return;
+        }
+    }
+}
+
 void OnAddMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRenderer)
 {
     struct _tDmrInfo * dmr;
-    if ( !g_dmr_flag )
-    {
-        dmrinfos = ILibInitHashTree();
-        //sem_init( gsem );
-        g_dmr_flag++;
-    }
 
     dmr = ( struct _tDmrInfo * )malloc( sizeof( struct _tDmrInfo ) );
 
     if ( dmr == NULL ) return;
 
+    dmr->index = g_dmr_count++;
     dmr->dmr_token = mediaRendererToken;
     dmr->render = mediaRenderer;
     mediaRenderer->StateChanged = OnRenderStateChanged;
-
-    ILibAddEntry( dmrinfos, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ), ( void * )dmr );
-    //printf( "[Leochen] AVRender USN: %s\n", mediaRenderer->device->UDN );
+    deleteKey(mediaRenderer->device->UDN);
+    dmrinfos[mediaRenderer->device->UDN] = dmr;
 }
 
 void OnRemoveMediaRenderer(void* mediaRendererToken, struct AVRenderer* mediaRenderer)
 {
-    void * dmrinfo;
-
-    if ( !dmrinfos ) return;
-    dmrinfo = ILibGetEntry( dmrinfos, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
-    ILibDeleteEntry( dmrinfos, mediaRenderer->device->UDN, strlen( mediaRenderer->device->UDN ) );
-    free( dmrinfo );
-
-    if ( !( --g_dmr_flag ) )
-    {
-        ILibDestroyHashTree( dmrinfos );
-        dmrinfos = NULL;
-    }
-    //printf( "[Leochen] AVRender %s[%s] leave...\n", mediaRenderer->FriendlyName, mediaRenderer->device->UDN );
+    if ( dmrinfos.empty() ) return;
+    deleteKey(mediaRenderer->device->UDN);
 }
 
 #endif // _DMR_CP_H_
