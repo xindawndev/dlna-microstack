@@ -3186,7 +3186,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3282,7 +3284,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3409,7 +3413,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned int,char*,char*,char*,char*,char*,char*,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3606,7 +3612,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned int,char*,char*,char*,char*,char*,int,int))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3780,7 +3788,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3899,7 +3909,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -3992,7 +4004,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4037,7 +4051,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4082,7 +4098,10 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
+
             free(_InvokeData);
             return;
         }
@@ -4127,7 +4146,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4172,7 +4193,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4217,7 +4240,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4262,7 +4287,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4307,7 +4334,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4352,7 +4381,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -4410,7 +4441,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -4511,7 +4544,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,int,int,char*,char*,int,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -4672,7 +4707,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -4781,7 +4818,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,int,int,int))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -4894,7 +4933,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -4987,7 +5028,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5080,7 +5123,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5173,7 +5218,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5266,7 +5313,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5359,7 +5408,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5452,7 +5503,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5545,7 +5598,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5637,7 +5692,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,int))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5730,7 +5787,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,int))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5824,7 +5883,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -5917,7 +5978,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6010,7 +6073,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6103,7 +6168,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6196,7 +6263,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,unsigned short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6289,7 +6358,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6383,7 +6454,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,short,short))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6485,7 +6558,9 @@ struct packetheader *header,
                 {
                     /* Connection Failed */
                     ((void (*)(struct UPnPService*,int,void*,char*))_InvokeData->CallbackPtr)(Service,IsInterrupt==0?-1:IsInterrupt,_InvokeData->User,INVALID_DATA);
+                    DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
                     DMRCP_Release(Service->Parent);
+                    DMRCP_DestructUPnPDevice(Service->Parent);
                     free(_InvokeData);
                     return;
                 }
@@ -6566,7 +6641,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6611,7 +6688,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6656,7 +6735,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6701,7 +6782,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6746,7 +6829,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6791,7 +6876,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6836,7 +6923,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6881,7 +6970,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6926,7 +7017,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -6971,7 +7064,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7016,7 +7111,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7061,7 +7158,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7106,7 +7205,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7151,7 +7252,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7196,7 +7299,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7241,7 +7346,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
@@ -7286,7 +7393,9 @@ struct packetheader *header,
         {
             /* Connection Failed */
             ((void (*)(struct UPnPService*,int,void*))_InvokeData->CallbackPtr)(Service,-1,_InvokeData->User);
+            DMRCP_CP_ProcessDeviceRemoval(((struct DMRCP_CP *)(Service->Parent->CP)), Service->Parent);
             DMRCP_Release(Service->Parent);
+            DMRCP_DestructUPnPDevice(Service->Parent);
             free(_InvokeData);
             return;
         }
