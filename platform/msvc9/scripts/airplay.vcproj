@@ -179,6 +179,10 @@
 				RelativePath="..\..\..\src\airplay\AirplayServer.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\src\airplay\HttpParser.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -187,10 +191,6 @@
 			>
 			<File
 				RelativePath="..\..\..\include\airplay\AirplayServer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\airplay\HttpParser.cpp"
 				>
 			</File>
 			<File
