@@ -24,15 +24,16 @@ public:
 
     bool plist_dict_get_size(plist_t node);
 
-    plist_t plist_dict_get_item(plist_t node, const char* key );
+    plist_t plist_dict_get_item(plist_t node, const char* key);
 
-    void plist_get_real_val(plist_t node, double *val) {}
+    void plist_get_real_val(plist_t node, double *val);
 
-    void plist_get_string_val(plist_t node, char **val) {}
+    void plist_get_string_val(plist_t node, char **val);
 
-    void plist_free_string_val(char *val) {}
+    void plist_free_string_val(char *val);
 
-    void plist_free(plist_t plist ) {}
+    void plist_free(plist_t plist);
+
 private:
     HINSTANCE m_dll_instance_;
 };
