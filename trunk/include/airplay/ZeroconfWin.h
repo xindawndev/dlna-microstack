@@ -1,16 +1,19 @@
 #include <memory>
 
-#include "airplay/Zeroconf.h"
+//#include "airplay/Zeroconf.h"
 #include "airplay/Lock.h"
 #include <dns_sd.h>
+#include <string>
+#include <map>
 
-class ZeroconfWin : public Zeroconf
+class ZeroconfWin //: public Zeroconf
 {
 public:
     ZeroconfWin();
     ~ZeroconfWin();
 
 protected:
+public:
     bool do_publish_service(const std::string& fcr_identifier,
         const std::string& fcr_type,
         const std::string& fcr_name,
