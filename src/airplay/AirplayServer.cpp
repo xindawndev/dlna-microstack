@@ -1,4 +1,10 @@
-#include "AirPlayServer.h"
+#include "airplay/AirPlayServer.h"
+#include "airplay/Md5.h"
+#include "airplay/HttpParser.h"
+#include "airplay/DllLibPlist.h"
+
+#include <time.h>
+#include <stdlib.h>
 
 #if defined(_WIN32)
 #define close closesocket
@@ -103,9 +109,29 @@ const char *eventStrings[] = {"playing", "paused", "loading", "stopped"};
 #define AUTH_REALM "AirPlay"
 #define AUTH_REQUIRED "WWW-Authenticate: Digest realm=\""  AUTH_REALM  "\", nonce=\"%s\"\r\n"
 
+DWORD WINAPI WorkThread(void *args)
+{
+    AirplayServer::get_instance()->process();
+    return 0;
+}
+
+void AirplayServer::create()
+{
+    DWORD ptid = 0;
+    CreateThread(NULL, 0, &WorkThread, NULL, 0, &ptid);
+}
+
 bool AirplayServer::start_server(int port, bool nonlocal)
 {
     stop_server(true);
+
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    wVersionRequested = MAKEWORD( 2, 0 );
+    if (WSAStartup( wVersionRequested, &wsaData ) != 0) {
+        return false;
+    }
+
     server_instance_ = new AirplayServer(port, nonlocal);
     if (server_instance_->_initialize()) {
         server_instance_->create();
@@ -134,11 +160,12 @@ bool AirplayServer::_set_internal_credentials(bool usepwd, const std::string & p
 void AirplayServer::stop_server(bool wait)
 {
     if (server_instance_) {
-        server_instance_->stop_thread(wait);
+        //server_instance_->stop_thread(wait);
         if (wait) {
             delete server_instance_;
             server_instance_ = NULL;
         }
+        WSACleanup();
     }
 }
 
@@ -281,9 +308,9 @@ AirplayServer::TcpClient::TcpClient(const TcpClient & copy)
 
 AirplayServer::TcpClient::~TcpClient()
 {
-    if (m_pLm_plib_plist_ibPlist->IsLoaded())
+    if (m_plib_plist_->is_loaded())
     {
-        m_plib_plist_->Unload();
+        m_plib_plist_->unload();
     }
     delete m_plib_plist_;
 }
@@ -302,7 +329,7 @@ void AirplayServer::TcpClient::push_buffer(AirplayServer * host, const char * bu
         std::string resp_header, resp_body;
         std::string reverse_header, reverse_body;
 
-        int status = ;
+        int status = _process_request(resp_header, resp_body, reverse_header, reverse_body, session_id);
         std::string status_msg = "OK";
         int reverse_socket = INVALID_SOCKET;
 
@@ -337,18 +364,52 @@ void AirplayServer::TcpClient::push_buffer(AirplayServer * host, const char * bu
             resp += resp_header;
         }
         if (resp_body.size() > 0) {
-
+            sprintf(buf, "%sContent-Length: %d\r\n", resp.c_str(), resp_body.size());
+            resp = buf;
         }
+        resp += "\r\n";
+
+        if (resp_body.size() > 0) {
+            resp + reverse_body;
+        }
+
+        if (status != AIRPLAY_STATUS_NO_RESPONSE_NEEDED) {
+            send(m_socket_, resp.c_str(), resp.size(), 0);
+        }
+
+        if (reverse_header.size() > 0 && reverse_sockets.find(session_id) != reverse_sockets.end())
+        {
+            //search the reverse socket to this sessionid
+            sprintf(buf, "POST /event HTTP/1.1\r\n");
+            resp = buf;
+            reverse_socket = reverse_sockets[session_id]; //that is our reverse socket
+            resp += reverse_header;
+        }
+        resp += "\r\n";
+
+        if (reverse_body.size() > 0) {
+            resp += reverse_body;
+        }
+
+        if (reverse_socket != INVALID_SOCKET) {
+            send(reverse_socket, resp.c_str(), resp.size(), 0);//send the event status on the eventSocket
+        }
+
+        // We need a new parser...
+        delete m_http_parser_;
+        m_http_parser_ = new HttpParser;
     }
 }
 
 void AirplayServer::TcpClient::disconnect()
 {
     if (m_socket_ != INVALID_SOCKET) {
-        Lock(m_cri_section_);
-        shutdown(m_socket_);
+        m_crit_section_.lock();
+        shutdown(m_socket_, SHUT_RDWR);
+        close(m_socket_);
         m_socket_ = INVALID_SOCKET;
         delete m_http_parser_;
+        m_crit_section_.unlock();
     }
 }
 
@@ -393,10 +454,30 @@ void AirplayServer::TcpClient::_compose_auth_request_answer(std::string & resp_h
     char buf[256] = {0};
     sprintf(buf, "%i", random);
     random_str = buf;
-    m_auth_nonce_ = Md5(random_str);
+    m_auth_nonce_ = Md5::GetMD5(random_str);
     sprintf(buf, AUTH_REQUIRED, m_auth_nonce_);
     resp_header = buf;
     resp_body.clear();
+}
+
+std::string str_to_lower(std::string & str)
+{
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str[i] >= 'A' && str[i] <= 'Z') {
+            str[i] |= 0x20;
+        }
+    }
+    return str;
+}
+
+std::string str_to_upper(std::string & str)
+{
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str[i] >= 'a' && str[i] <= 'z') {
+            str[i] &= 0xdf;
+        }
+    }
+    return str;
 }
 
 std::string calc_response(const std::string& username,
@@ -410,15 +491,143 @@ std::string calc_response(const std::string& username,
     std::string ha1;
     std::string ha2;
 
-    ha1 = Md5(username + ":" + realm + ":" + password);
-    ha2 = Md5(method + ":" + digestUri);
+    ha1 = Md5::GetMD5(username + ":" + realm + ":" + password);
+    ha2 = Md5::GetMD5(method + ":" + digestUri);
 
-    resp = Md5(ha1.tolower() + ":" + nonce + ":" + ha2.tolower());
-    return resp.tolower();
+    resp = Md5::GetMD5(str_to_lower(ha1) + ":" + nonce + ":" + str_to_lower(ha2));
+    return str_to_lower(resp);
+}
+
+int split_string(const std::string & s, std::string delim, std::vector<std::string> * ret)
+{
+    size_t last = 0;
+    size_t index = s.find_first_of(delim, last);
+    while (index != std::string::npos) {
+        ret->push_back(s.substr(last, index - last));
+        last = index + 1;
+        index = s.find_first_of(delim, last);
+    }
+    if (index - last > 0) {
+        ret->push_back(s.substr(last, index - last));
+    }
+    return ret->size();
 }
 
 std::string get_fild_from_string(const std::string & str, const char * field)
 {
     std::string tmp_str;
-    std::tmp_ar1, tmp_ar2;
+    std::vector<std::string> tmp_ar1, tmp_ar2;
+    split_string(str, ",", &tmp_ar1);
+
+    for (unsigned int i = 0; i < tmp_ar1.size(); ++i) {
+        if (tmp_ar1[i].find_first_of(field) != std::string::npos) {
+            if (split_string(tmp_ar1[i], "=", &tmp_ar2) == 2) {
+                //tmp_ar2[1].remove('\"');// 删除 "
+                return tmp_ar2[1];
+            }
+        }
+    }
+
+    return "";
+}
+
+bool AirplayServer::TcpClient::_check_authorization(const std::string & auth_str, const std::string & method, const std::string & uri)
+{
+    bool auth_valid = true;
+    std::string username;
+
+    if (auth_str.empty()) return false;
+
+    username = get_fild_from_string(auth_str, "username");
+    if (username.empty())
+        auth_valid = false;
+
+    if (auth_valid)
+        if (get_fild_from_string(auth_str, "realm") != AUTH_REALM)
+            auth_valid = false;
+
+    if (auth_valid)
+        if (get_fild_from_string(auth_str, "nonce") != m_auth_nonce_)
+            auth_valid = false;
+
+    if (auth_valid)
+        if (get_fild_from_string(auth_str, "uri") != uri)
+            auth_valid = false;
+
+    if (auth_valid) {
+        std::string  realm = AUTH_REALM;
+        std::string our_resp = calc_response(username, server_instance_->m_pwd_, realm, method, uri, m_auth_nonce_);
+        std::string their_resp = get_fild_from_string(auth_str, "response");
+
+        if (their_resp != our_resp) { // warning: 需要大小写不敏感比较
+            auth_valid = false;
+            printf("AirAuth: response mismatch - our: %s theirs: %s\n", our_resp.c_str(), their_resp.c_str());
+        } else {
+            printf("AirAuth: successfull authentication from AirPlay client\n");
+        }
+    }
+
+    m_authenticated_ = auth_valid;
+
+    return m_authenticated_;
+}
+
+int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::string & resp_body, std::string & reverse_header, std::string & reverse_body, std::string & session_id)
+{
+    std::string method          = m_http_parser_->getMethod();
+    std::string uri             = m_http_parser_->getUri();
+    std::string query_str       = m_http_parser_->getQueryString();
+    std::string body            = m_http_parser_->getBody();
+    std::string content_type    = m_http_parser_->getValue("content-type");
+    std::string authorization   = m_http_parser_->getValue("authorization");
+    session_id                  = m_http_parser_->getValue("x-apple-session-id");
+    int status                  = AIRPLAY_STATUS_OK;
+    bool need_auth              = false;
+
+    if (server_instance_->m_use_pwd_ && !m_authenticated_)
+        need_auth = true;
+
+    int start_qs = uri.find('?');
+    if (start_qs != std::string::npos)
+        uri = uri.substr(0, start_qs);
+
+    if (uri == "/reverse") {
+        status = AIRPLAY_STATUS_SWITCHING_PROTOCOLS;
+        resp_header = "Upgrade: PTTH/1.0\r\nConnection: Upgrade\r\n";
+    } else if (uri == "/rate") {
+        const char * found = strstr(query_str.c_str(), "value=");
+    } else if (uri == "/volume") {
+        
+    } else if (uri == "/play") {
+        
+    } else if (uri == "/scrub") {
+        
+    } else if (uri == "/stop") {
+
+    } else if (uri == "/photo") {
+
+    } else if (uri == "/playback-info") {
+
+    } else if (uri == "/server-info") {
+
+    } else if (uri == "/slideshow-features") {
+
+    } else if (uri == "/authorize") {
+
+    } else if (uri == "/setProperty") {
+
+    } else if (uri == "/getProperty") {
+
+    } else if (uri == "200") {
+
+    } else {
+        printf("AIRPLAY Server: unhandled request [%s]\n", uri.c_str());
+        status = AIRPLAY_STATUS_NOT_IMPLEMENTED;
+    }
+
+    if (status == AIRPLAY_STATUS_NEED_AUTH) {
+        _compose_auth_request_answer(resp_header, resp_body);
+    }
+
+    return status;
 }
