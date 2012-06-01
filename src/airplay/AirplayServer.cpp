@@ -209,6 +209,7 @@ void AirplayServer::process()
                     nread = recv(sock, (char *)&buffer, RECEIVEBUFFER, 0);
                     if (nread > 0) {
                         std::string sid;
+                        printf("recv data: %dbytes\n", nread);
                         m_connection_[i].push_buffer(this, buffer, nread, sid, m_reverse_sockets_);
                     } else {
                         perror("disconnection");
@@ -559,7 +560,8 @@ bool AirplayServer::TcpClient::_check_authorization(const std::string & auth_str
         std::string our_resp = calc_response(username, server_instance_->m_pwd_, realm, method, uri, m_auth_nonce_);
         std::string their_resp = get_fild_from_string(auth_str, "response");
 
-        if (their_resp != our_resp) { // warning: 需要大小写不敏感比较
+        std::string tmp1 = their_resp, tmp2 = our_resp;
+        if (str_to_lower(tmp1) != str_to_lower(tmp2)) { // 需要大小写不敏感比较
             auth_valid = false;
             printf("AirAuth: response mismatch - our: %s theirs: %s\n", our_resp.c_str(), their_resp.c_str());
         } else {
