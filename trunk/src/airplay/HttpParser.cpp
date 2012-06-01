@@ -1,4 +1,4 @@
-#include "HttpParser.h"
+#include "airplay/HttpParser.h"
 
 HttpParser::HttpParser() :
     _headerStart(0),
