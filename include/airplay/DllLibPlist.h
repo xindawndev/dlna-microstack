@@ -2,30 +2,29 @@
 #define _CXL_YETI_DLLLIBPLIST_H_
 
 #include <plist/plist.h>
+#include <windows.h>
 
 class DllLibPlist
 {
 public:
     DllLibPlist() {}
-    bool load() { return true; }
-
-    bool is_loaded() {
-        return true;
+    ~DllLibPlist() {
+        if (is_loaded())
+            unload();
     }
+    bool load();
 
-    void unload() {
+    bool is_loaded();
 
-    }
+    void unload();
 
-    void enable_delayed_unload(bool enabled) {}
+    void enable_delayed_unload(bool enabled);
 
-    void plist_from_bin(const char *plist_bin, uint32_t length, plist_t * plist) {}
+    void plist_from_bin(const char *plist_bin, uint32_t length, plist_t * plist);
 
-    bool plist_dict_get_size(plist_t node ) {
-        return true;
-    }
+    bool plist_dict_get_size(plist_t node);
 
-    plist_t plist_dict_get_item(plist_t node, const char* key ) { return (plist_t)NULL; }
+    plist_t plist_dict_get_item(plist_t node, const char* key );
 
     void plist_get_real_val(plist_t node, double *val) {}
 
@@ -34,6 +33,8 @@ public:
     void plist_free_string_val(char *val) {}
 
     void plist_free(plist_t plist ) {}
+private:
+    HINSTANCE m_dll_instance_;
 };
 
 #endif // _CXL_YETI_DLLLIBPLIST_H_
