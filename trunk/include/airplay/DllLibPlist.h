@@ -5,6 +5,8 @@ class DllLibPlist
 {
 public:
     DllLibPlist() {}
+    bool load() { return true; }
+
     bool is_loaded() {
         return true;
     }
@@ -12,6 +14,8 @@ public:
     void unload() {
 
     }
+
+    void enable_delayed_unload() {}
 };
 
 #endif // _CXL_YETI_DLLLIBPLIST_H_
