@@ -638,76 +638,76 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
 
         printf("AIRPLAY: got request %s\n", uri.c_str());
 
-//        if (need_auth && !_check_authorization(authorization, method, uri)) {
-//            status = AIRPLAY_STATUS_NEED_AUTH;
-//        } else if (content_type == "application/x-apple-binary-plist") {
-//            AirplayServer::m_is_playing_++;
-//
-//            if (m_plib_plist_->load()) {
-//                m_plib_plist_->enable_delayed_unload(false);
-//
-//                const char* bodyChr = m_http_parser_->getBody();
-//
-//                plist_t dict = NULL;
-//                m_plib_plist_->plist_from_bin(bodyChr, m_http_parser_->getContentLength(), &dict);
-//
-//                if (m_plib_plist_->plist_dict_get_size(dict)) {
-//                    plist_t tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Start-Position");
-//                    if (tmpNode) {
-//                        double tmpDouble = 0;
-//                        m_plib_plist_->plist_get_real_val(tmpNode, &tmpDouble);
-//                        position = (float)tmpDouble;
-//                    }
-//
-//                    tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Content-Location");
-//                    if (tmpNode) {
-//                        char *tmpStr = NULL;
-//                        m_plib_plist_->plist_get_string_val(tmpNode, &tmpStr);
-//                        location=tmpStr;
-//#ifdef _WIN32
-//                        m_plib_plist_->plist_free_string_val(tmpStr);
-//#else
-//                        free(tmpStr);
-//#endif
-//                    }
-//
-//                    if (dict) {
-//                        m_plib_plist_->plist_free(dict);
-//                    }
-//                } else {
-//                   perror("Error parsing plist");
-//                }
-//                m_plib_plist_->unload();
-//            }
-//        } else {
-//            AirplayServer::m_is_playing_++;
-//            // Get URL to play
-//            int start = body.Find("Content-Location: ");
-//            if (start == -1)
-//                return AIRPLAY_STATUS_NOT_IMPLEMENTED;
-//            start += strlen("Content-Location: ");
-//            int end = body.Find('\n', start);
-//            location = body.Mid(start, end - start);
-//
-//            start = body.Find("Start-Position");
-//            if (start != -1) {
-//                start += strlen("Start-Position: ");
-//                int end = body.Find('\n', start);
-//                std::string positionStr = body.Mid(start, end - start);
-//                position = (float)atof(positionStr.c_str());
-//            }
-//        }
-//
-//        if (status != AIRPLAY_STATUS_NEED_AUTH) {
-//            std::string userAgent="AppleCoreMedia/1.0.0.8F455 (AppleTV; U; CPU OS 4_3 like Mac OS X; de_de)";
-//            CURL::Encode(userAgent);
-//            location += "|User-Agent=" + userAgent;
-//
-//            CFileItem fileToPlay(location, false);
-//            fileToPlay.SetProperty("StartPercent", position*100.0f);
-//            g_application.getApplicationMessenger().MediaPlay(fileToPlay);
-//            _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
-//        }
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
+        } else if (content_type == "application/x-apple-binary-plist") {
+            AirplayServer::m_is_playing_++;
+
+            if (m_plib_plist_->load()) {
+                m_plib_plist_->enable_delayed_unload(false);
+
+                const char* bodyChr = m_http_parser_->getBody();
+
+                plist_t dict = NULL;
+                m_plib_plist_->plist_from_bin(bodyChr, m_http_parser_->getContentLength(), &dict);
+
+                if (m_plib_plist_->plist_dict_get_size(dict)) {
+                    plist_t tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Start-Position");
+                    if (tmpNode) {
+                        double tmpDouble = 0;
+                        m_plib_plist_->plist_get_real_val(tmpNode, &tmpDouble);
+                        position = (float)tmpDouble;
+                    }
+
+                    tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Content-Location");
+                    if (tmpNode) {
+                        char *tmpStr = NULL;
+                        m_plib_plist_->plist_get_string_val(tmpNode, &tmpStr);
+                        location=tmpStr;
+#ifdef _WIN32
+                        m_plib_plist_->plist_free_string_val(tmpStr);
+#else
+                        free(tmpStr);
+#endif
+                    }
+
+                    if (dict) {
+                        m_plib_plist_->plist_free(dict);
+                    }
+                } else {
+                   perror("Error parsing plist");
+                }
+                m_plib_plist_->unload();
+            }
+        } else {
+            AirplayServer::m_is_playing_++;
+            // Get URL to play
+            //int start = body.Find("Content-Location: ");
+            //if (start == -1)
+            //    return AIRPLAY_STATUS_NOT_IMPLEMENTED;
+            //start += strlen("Content-Location: ");
+            //int end = body.Find('\n', start);
+            //location = body.Mid(start, end - start);
+
+            //start = body.Find("Start-Position");
+            //if (start != -1) {
+            //    start += strlen("Start-Position: ");
+            //    int end = body.Find('\n', start);
+            //    std::string positionStr = body.Mid(start, end - start);
+            //    position = (float)atof(positionStr.c_str());
+            //}
+        }
+
+        if (status != AIRPLAY_STATUS_NEED_AUTH) {
+            //std::string userAgent="AppleCoreMedia/1.0.0.8F455 (AppleTV; U; CPU OS 4_3 like Mac OS X; de_de)";
+            //CURL::Encode(userAgent);
+            //location += "|User-Agent=" + userAgent;
+
+            //CFileItem fileToPlay(location, false);
+            //fileToPlay.SetProperty("StartPercent", position*100.0f);
+            //g_application.getApplicationMessenger().MediaPlay(fileToPlay);
+            //_compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+        }
     } else if (uri == "/scrub") {
         if (need_auth && !_check_authorization(authorization, method, uri)) {
             status = AIRPLAY_STATUS_NEED_AUTH;
