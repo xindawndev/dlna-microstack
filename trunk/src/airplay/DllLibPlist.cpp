@@ -58,3 +58,47 @@ plist_t DllLibPlist::plist_dict_get_item(plist_t node, const char* key)
     } 
     return (plist_t)NULL;
 }
+
+void DllLibPlist::plist_get_real_val(plist_t node, double *val) 
+{
+    if (!is_loaded()) return;
+    typedef void (*Plist_get_real_val)(plist_t node, double *val);
+    Plist_get_real_val inner_func   = NULL;
+    inner_func                       =   (Plist_get_real_val)GetProcAddress(m_dll_instance_, "plist_get_real_val"); 
+    if (inner_func) { 
+        return inner_func(node, val); 
+    } 
+}
+
+void DllLibPlist::plist_get_string_val(plist_t node, char **val)
+{
+    if (!is_loaded()) return;
+    typedef void (*Plist_get_string_val)(plist_t node, char**val);
+    Plist_get_string_val inner_func   = NULL;
+    inner_func                       =   (Plist_get_string_val)GetProcAddress(m_dll_instance_, "plist_get_string_val"); 
+    if (inner_func) { 
+        return inner_func(node, val); 
+    } 
+}
+
+void DllLibPlist::plist_free_string_val(char *val)
+{
+    if (!is_loaded()) return;
+    typedef void (*Plist_free_string_val)(char*val);
+    Plist_free_string_val inner_func   = NULL;
+    inner_func                         =   (Plist_free_string_val)GetProcAddress(m_dll_instance_, "plist_free_string_val"); 
+    if (inner_func) { 
+        return inner_func(val); 
+    }
+}
+
+void DllLibPlist::plist_free(plist_t plist)
+{
+    if (!is_loaded()) return;
+    typedef void (*Plist_free)(plist_t plist);
+    Plist_free inner_func   = NULL;
+    inner_func              =   (Plist_free)GetProcAddress(m_dll_instance_, "plist_free"); 
+    if (inner_func) { 
+        return inner_func(plist); 
+    }
+}
