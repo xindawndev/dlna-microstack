@@ -1,4 +1,5 @@
 #include "airplay/Zeroconf.h"
+#include "airplay/JobManager.h"
 
 #ifdef _LINUX
 #ifndef __APPLE__
@@ -13,21 +14,19 @@
 #include "airplay/Lock.h"
 
 #ifndef HAS_ZEROCONF
-//dummy implementation used if no zeroconf is present
-//should be optimized away
 class CZeroconfDummy : public Zeroconf
 {
     virtual bool do_publish_service(const std::string&, const std::string&, const std::string&, unsigned int, std::map<std::string, std::string>)
     {
         return false;
     }
-    virtual bool doRemoveService(const std::string& fcr_ident){return false;}
+    virtual bool do_remove_service(const std::string& fcr_ident){return false;}
     virtual void do_stop(){}
 };
 #endif
 
 long Zeroconf::sm_singleton_guard = 0;
-Zeroconf* Zeroconf::smp_instance = 0;
+Zeroconf * Zeroconf::smp_instance = 0;
 
 Zeroconf::Zeroconf():mp_crit_sec(new CriticalSection),m_started(false)
 {
@@ -44,21 +43,20 @@ bool Zeroconf::publish_service(const std::string& fcr_identifier,
                               unsigned int f_port,
                               std::map<std::string, std::string> txt)
 {
-    mp_crit_sec->lock();
+    SingleLock lock(*mp_crit_sec);
     Zeroconf::PublishInfo info = {fcr_type, fcr_name, f_port, txt};
     std::pair<tServiceMap::const_iterator, bool> ret = m_service_map.insert(std::make_pair(fcr_identifier, info));
-    if(!ret.second) //identifier exists
+    if(!ret.second) // identifier exists
         return false;
     if(m_started)
-        CJobManager::get_instance().AddJob(new Publish(fcr_identifier, info), NULL);
+        JobManager::get_instance().add_job(new Publish(fcr_identifier, info), NULL);
 
-    //not yet started, so its just queued
     return true;
 }
 
 bool Zeroconf::remove_service(const std::string& fcr_identifier)
 {
-    mp_crit_sec->lock();
+    SingleLock lock(*mp_crit_sec);
 
     tServiceMap::iterator it = m_service_map.find(fcr_identifier);
     if(it == m_service_map.end())
@@ -77,24 +75,24 @@ bool Zeroconf::has_service(const std::string& fcr_identifier) const
 
 void Zeroconf::start()
 {
-    CSingleLock lock(*mp_crit_sec);
+    SingleLock lock(*mp_crit_sec);
     if(!is_zc_daemon_running())
     {
-        g_guiSettings.SetBool("services.zeroconf", false);
-        if (g_guiSettings.GetBool("services.airplay"))
-            g_guiSettings.SetBool("services.airplay", false);
+        //g_guiSettings.SetBool("services.zeroconf", false);
+        //if (g_guiSettings.GetBool("services.airplay"))
+        //    g_guiSettings.SetBool("services.airplay", false);
         return;
     }
     if(m_started)
         return;
     m_started = true;
 
-    CJobManager::get_instance().AddJob(new Publish(m_service_map), NULL);
+    JobManager::get_instance().add_job(new Publish(m_service_map), NULL);
 }
 
 void Zeroconf::stop()
 {
-    CSingleLock lock(*mp_crit_sec);
+    SingleLock lock(*mp_crit_sec);
     if(!m_started)
         return;
     do_stop();
@@ -113,7 +111,7 @@ Zeroconf*  Zeroconf::get_instance()
         smp_instance = new CZeroconfOSX;
 #elif defined(_LINUX)
         smp_instance  = new CZeroconfAvahi;
-#elif defined(TARGET_WINDOWS)
+#elif defined(_WIN32)
         smp_instance  = new CZeroconfWIN;
 #endif
 #endif
@@ -139,7 +137,7 @@ Zeroconf::Publish::Publish(const tServiceMap& servmap)
 {
 }
 
-bool Zeroconf::Publish::DoWork()
+bool Zeroconf::Publish::do_work()
 {
     for(tServiceMap::const_iterator it = m_servmap.begin(); it != m_servmap.end(); ++it)
         Zeroconf::get_instance()->do_publish_service(it->first, it->second.type, it->second.name, it->second.port, it->second.txt);
