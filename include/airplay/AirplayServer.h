@@ -11,6 +11,8 @@
 class HttpParser;
 class DllLibPlist;
 
+#define AIRPLAY_SERVER_VERSION_STR "101.28"
+
 class AirplayServer
 {
 public:
