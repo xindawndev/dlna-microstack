@@ -4,10 +4,19 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "HttpParser.h"
+#include "airplay/Socket.h"
+#include "airplay/Lock.h"
+#include <windows.h>
+
+class HttpParser;
+class DllLibPlist;
 
 class AirplayServer
 {
+public:
+    static void create();
+    static AirplayServer * get_instance() { return server_instance_; }
+
 public:
     static bool start_server(int port, bool nonlocal);
     static void stop_server(bool wait);
@@ -15,7 +24,6 @@ public:
     static bool is_playing() { return m_is_playing_ > 0; }
     static int m_is_playing_;
 
-protected:
     void process();
 
 private:
@@ -41,11 +49,11 @@ private:
         int             m_socket_;
         struct sockaddr m_cliaddr_;
         socklen_t       m_addrlen_;
-        //CriticalSection m_crit_section_;
+        CriticalSection m_crit_section_;
 
     private:
         int _process_request(std::string & resp_header,
-            std::string & resp,
+            std::string & resp_body,
             std::string & reverse_header,
             std::string & reverse_body,
             std::string & session_id);
@@ -54,13 +62,13 @@ private:
             std::string & session_id,
             int state);
         void _compose_auth_request_answer(std::string & resp_header, std::string & resp_body);
-        void _check_authorization(const std::string & auth_str,
+        bool _check_authorization(const std::string & auth_str,
             const std::string & method,
             const std::string & uri);
         void _copy(const TcpClient & client);
 
         HttpParser *    m_http_parser_;
-        //DllLibPlist *   m_plib_plist_;
+        DllLibPlist *   m_plib_plist_;
         bool            m_authenticated_;
         int             m_last_event_;
         std::string     m_auth_nonce_;
@@ -73,6 +81,8 @@ private:
     bool                        m_nonlocal_;
     bool                        m_use_pwd_;
     std::string                 m_pwd_;
+
+    bool                        m_stop_;
 
     static AirplayServer * server_instance_;
 };
