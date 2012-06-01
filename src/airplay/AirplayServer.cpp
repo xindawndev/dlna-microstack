@@ -197,7 +197,7 @@ void AirplayServer::process()
 
         int res = select(max_fd + 1, &rfds, NULL, NULL, &to);
         if (res < 0) {
-            perror("select");
+            perror("AIRPLAY Server: Select failed");
             Sleep(1000);
             _initialize();
         } else if (res > 0) {
@@ -212,7 +212,7 @@ void AirplayServer::process()
                         printf("recv data: %dbytes\n", nread);
                         m_connection_[i].push_buffer(this, buffer, nread, sid, m_reverse_sockets_);
                     } else {
-                        perror("disconnection");
+                        printf("AIRPLAY Server: Disconnection detected\n");
                         m_connection_[i].disconnect();
                         m_connection_.erase(m_connection_.begin() + i);
                     }
@@ -220,13 +220,13 @@ void AirplayServer::process()
             }
 
             if (FD_ISSET(m_server_socket_, &rfds)) {
-                printf("new connection\n");
+                printf("AIRPLAY Server: New connection detected\n");
                 TcpClient new_connection;
                 new_connection.m_socket_ = accept(m_server_socket_, &new_connection.m_cliaddr_, &new_connection.m_addrlen_);
                 if (new_connection.m_socket_ == INVALID_SOCKET) {
-                    perror("accept");
+                    perror("AIRPLAY Server: Accept of new connection failed");
                 } else {
-                    printf("new connection added\n");
+                    printf("AIRPLAY Server: New connection added\n");
                     m_connection_.push_back(new_connection);
                 }
             }
@@ -253,23 +253,23 @@ bool AirplayServer::_initialize()
     m_server_socket_ = socket(PF_INET, SOCK_STREAM, 0);
 
     if (m_server_socket_ == INVALID_SOCKET) {
-        perror("create server socket");
+        perror("AIRPLAY Server: Failed to create server socket!");
         return false;
     }
 
     if (bind(m_server_socket_, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-        perror("bind server socket");
+        perror("AIRPLAY Server: Failed to bind server socket!");
         close(m_server_socket_);
         return false;
     }
 
     if (listen(m_server_socket_, 10) < 0) {
-        perror("server set listen");
+        perror("AIRPLAY Server: Failed to set listen!");
         close(m_server_socket_);
         return false;
     }
 
-    printf("initialized successfully!\n");
+    printf("AIRPLAY Server: Successfully initialized\n");
     return true;
 }
 
@@ -435,7 +435,7 @@ void AirplayServer::TcpClient::_compose_reverse_event(std::string & reverse_head
                 char buf[512] = {0};
                 sprintf(buf, EVENT_INFO, eventStrings[state]);
                 reverse_body = buf;
-                printf("sending event: %s\n", eventStrings[state]);
+                printf("AIRPLAY: sending event: %s\n", eventStrings[state]);
                 break;
         }
         char buf[512] = {0};
@@ -597,31 +597,235 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
         status = AIRPLAY_STATUS_SWITCHING_PROTOCOLS;
         resp_header = "Upgrade: PTTH/1.0\r\nConnection: Upgrade\r\n";
     } else if (uri == "/rate") {
-        const char * found = strstr(query_str.c_str(), "value=");
+        const char* found = strstr(query_str.c_str(), "value=");
+        int rate = found ? (int)(atof(found + strlen("value=")) + 0.5f) : 0;
+
+        printf("AIRPLAY: got request %s with rate %i\n", uri.c_str(), rate);
+
+        //if (need_auth && !_check_authorization(authorization, method, uri)) {
+        //    status = AIRPLAY_STATUS_NEED_AUTH;
+        //} else if (rate == 0) {
+        //    if (g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused()) {
+        //        g_application.getApplicationMessenger().MediaPause();
+        //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PAUSED);
+        //    }
+        //} else {
+        //    if (g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused()) {
+        //        g_application.getApplicationMessenger().MediaPause();
+        //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+        //    }
+        //}
     } else if (uri == "/volume") {
-        
+        const char* found = strstr(query_str.c_str(), "volume=");
+        double volume = found ? (double)(atof(found + strlen("volume="))) : 0;
+
+        printf("AIRPLAY: got request %s with volume %f\n", uri.c_str(), volume);
+
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
+        } else if (volume >= 0 && volume <= 1) {
+            //int oldVolume = g_application.GetVolume();
+            //volume *= 100;
+            //if(oldVolume != (int)volume) {
+            //    g_application.SetVolume(volume);          
+            //    g_application.getApplicationMessenger().ShowVolumeBar(oldVolume < volume);
+            //}
+        }
     } else if (uri == "/play") {
-        
+        std::string location;
+        float position = 0.0;
+        m_last_event_ = EVENT_NONE;
+
+        printf("AIRPLAY: got request %s\n", uri.c_str());
+
+//        if (need_auth && !_check_authorization(authorization, method, uri)) {
+//            status = AIRPLAY_STATUS_NEED_AUTH;
+//        } else if (content_type == "application/x-apple-binary-plist") {
+//            AirplayServer::m_is_playing_++;
+//
+//            if (m_plib_plist_->load()) {
+//                m_plib_plist_->enable_delayed_unload(false);
+//
+//                const char* bodyChr = m_http_parser_->getBody();
+//
+//                plist_t dict = NULL;
+//                m_plib_plist_->plist_from_bin(bodyChr, m_http_parser_->getContentLength(), &dict);
+//
+//                if (m_plib_plist_->plist_dict_get_size(dict)) {
+//                    plist_t tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Start-Position");
+//                    if (tmpNode) {
+//                        double tmpDouble = 0;
+//                        m_plib_plist_->plist_get_real_val(tmpNode, &tmpDouble);
+//                        position = (float)tmpDouble;
+//                    }
+//
+//                    tmpNode = m_plib_plist_->plist_dict_get_item(dict, "Content-Location");
+//                    if (tmpNode) {
+//                        char *tmpStr = NULL;
+//                        m_plib_plist_->plist_get_string_val(tmpNode, &tmpStr);
+//                        location=tmpStr;
+//#ifdef _WIN32
+//                        m_plib_plist_->plist_free_string_val(tmpStr);
+//#else
+//                        free(tmpStr);
+//#endif
+//                    }
+//
+//                    if (dict) {
+//                        m_plib_plist_->plist_free(dict);
+//                    }
+//                } else {
+//                   perror("Error parsing plist");
+//                }
+//                m_plib_plist_->unload();
+//            }
+//        } else {
+//            AirplayServer::m_is_playing_++;
+//            // Get URL to play
+//            int start = body.Find("Content-Location: ");
+//            if (start == -1)
+//                return AIRPLAY_STATUS_NOT_IMPLEMENTED;
+//            start += strlen("Content-Location: ");
+//            int end = body.Find('\n', start);
+//            location = body.Mid(start, end - start);
+//
+//            start = body.Find("Start-Position");
+//            if (start != -1) {
+//                start += strlen("Start-Position: ");
+//                int end = body.Find('\n', start);
+//                std::string positionStr = body.Mid(start, end - start);
+//                position = (float)atof(positionStr.c_str());
+//            }
+//        }
+//
+//        if (status != AIRPLAY_STATUS_NEED_AUTH) {
+//            std::string userAgent="AppleCoreMedia/1.0.0.8F455 (AppleTV; U; CPU OS 4_3 like Mac OS X; de_de)";
+//            CURL::Encode(userAgent);
+//            location += "|User-Agent=" + userAgent;
+//
+//            CFileItem fileToPlay(location, false);
+//            fileToPlay.SetProperty("StartPercent", position*100.0f);
+//            g_application.getApplicationMessenger().MediaPlay(fileToPlay);
+//            _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+//        }
     } else if (uri == "/scrub") {
-        
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
+        } else if (method == "GET") {
+            printf("AIRPLAY: got GET request %s\n", uri.c_str());
+
+            //if (g_application.m_pPlayer && g_application.m_pPlayer->GetTotalTime()) {
+            //    float position = ((float) g_application.m_pPlayer->GetTime()) / 1000;
+            //    resp_body.Format("duration: %d\r\nposition: %f", g_application.m_pPlayer->GetTotalTime(), position);
+
+            //    //unpause media on GET scrub when paused
+            //    if (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused()) {
+            //        g_application.getApplicationMessenger().MediaPause();
+            //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+            //    }
+            //} else {
+            //    status = AIRPLAY_STATUS_METHOD_NOT_ALLOWED;
+            //}
+        } else {
+            const char* found = strstr(query_str.c_str(), "position=");
+
+            //if (found && g_application.m_pPlayer) {
+            //    __int64 position = (__int64) (atof(found + strlen("position=")) * 1000.0);
+            //    g_application.m_pPlayer->SeekTime(position);
+            //    printf("AIRPLAY: got POST request %s with pos %\n"PRId64, uri.c_str(), position);
+            //}
+        }
     } else if (uri == "/stop") {
-
+        printf("AIRPLAY: got request %s\n", uri.c_str());
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
+        } else {
+            if (is_playing()) {//only stop player if we started him
+                //g_application.getApplicationMessenger().MediaStop();
+                AirplayServer::m_is_playing_--;
+            } else {//if we are not playing and get the stop request - we just wanna stop picture streaming
+                //g_windowManager.PreviousWindow();
+            }
+            _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_STOPPED);
+        }
     } else if (uri == "/photo") {
+        printf("AIRPLAY: got request %s\n", uri.c_str());
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
+        } else if (m_http_parser_->getContentLength() > 0) {
+            // 将图片写入缓存，然后输出显示
+            //XFILE::CFile tmpFile;
+            //CStdString tmpFileName = "special://temp/airplay_photo.jpg";
 
+            //if( m_http_parser_->getContentLength() > 3 &&
+            //    m_http_parser_->getBody()[1] == 'P' &&
+            //    m_http_parser_->getBody()[2] == 'N' &&
+            //    m_http_parser_->getBody()[3] == 'G') {
+            //    tmpFileName = "special://temp/airplay_photo.png";
+            //}
+
+            //if (tmpFile.OpenForWrite(tmpFileName, true)) {
+            //    int writtenBytes = 0;
+            //    writtenBytes = tmpFile.Write(m_http_parser_->getBody(), m_http_parser_->getContentLength());
+            //    tmpFile.Close();
+
+            //    if (writtenBytes > 0 && (unsigned int)writtenBytes == m_http_parser_->getContentLength()) {
+            //        g_application.getApplicationMessenger().PictureShow(tmpFileName);
+            //    } else {
+            //        perror("AirPlayServer: Error writing tmpFile!");
+            //    }
+            //}
+        }
     } else if (uri == "/playback-info") {
+        float position      = 0.0f;
+        float duration      = 0.0f;
+        float cacheDuration = 0.0f;
+        bool playing        = false;
 
+        printf("AIRPLAY: got request %s\n", uri.c_str());
+
+        // 获取当前播放状态
+        //if (need_auth && !_check_authorization(authorization, method, uri)) {
+        //    status = AIRPLAY_STATUS_NEED_AUTH;
+        //} else if (g_application.m_pPlayer) {
+        //    if (g_application.m_pPlayer->GetTotalTime()) {
+        //        position = ((float) g_application.m_pPlayer->GetTime()) / 1000;
+        //        duration = (float) g_application.m_pPlayer->GetTotalTime();
+        //        playing = g_application.m_pPlayer ? !g_application.m_pPlayer->IsPaused() : false;
+        //        cacheDuration = (float) g_application.m_pPlayer->GetTotalTime() * g_application.GetCachePercentage()/100.0f;
+        //    }
+
+        //    resp_body.Format(PLAYBACK_INFO, duration, cacheDuration, position, (playing ? 1 : 0), duration);
+        //    resp_header = "Content-Type: text/x-apple-plist+xml\r\n";
+
+        //    if (g_application.m_pPlayer->IsCaching()) {
+        //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_LOADING);
+        //    } else if (playing) {
+        //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+        //    } else {
+        //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PAUSED);
+        //    }
+        //} else {
+        //    resp_body.Format(PLAYBACK_INFO_NOT_READY, duration, cacheDuration, position, (playing ? 1 : 0), duration);
+        //    resp_header = "Content-Type: text/x-apple-plist+xml\r\n";     
+        //    _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_STOPPED);
+        //}
     } else if (uri == "/server-info") {
-
+        printf("AIRPLAY: got request %s", uri.c_str());
+        char tmpbuf[256] = {0};
+        sprintf(SERVER_INFO, "74:E5:0B:10:74:72"); // warning: need local mac address
+        resp_body = tmpbuf;
+        resp_header = "Content-Type: text/x-apple-plist+xml\r\n";
     } else if (uri == "/slideshow-features") {
 
     } else if (uri == "/authorize") {
 
     } else if (uri == "/setProperty") {
-
+        status = AIRPLAY_STATUS_NOT_FOUND;
     } else if (uri == "/getProperty") {
-
+        status = AIRPLAY_STATUS_NOT_FOUND;
     } else if (uri == "200") {
-
+        status = AIRPLAY_STATUS_NO_RESPONSE_NEEDED;
     } else {
         printf("AIRPLAY Server: unhandled request [%s]\n", uri.c_str());
         status = AIRPLAY_STATUS_NOT_IMPLEMENTED;
