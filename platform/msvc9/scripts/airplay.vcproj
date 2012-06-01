@@ -42,8 +42,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES"
+				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;&quot;../../../deps/airplay/dnssd-320.5.1-win32/include&quot;;&quot;../../../deps/airplay/libplist-1.7-win32-2/include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES;HAS_ZEROCONF"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -64,6 +64,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;../../../deps/airplay/dnssd-320.5.1-win32/lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -180,7 +181,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\airplay\DllLibPlist.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\airplay\HttpParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\airplay\Lock.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\airplay\Md5.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\airplay\ZeroconfWin.cpp"
 				>
 			</File>
 		</Filter>
@@ -194,7 +211,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\airplay\DllLibPlist.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\airplay\HttpParser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\airplay\Lock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\airplay\Md5.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\airplay\Socket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\airplay\ZeroconfWin.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="main"
+			>
+			<File
+				RelativePath="..\..\..\src\airplay\AppMain.cpp"
 				>
 			</File>
 		</Filter>
