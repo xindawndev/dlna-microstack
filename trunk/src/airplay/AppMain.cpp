@@ -19,7 +19,7 @@ int main(int argc, char **argv)
         txt["features"] = "0x77";
         txt["model"] = "AppleTV2,1";
         txt["srcvers"] = AIRPLAY_SERVER_VERSION_STR;
-        zfw.do_publish_service("servers.airplay", "_airplay._tcp", "my_airplay", listenPort, txt);
+        zfw.do_publish_service("servers.airplay", "_airplay._tcp", "PPTV_Client", listenPort, txt);
     }
 
     while(1);
