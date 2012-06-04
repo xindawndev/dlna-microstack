@@ -201,7 +201,7 @@ void AirplayServer::process()
             Sleep(1000);
             _initialize();
         } else if (res > 0) {
-            for (unsigned int i = m_connection_.size() - 1; i >= 0; --i) {
+            for (int i = m_connection_.size() - 1; i >= 0; --i) {
                 int sock = m_connection_[i].m_socket_;
                 if (FD_ISSET(sock, &rfds)) {
                     char buffer[RECEIVEBUFFER] = {0};
@@ -209,7 +209,7 @@ void AirplayServer::process()
                     nread = recv(sock, (char *)&buffer, RECEIVEBUFFER, 0);
                     if (nread > 0) {
                         std::string sid;
-                        printf("recv data: %dbytes\n", nread);
+                        printf("recv %d bytes data:\n%s\n", nread, buffer);
                         m_connection_[i].push_buffer(this, buffer, nread, sid, m_reverse_sockets_);
                     } else {
                         printf("AIRPLAY Server: Disconnection detected\n");
@@ -396,7 +396,6 @@ void AirplayServer::TcpClient::push_buffer(AirplayServer * host, const char * bu
             send(reverse_socket, resp.c_str(), resp.size(), 0);//send the event status on the eventSocket
         }
 
-        // We need a new parser...
         delete m_http_parser_;
         m_http_parser_ = new HttpParser;
     }
@@ -579,10 +578,10 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
     std::string method          = m_http_parser_->getMethod();
     std::string uri             = m_http_parser_->getUri();
     std::string query_str       = m_http_parser_->getQueryString();
-    std::string body            = m_http_parser_->getBody();
-    std::string content_type    = m_http_parser_->getValue("content-type");
-    std::string authorization   = m_http_parser_->getValue("authorization");
-    session_id                  = m_http_parser_->getValue("x-apple-session-id");
+    std::string body            = m_http_parser_->getBody() == NULL ? "" : m_http_parser_->getBody();
+    std::string content_type    = m_http_parser_->getValue("content-type") == NULL ? "" : m_http_parser_->getValue("content-type");
+    std::string authorization   = m_http_parser_->getValue("authorization") == NULL ? "" : m_http_parser_->getValue("authorization");
+    session_id                  = m_http_parser_->getValue("x-apple-session-id") == NULL ? "" : m_http_parser_->getValue("x-apple-session-id");
     int status                  = AIRPLAY_STATUS_OK;
     bool need_auth              = false;
 
@@ -707,6 +706,7 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
             //fileToPlay.SetProperty("StartPercent", position*100.0f);
             //g_application.getApplicationMessenger().MediaPlay(fileToPlay);
             //_compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
+            _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PLAYING);
         }
     } else if (uri == "/scrub") {
         if (need_auth && !_check_authorization(authorization, method, uri)) {
@@ -785,8 +785,8 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
         printf("AIRPLAY: got request %s\n", uri.c_str());
 
         // 获取当前播放状态
-        //if (need_auth && !_check_authorization(authorization, method, uri)) {
-        //    status = AIRPLAY_STATUS_NEED_AUTH;
+        if (need_auth && !_check_authorization(authorization, method, uri)) {
+            status = AIRPLAY_STATUS_NEED_AUTH;
         //} else if (g_application.m_pPlayer) {
         //    if (g_application.m_pPlayer->GetTotalTime()) {
         //        position = ((float) g_application.m_pPlayer->GetTime()) / 1000;
@@ -805,15 +805,17 @@ int AirplayServer::TcpClient::_process_request(std::string & resp_header, std::s
         //    } else {
         //        _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_PAUSED);
         //    }
-        //} else {
-        //    resp_body.Format(PLAYBACK_INFO_NOT_READY, duration, cacheDuration, position, (playing ? 1 : 0), duration);
-        //    resp_header = "Content-Type: text/x-apple-plist+xml\r\n";     
-        //    _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_STOPPED);
-        //}
+        } else {
+            char buf[256] = {0};
+            sprintf(buf, PLAYBACK_INFO_NOT_READY, duration, cacheDuration, position, (playing ? 1 : 0), duration);
+            resp_body = buf;
+            resp_header = "Content-Type: text/x-apple-plist+xml\r\n";
+            _compose_reverse_event(reverse_header, reverse_body, session_id, EVENT_STOPPED);
+        }
     } else if (uri == "/server-info") {
         printf("AIRPLAY: got request %s", uri.c_str());
         char tmpbuf[256] = {0};
-        sprintf(SERVER_INFO, "74:E5:0B:10:74:72"); // warning: need local mac address
+        sprintf(tmpbuf, SERVER_INFO, "74:E5:0B:10:74:72"); // warning: need local mac address
         resp_body = tmpbuf;
         resp_header = "Content-Type: text/x-apple-plist+xml\r\n";
     } else if (uri == "/slideshow-features") {
