@@ -12,7 +12,6 @@ public:
     ZeroconfWin();
     ~ZeroconfWin();
 
-protected:
 public:
     bool do_publish_service(const std::string& fcr_identifier,
         const std::string& fcr_type,
