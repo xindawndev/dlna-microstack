@@ -751,6 +751,14 @@ int startAVRCP(int threadpool_size)
     DWORD ptid = 0;
 #else
     pthread_t t;
+    // 线程中忽略SIGPIPE信号
+    sigset_t signal_mask;
+    sigemptyset (&signal_mask);
+    sigaddset (&signal_mask, SIGPIPE);
+    int rc = pthread_sigmask (SIG_BLOCK, &signal_mask, NULL);
+    if (rc != 0) {
+             printf("block sigpipe error\n");
+    }
 #endif
 
     sem_init(&(mavrcp.avrender_lock), 0, 1);
