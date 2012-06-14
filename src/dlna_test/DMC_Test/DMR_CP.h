@@ -494,8 +494,10 @@ void OnRenderStateChanged( struct AVRenderer * sender,struct AVRendererConnectio
         printf( "Channel[%d] = %s\n", i, Connection->Channel[i] );
     }
 
-    printf( "Volume = %d\n", Connection->Volume[0] );
-    printf( "Mute = %d\n", *( Connection->Mute ) );
+    if (Connection->Volume)
+        printf( "Volume = %d\n", Connection->Volume[0] );
+    if (Connection->Mute)
+        printf( "Mute = %d\n", *( Connection->Mute ) );
 
     printf( "%s State changed                                       End\n", sender->FriendlyName );
 
