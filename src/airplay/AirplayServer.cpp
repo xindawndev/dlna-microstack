@@ -455,7 +455,7 @@ void AirplayServer::TcpClient::_compose_auth_request_answer(std::string & resp_h
     sprintf(buf, "%i", random);
     random_str = buf;
     m_auth_nonce_ = Md5::GetMD5(random_str);
-    sprintf(buf, AUTH_REQUIRED, m_auth_nonce_);
+    sprintf(buf, AUTH_REQUIRED, m_auth_nonce_.c_str());
     resp_header = buf;
     resp_body.clear();
 }
