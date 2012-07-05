@@ -5975,6 +5975,92 @@ time_t ILibTime_Parse(char *timeString)
     return(retval);
 }
 
+const char pub_key[KEY_NUM][KEY_LEN] = {
+    "~`1qwsfgu7890-+=",
+    "2#$!&*$%3fDFqqFe",
+    "asllWEwe#W$23err",
+    "<?///sdfE33%wefr",
+    "][{od9J88s880sd*",
+    "&***ewf;W2efAsdf",
+    "asdw#frg$5tyFasa",
+    "==$$132!s4$3sd7+",
+    "sdf$SDFGDGGVCXVC",
+    "9[rtOhRhR$YH$dfg",
+    "++)9(*%^$#9&Fffd",
+    "<?///sdfE33%wefr",
+    "((09w23jlJueu&37",
+    "saWER54^&U_=s,.,",
+    "8^767^&yhud9Uh78",
+    "JKefUHue8*&Ts923"
+};
+
+int ILibGetResult(int cardinal, int exponent, int mod)
+{
+    int c = 0, d = 1, i = 0, intsize = sizeof(int) * 8;
+    if (cardinal <= 0 || exponent <= 0 || mod <= 0) return -1;
+    while (!(((exponent << i++) & 0x80000000) >> (intsize - 1)));
+    for (--i; i < intsize; ++i) {
+        c *= 2;
+        d = (d * d) % mod;
+        if (((exponent << i) & 0x80000000) >> (intsize - 1)) {
+            c++;
+            d = (d * cardinal) % mod;
+        }
+        printf("i = %d, bi = %d, c = %d, d = %d\n", intsize - i, ((exponent << i) & 0x80000000) >> (intsize - 1), c, d);
+    }
+    return d;
+}
+
+/*
+type = 1 encryption
+type = 0 decryption
+*/
+const char * hexchars = "0123456789ABCDEF";
+char * ILibEncryption(const char * in, const char * key, int type)
+{
+    unsigned int i, j;
+    char * retstr = NULL;
+    if (in == NULL || key == NULL) return NULL;
+    if (type) { /* encryption */
+        retstr = (char *)malloc(2 * strlen(in) + 1);
+        memset(retstr, 0x00, 2 * strlen(in) + 1);
+        for (i = 0; i < strlen(in); ++i) {
+            retstr[2 * i] = hexchars[((in[i] ^ key[i < strlen(key) ? i : i % strlen(key)]) >> 4) & 0x0F];
+            retstr[2 * i + 1] = hexchars[((in[i] ^ key[i < strlen(key) ? i : i % strlen(key)])     ) & 0x0F];
+        }
+    } else { /* decryption */
+        char low, high;
+        if (strlen(in) % 2 != 0) return NULL;
+        retstr = (char *)malloc(strlen(in) + 1);
+        memset(retstr, 0x00, strlen(in) + 1);
+        for (i = 0; i < strlen(in) - 1; i += 2) {
+            if (((in[i] >= '0' && in[i] <= '9') 
+                || (in[i] >= 'A' && in[i] <= 'F'))
+                && ((in[i + 1] >= '0' && in[i + 1] <= '9') 
+                || (in[i + 1] >= 'A' && in[i + 1] <= 'F'))) {
+                    if (in[i] >= '0' && in[i] <= '9') {
+                        high = ((in[i] - '0') << 4) & 0xF0;
+                    } else {
+                        high = ((in[i] - 'A' + 10) << 4) & 0xF0;
+                    }
+                    if (in[i + 1] >= '0' && in[i + 1] <= '9') {
+                        low = (in[i + 1] - '0') & 0x0F;
+                    } else {
+                        low = (in[i + 1] - 'A' + 10) & 0x0F;
+                    }
+                    retstr[i / 2] = high | low;
+
+            } else {
+                return NULL;
+            }
+        }
+        for (j = 0; j < strlen(in) / 2; ++j) {
+            retstr[j] ^= key[j < strlen(key) ? j : j % strlen(key)];
+        }
+    }
+    return retstr;
+}
+
 void freesafe(void *p)
 {
     if (p != NULL)
