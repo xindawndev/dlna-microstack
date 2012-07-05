@@ -936,6 +936,13 @@ int ILibGetLocalIPAddressList(int** pp_int);
 
 /* \} */
 
+#define KEY_NUM 16
+#define KEY_LEN 16
+extern const char pub_key[KEY_NUM][KEY_LEN];
+
+int ILibGetResult(int cardinal, int exponent, int mod);
+char * ILibEncryption(const char * in, const char * key, int type);
+
 void* dbg_malloc(int sz);
 void dbg_free(void* ptr);
 int dbg_GetCount();
