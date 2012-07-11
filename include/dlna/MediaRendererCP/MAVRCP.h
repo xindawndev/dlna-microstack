@@ -3,13 +3,6 @@
 
 #include <stdlib.h>
 
-/* av render info */
-struct _tAVRInfo
-{
-    char avr_uuid[128];
-    char avr_name[128];
-};
-
 enum _ePlayStateEnum
 {
     MAVRCP_PLAYING=0,                        // ≤•∑≈÷–
@@ -79,6 +72,7 @@ typedef void (* Callback_CommonSink)( int ErrorCode);
 typedef void (* Callback_GetDevCapSink)( int ErrorCode, char* PlayMedia, char* RecMedia, char* RecQualityModes);
 typedef void (* Callback_GetMediaInfoSink)( int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
 typedef void (* Callback_GetPositionSink)( int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
+typedef void (* Callback_GetTransportInfoSink)( int ErrorCode, char* CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed);
 
 /* callback functions define */
 extern Callback_AVRenderSink           avrender_add         ;
@@ -99,6 +93,7 @@ extern Callback_CommonSink             setmute_callback     ;
 extern Callback_CommonSink             setplaymode_callback ;
 extern Callback_GetMediaInfoSink       getmediainfo_callback;
 extern Callback_GetPositionSink        getposition_callback ;
+extern Callback_GetTransportInfoSink   gettransportinfo_callback ;
 
 /************************************************************************/
 /* Interface                                                            */
@@ -124,6 +119,7 @@ void dmrSetMute( char * udn, int ismute );
 void dmrSetPlayMode( char * udn, enum _ePlayModeEnum playmode );
 void dmrGetMediaInfo( char * udn );
 void dmrGetPosition( char * udn );
+void dmrGetTransportInfo( char * udn );
 
 /************************************************************************/
 /* Interface                                                            */

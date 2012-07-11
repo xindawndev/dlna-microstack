@@ -157,7 +157,8 @@ void RCP_SetVolume(struct AVRendererConnection *connection, char *Channel, char 
 void RCP_SetMute(struct AVRendererConnection *connection, char *Channel, int MuteState, void *Tag, void(*SetMuteSink)(struct AVRendererConnection *sender,int ErrorCode, void *Tag));
 void RCP_SetPlayMode(struct AVRendererConnection *connection, enum PlayModeEnum PlayMode, void *Tag, void(*SetPlayModeSink)(struct AVRendererConnection *sender, int ErrorCode, void *Tag));
 void RCP_GetMediaInfo(struct AVRendererConnection *connection,void *Tag,void (*GetMediaInfoSink)(struct AVRendererConnection*,int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI,void *Tag));
-void RCP_GetPosition(struct AVRendererConnection *connection,void *Tag,void (*GetMediaInfoSink)(struct AVRendererConnection*,int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter,void *Tag));
+void RCP_GetPosition(struct AVRendererConnection *connection,void *Tag,void (*GetPositionSink)(struct AVRendererConnection*,int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter,void *Tag));
+void RCP_GetTransportInfo(struct AVRendererConnection *connection,void *Tag,void (*GetTransportInfoSink)(struct AVRendererConnection*,int ErrorCode, char* CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed,void *Tag));
 
 void RCP_AddRef(struct AVRenderer *r);
 void RCP_Release(struct AVRenderer *r);
