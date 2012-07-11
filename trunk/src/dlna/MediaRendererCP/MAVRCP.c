@@ -48,6 +48,7 @@ Callback_CommonSink             setmute_callback        = NULL;
 Callback_CommonSink             setplaymode_callback    = NULL;
 Callback_GetMediaInfoSink       getmediainfo_callback   = NULL;
 Callback_GetPositionSink        getposition_callback    = NULL;
+Callback_GetTransportInfoSink   gettransportinfo_callback = NULL;
 
 /************************************************************************/
 /* Callback Functions                                                   */
@@ -269,6 +270,24 @@ void OnGetPositionSink(struct AVRendererConnection * avrc, int ErrorCode, int Re
         getposition_callback(ErrorCode, RelativeSeconds, AbsoluteSeconds, RelativeCounter, AbsoluteCounter);
     }
 }
+
+void OnGetTransportInfoSink(struct AVRendererConnection * avrc, int ErrorCode, char* CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed,void *Tag )
+{
+#if defined(_DEBUG) || defined(DEBUG)
+    printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
+    if ( !ErrorCode )
+    {
+        printf( "OnGetTransportInfoSink: Success!\n" );
+        printf( "CurrentTransportState = %s, CurrentTransportStatus = %s, CurrentSpeed = %s\n", CurrentTransportState ? CurrentTransportState : "", CurrentTransportStatus ? CurrentTransportStatus : "", CurrentSpeed ? CurrentSpeed : "" );
+    }
+#endif
+
+    if ( gettransportinfo_callback != NULL )
+    {
+        gettransportinfo_callback(ErrorCode, CurrentTransportState, CurrentTransportStatus, CurrentSpeed);
+    }
+}
+
 
 /************************************************************************/
 /* Interface                                                            */
@@ -511,6 +530,17 @@ void dmrGetPosition( char * udn )
         return;
     }
     RCP_GetPosition( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetPositionSink );
+}
+
+void dmrGetTransportInfo( char * udn )
+{
+    struct _tDmrInfo * Val = _getDmrInfo( udn );
+    if ( Val == NULL )
+    {
+        printf( "You choice a invalid device!\n" );
+        return;
+    }
+    RCP_GetTransportInfo( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetTransportInfoSink);
 }
 
 /************************************************************************/
