@@ -1,13 +1,16 @@
-#include "airplay/AirPlayServer.h"
+#include "airplay/AirplayServer.h"
 #include "airplay/Md5.h"
 #include "airplay/HttpParser.h"
 #include "airplay/DllLibPlist.h"
 
 #include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #if defined(_WIN32)
 #define close closesocket
+#else
+#include <sys/socket.h>
 #endif
 
 #define RECEIVEBUFFER 1024
@@ -109,28 +112,42 @@ const char *eventStrings[] = {"playing", "paused", "loading", "stopped"};
 #define AUTH_REALM "AirPlay"
 #define AUTH_REQUIRED "WWW-Authenticate: Digest realm=\""  AUTH_REALM  "\", nonce=\"%s\"\r\n"
 
+#if defined(_WIN32)
 DWORD WINAPI WorkThread(void *args)
 {
     AirplayServer::get_instance()->process();
     return 0;
 }
+#else
+void * WorkThread(void *)
+{
+    AirplayServer::get_instance()->process();
+    return 0;
+}
+#endif
 
 void AirplayServer::create()
 {
+#if defined(_WIN32)
     DWORD ptid = 0;
     CreateThread(NULL, 0, &WorkThread, NULL, 0, &ptid);
+#else
+    pthread_t ptid = 0;
+    pthread_create(&ptid, NULL, &WorkThread, NULL);
+#endif
 }
 
 bool AirplayServer::start_server(int port, bool nonlocal)
 {
     stop_server(true);
-
+#if defined(_WIN32)
     WORD wVersionRequested;
     WSADATA wsaData;
     wVersionRequested = MAKEWORD( 2, 0 );
     if (WSAStartup( wVersionRequested, &wsaData ) != 0) {
         return false;
     }
+#endif
 
     server_instance_ = new AirplayServer(port, nonlocal);
     if (server_instance_->_initialize()) {
@@ -165,7 +182,9 @@ void AirplayServer::stop_server(bool wait)
             delete server_instance_;
             server_instance_ = NULL;
         }
+#if defined(_WIN32)
         WSACleanup();
+#endif
     }
 }
 
@@ -198,7 +217,11 @@ void AirplayServer::process()
         int res = select(max_fd + 1, &rfds, NULL, NULL, &to);
         if (res < 0) {
             perror("AIRPLAY Server: Select failed");
+#if defined(_WIN32)
             Sleep(1000);
+#else
+            sleep(1);
+#endif
             _initialize();
         } else if (res > 0) {
             for (int i = m_connection_.size() - 1; i >= 0; --i) {
