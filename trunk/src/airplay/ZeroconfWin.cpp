@@ -3,8 +3,6 @@
 #include <string>
 #include <sstream>
 
-#pragma comment(lib, "dnssd.lib")
-
 ZeroconfWin::ZeroconfWin()
 {
 }
