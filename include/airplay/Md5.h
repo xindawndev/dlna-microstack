@@ -3,6 +3,7 @@
 #define _CXL_YETI_MD5_H_
 
 #include <string>
+#include <stdio.h>
 
 struct MD5Context {
     unsigned int buf[4];
