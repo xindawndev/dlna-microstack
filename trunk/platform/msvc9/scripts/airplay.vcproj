@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;&quot;../../../deps/airplay/dnssd-320.5.1-win32/include&quot;;&quot;../../../deps/airplay/libplist-1.7-win32-2/include&quot;"
+				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;../../../include/dns_sd;&quot;../../../deps/airplay/libplist-1.7-win32-2/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES;HAS_ZEROCONF;TARGET_OS_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src"
+				AdditionalIncludeDirectories="../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;&quot;../../../deps/airplay/dnssd-320.5.1-win32/include&quot;;&quot;../../../deps/airplay/libplist-1.7-win32-2/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -139,6 +139,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;../../../deps/airplay/dnssd-320.5.1-win32/lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -216,6 +217,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\airplay\HttpParser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\airplay\IAirplay.h"
 				>
 			</File>
 			<File
