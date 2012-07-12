@@ -1,6 +1,7 @@
 #ifndef _CXL_YETI_SOCKET_H_
 #define _CXL_YETI_SOCKET_H_
 
+#if defined(_WIN32)
 #include <Winsock2.h>
 #include <WS2tcpip.h>
 #include <ws2bth.h>
@@ -35,6 +36,7 @@
 #endif
 
 typedef int socklen_t;
+#endif
 
 #endif // _CXL_YETI_SOCKET_H_
 

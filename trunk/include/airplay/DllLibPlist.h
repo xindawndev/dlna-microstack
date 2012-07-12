@@ -1,8 +1,14 @@
 #ifndef _CXL_YETI_DLLLIBPLIST_H_
 #define _CXL_YETI_DLLLIBPLIST_H_
 
+#if defined(_WIN32)
 #include <plist/plist.h>
 #include <windows.h>
+#else
+typedef void * plist_t;
+typedef unsigned int uint32_t;
+#define NULL 0
+#endif
 
 class DllLibPlist
 {
@@ -35,7 +41,12 @@ public:
     void plist_free(plist_t plist);
 
 private:
+
+#if defined(_WIN32)
     HINSTANCE m_dll_instance_;
+#else
+    int m_dll_instance_;
+#endif
 };
 
 #endif // _CXL_YETI_DLLLIBPLIST_H_

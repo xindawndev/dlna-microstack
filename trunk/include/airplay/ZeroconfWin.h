@@ -3,8 +3,14 @@
 //#include "airplay/Zeroconf.h"
 #include "airplay/Lock.h"
 #include <dns_sd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <map>
+#if !defined(_WIN32)
+#include <arpa/inet.h>
+#endif
 
 class ZeroconfWin //: public Zeroconf
 {

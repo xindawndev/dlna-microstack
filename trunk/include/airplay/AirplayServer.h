@@ -6,7 +6,15 @@
 #include <vector>
 #include "airplay/Socket.h"
 #include "airplay/Lock.h"
+#if defined(_WIN32)
 #include <windows.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#define INVALID_SOCKET -1
+#endif
 
 class HttpParser;
 class DllLibPlist;
