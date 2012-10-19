@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{856E3377-8CCD-40CE-9CE9-EFE563B9271C}</ProjectGuid>
+    <RootNamespace>cxl_dlna</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>../../../lib/$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>../../../lib/$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WINSOCK2;MMSCP_LEAN_AND_MEAN;MICROSTACK_NO_STDAFX;WITH_VOLUME;WITH_DISPLAY;INCLUDE_FEATURE_VOLUME;INCLUDE_FEATURE_DISPLAY;INCLUDE_FEATURE_UPLOAD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WINSOCK2;MMSCP_LEAN_AND_MEAN;MICROSTACK_NO_STDAFX;WITH_VOLUME;WITH_DISPLAY;INCLUDE_FEATURE_VOLUME;INCLUDE_FEATURE_DISPLAY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsDidlSerializer.h" />
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsErrors.h" />
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsMediaClass.h" />
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsObject.h" />
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsStrings.h" />
+    <ClInclude Include="..\..\..\include\dlna\UploadController\UploadController.h" />
+    <ClInclude Include="..\..\..\include\dlna\DmsIntegration\DmsIntegration.h" />
+    <ClInclude Include="..\..\..\include\dlna\DmsIntegration\FileSystemEnumerator\FileSystemEnumerator.h" />
+    <ClInclude Include="..\..\..\include\dlna\DownloadController\DownloadController.h" />
+    <ClInclude Include="..\..\..\include\dlna\FileAbstractionFiles\FileIoAbstraction.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\DMR_MicroStack.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\DMRCP_ControlPoint.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncServerSocket.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncSocket.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncUDPSocket.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibParsers.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibSSDPClient.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibThreadPool.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibWebClient.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibWebServer.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\MediaServer_MicroStack.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\MediaServerCP_ControlPoint.h" />
+    <ClInclude Include="..\..\..\include\dlna\Functional\UPnPControlPointStructs.h" />
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttp.h" />
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttpClient.h" />
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttpServer.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMR.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMRCommon.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMRConfiguration.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaRendererCP\MAVRCP.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaRendererCP\MicroAVRCP.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaServerAbstraction\MediaServerAbstraction.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaServerBrowser\FilteringBrowser.h" />
+    <ClInclude Include="..\..\..\include\dlna\MediaServerBrowser\MediaServerControlPoint.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\BitArray.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\CircularBuffer.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\IndexBlocks.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlayListManager.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlaylistManagerPC.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlaylistManagerS.h" />
+    <ClInclude Include="..\..\..\include\dlna\PlaySingleUri\PlaySingleUri.h" />
+    <ClInclude Include="..\..\..\include\dlna\ProtocolInfoParser\DLNAProtocolInfo.h" />
+    <ClInclude Include="..\..\..\include\dlna\PushController\PushController.h" />
+    <ClInclude Include="..\..\..\include\dlna\StringUtils\MimeTypes.h" />
+    <ClInclude Include="..\..\..\include\dlna\StringUtils\UTF8Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsDidlSerializer.c" />
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsErrors.c" />
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsMediaClass.c" />
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsObject.c" />
+    <ClCompile Include="..\..\..\src\dlna\DmsIntegration\DmsIntegration.c" />
+    <ClCompile Include="..\..\..\src\dlna\DmsIntegration\FileSystemEnumerator\FileSystemEnumerator.c" />
+    <ClCompile Include="..\..\..\src\dlna\DownloadController\DownloadController.c" />
+    <ClCompile Include="..\..\..\src\dlna\FileAbstractionFiles\FileIoAbstraction.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\DMR_MicroStack.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\DMRCP_ControlPoint.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncServerSocket.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncSocket.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncUDPSocket.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibParsers.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibSSDPClient.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibThreadPool.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibWebClient.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibWebServer.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\MediaServer_MicroStack.c" />
+    <ClCompile Include="..\..\..\src\dlna\Functional\MediaServerCP_ControlPoint.c" />
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttp.c" />
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttpClient.c" />
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttpServer.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaRenderer\DMR.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaRendererCP\MAVRCP.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaRendererCP\MicroAVRCP.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaServerAbstraction\MediaServerAbstraction.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaServerBrowser\FilteringBrowser.c" />
+    <ClCompile Include="..\..\..\src\dlna\MediaServerBrowser\MediaServerControlPoint.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\BitArray.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\CircularBuffer.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\IndexBlocks.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlayListManager.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlaylistManagerPC.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlaylistManagerS.c" />
+    <ClCompile Include="..\..\..\src\dlna\PlaySingleUri\PlaySingleUri.c" />
+    <ClCompile Include="..\..\..\src\dlna\ProtocolInfoParser\DLNAProtocolInfo.c" />
+    <ClCompile Include="..\..\..\src\dlna\PushController\PushController.c" />
+    <ClCompile Include="..\..\..\src\dlna\StringUtils\MimeTypes.c" />
+    <ClCompile Include="..\..\..\src\dlna\StringUtils\UTF8Utils.c" />
+    <ClCompile Include="..\..\..\src\dlna\UploadController\UploadController.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

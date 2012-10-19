@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{32B4D6CC-0117-4535-90B7-CC905680EE8F}</ProjectGuid>
+    <RootNamespace>airplay</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>../../../bin/$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>../../../bin/$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;../../../include/dns_sd;../../../deps/airplay/libplist-1.7-win32-2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES;HAS_ZEROCONF;TARGET_OS_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../deps/airplay/dnssd-320.5.1-win32/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>../../../include/dlna;../../../include/dlna/CdsObjects;../../../include/dlna/DmsIntegration;../../../include/dlna/DownloadController;../../../include/dlna/FileAbstractionFiles;../../../include/dlna/Functional;../../../include/dlna/HttpFiles;../../../include/dlna/MediaRenderer;../../../include/dlna/MediaRendererCP;../../../include/dlna/MediaServerBrowser;../../../include/dlna/PlaylistTrackManager;../../../include/dlna/PlaySingleUri;../../../include/dlna/ProtocolInfoParser;../../../include/dlna/PushController;../../../include/dlna/StringUtils;../../../include/dlna/UploadController;../../../include/dlna/DmsIntegration/FileSystemEnumerator;../../../include/dlna/MediaServerAbstraction;../../../include;../../../src;../../../deps/airplay/dnssd-320.5.1-win32/include;../../../deps/airplay/libplist-1.7-win32-2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;MICROSTACK_NO_STDAFX;WINSOCK2;HAS_AIRPLAY;HAS_AIRTUNES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../deps/airplay/dnssd-320.5.1-win32/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\airplay\AirplayServer.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\DllLibPlist.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\HttpParser.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\Lock.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\Md5.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\ZeroconfWin.cpp" />
+    <ClCompile Include="..\..\..\src\airplay\AppMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\airplay\AirplayServer.h" />
+    <ClInclude Include="..\..\..\include\airplay\DllLibPlist.h" />
+    <ClInclude Include="..\..\..\include\airplay\HttpParser.h" />
+    <ClInclude Include="..\..\..\include\airplay\IAirplay.h" />
+    <ClInclude Include="..\..\..\include\airplay\Lock.h" />
+    <ClInclude Include="..\..\..\include\airplay\Md5.h" />
+    <ClInclude Include="..\..\..\include\airplay\Socket.h" />
+    <ClInclude Include="..\..\..\include\airplay\ZeroconfWin.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

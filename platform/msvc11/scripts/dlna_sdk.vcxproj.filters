@@ -1,0 +1,375 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{6b43312d-ae5e-47d8-a523-24404fac4feb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\CdsObjects">
+      <UniqueIdentifier>{e94a3357-0839-47cb-94ce-d8c9ec758b7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\UploadController">
+      <UniqueIdentifier>{9fb8b2cc-a3ab-4a8e-98b0-0b402f8fa012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\DmsIntegration">
+      <UniqueIdentifier>{d61d2024-b58d-4b5e-8116-187d9f46c63a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\DmsIntegration\FileSystemEnumerator">
+      <UniqueIdentifier>{a1010914-880c-4dbe-ba44-e8a0fd060b00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\DownloadController">
+      <UniqueIdentifier>{ceb68afe-7787-44c3-b87f-bcacbf43bf3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\FileAbstractionFiles">
+      <UniqueIdentifier>{36224f1c-ba53-40f0-96f2-6db3ddf91908}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Functional">
+      <UniqueIdentifier>{8ee070f7-55c4-4fa1-978b-c80447755e0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\HttpFiles">
+      <UniqueIdentifier>{fe797d2c-a1b1-439c-9af1-6083de25d9f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\MediaRenderer">
+      <UniqueIdentifier>{f4e324e2-7b44-4459-a256-296838fcfbf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\MediaRendererCP">
+      <UniqueIdentifier>{58ed3239-e42c-4239-b1f7-5bfba181208e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\MediaServerAbstraction">
+      <UniqueIdentifier>{59952436-0767-4dae-aacc-805201bc6073}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\MediaServerBrowser">
+      <UniqueIdentifier>{62bdb67c-63c1-4493-b4b1-1fa15d74b6f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\PlaylistTrackManager">
+      <UniqueIdentifier>{7248bab4-d69f-4a35-82ee-3ec28b92d964}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\PlaySingleUri">
+      <UniqueIdentifier>{d7f4d928-4e97-4cb4-88e4-488ff48de98e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\ProtocolInfoParser">
+      <UniqueIdentifier>{81f58941-ba67-4eb3-ab62-74cd610b89ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\PushController">
+      <UniqueIdentifier>{9dc53329-4f21-4a80-90a5-71335b08c1b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\StringUtils">
+      <UniqueIdentifier>{37dd1f7a-a6fc-49f6-ac4b-5860cf16e380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4d952f58-f9f4-4560-9973-efd4e692fdec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\CdsObjects">
+      <UniqueIdentifier>{21500147-7cd6-47a0-9fcc-745485658f34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\DmsIntegration">
+      <UniqueIdentifier>{65ab6702-8408-4d8a-84de-0fcf2d4cdff9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\DmsIntegration\FileSystemEnumerator">
+      <UniqueIdentifier>{89d3f1a1-c8cb-424d-9887-5dd221583412}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\DownloadController">
+      <UniqueIdentifier>{2664a8db-79c5-4e88-93a7-6784a3ba9e81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\FileAbstractionFiles">
+      <UniqueIdentifier>{51661eed-012e-4ca6-b38d-666e1526bc41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Functional">
+      <UniqueIdentifier>{a7379e1c-9a37-48f3-a98b-7dbdb7a9a084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\HttpFiles">
+      <UniqueIdentifier>{4d3ef753-aac7-4df3-b65e-6873eb04ae26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\MediaRenderer">
+      <UniqueIdentifier>{3013fca8-94c1-4752-a482-419ffd91117b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\MediaRendererCP">
+      <UniqueIdentifier>{2be6e5d6-2d84-47e4-b474-34776ae47017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\MediaServerAbstraction">
+      <UniqueIdentifier>{1b72b695-a8ce-4c26-9250-b8f48b472cb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\MediaServerBrowser">
+      <UniqueIdentifier>{c754216e-c41f-413a-8a81-db2cbef9cce4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PlaylistTrackManager">
+      <UniqueIdentifier>{c43c0207-c157-4190-a0b1-b125d94bea80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PlaySingleUri">
+      <UniqueIdentifier>{b61c55ff-ac87-41aa-b318-27a52b9adfa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ProtocolInfoParser">
+      <UniqueIdentifier>{ab111dc4-5397-4f32-b742-a4d0c9db601b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PushController">
+      <UniqueIdentifier>{80c46d83-ccf2-4494-ae41-e67af0c4b20b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\StringUtils">
+      <UniqueIdentifier>{ecd23507-feda-4770-b9e9-4951cefbbae7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\UploadController">
+      <UniqueIdentifier>{51b99118-09d1-4a25-8931-d581dfbc4126}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsDidlSerializer.h">
+      <Filter>include\CdsObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsErrors.h">
+      <Filter>include\CdsObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsMediaClass.h">
+      <Filter>include\CdsObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsObject.h">
+      <Filter>include\CdsObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\CdsObjects\CdsStrings.h">
+      <Filter>include\CdsObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\UploadController\UploadController.h">
+      <Filter>include\UploadController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\DmsIntegration\DmsIntegration.h">
+      <Filter>include\DmsIntegration</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\DmsIntegration\FileSystemEnumerator\FileSystemEnumerator.h">
+      <Filter>include\DmsIntegration\FileSystemEnumerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\DownloadController\DownloadController.h">
+      <Filter>include\DownloadController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\FileAbstractionFiles\FileIoAbstraction.h">
+      <Filter>include\FileAbstractionFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\DMR_MicroStack.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\DMRCP_ControlPoint.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncServerSocket.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncSocket.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibAsyncUDPSocket.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibParsers.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibSSDPClient.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibThreadPool.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibWebClient.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\ILibWebServer.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\MediaServer_MicroStack.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\MediaServerCP_ControlPoint.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\Functional\UPnPControlPointStructs.h">
+      <Filter>include\Functional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttp.h">
+      <Filter>include\HttpFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttpClient.h">
+      <Filter>include\HttpFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\HttpFiles\DlnaHttpServer.h">
+      <Filter>include\HttpFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMR.h">
+      <Filter>include\MediaRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMRCommon.h">
+      <Filter>include\MediaRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaRenderer\DMRConfiguration.h">
+      <Filter>include\MediaRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaRendererCP\MAVRCP.h">
+      <Filter>include\MediaRendererCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaRendererCP\MicroAVRCP.h">
+      <Filter>include\MediaRendererCP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaServerAbstraction\MediaServerAbstraction.h">
+      <Filter>include\MediaServerAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaServerBrowser\FilteringBrowser.h">
+      <Filter>include\MediaServerBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\MediaServerBrowser\MediaServerControlPoint.h">
+      <Filter>include\MediaServerBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\BitArray.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\CircularBuffer.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\IndexBlocks.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlayListManager.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlaylistManagerPC.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaylistTrackManager\PlaylistManagerS.h">
+      <Filter>include\PlaylistTrackManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PlaySingleUri\PlaySingleUri.h">
+      <Filter>include\PlaySingleUri</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\ProtocolInfoParser\DLNAProtocolInfo.h">
+      <Filter>include\ProtocolInfoParser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\PushController\PushController.h">
+      <Filter>include\PushController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\StringUtils\MimeTypes.h">
+      <Filter>include\StringUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\dlna\StringUtils\UTF8Utils.h">
+      <Filter>include\StringUtils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsDidlSerializer.c">
+      <Filter>src\CdsObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsErrors.c">
+      <Filter>src\CdsObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsMediaClass.c">
+      <Filter>src\CdsObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\CdsObjects\CdsObject.c">
+      <Filter>src\CdsObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\DmsIntegration\DmsIntegration.c">
+      <Filter>src\DmsIntegration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\DmsIntegration\FileSystemEnumerator\FileSystemEnumerator.c">
+      <Filter>src\DmsIntegration\FileSystemEnumerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\DownloadController\DownloadController.c">
+      <Filter>src\DownloadController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\FileAbstractionFiles\FileIoAbstraction.c">
+      <Filter>src\FileAbstractionFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\DMR_MicroStack.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\DMRCP_ControlPoint.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncServerSocket.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncSocket.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibAsyncUDPSocket.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibParsers.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibSSDPClient.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibThreadPool.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibWebClient.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\ILibWebServer.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\MediaServer_MicroStack.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\Functional\MediaServerCP_ControlPoint.c">
+      <Filter>src\Functional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttp.c">
+      <Filter>src\HttpFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttpClient.c">
+      <Filter>src\HttpFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\HttpFiles\DlnaHttpServer.c">
+      <Filter>src\HttpFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaRenderer\DMR.c">
+      <Filter>src\MediaRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaRendererCP\MAVRCP.c">
+      <Filter>src\MediaRendererCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaRendererCP\MicroAVRCP.c">
+      <Filter>src\MediaRendererCP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaServerAbstraction\MediaServerAbstraction.c">
+      <Filter>src\MediaServerAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaServerBrowser\FilteringBrowser.c">
+      <Filter>src\MediaServerBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\MediaServerBrowser\MediaServerControlPoint.c">
+      <Filter>src\MediaServerBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\BitArray.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\CircularBuffer.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\IndexBlocks.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlayListManager.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlaylistManagerPC.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaylistTrackManager\PlaylistManagerS.c">
+      <Filter>src\PlaylistTrackManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PlaySingleUri\PlaySingleUri.c">
+      <Filter>src\PlaySingleUri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\ProtocolInfoParser\DLNAProtocolInfo.c">
+      <Filter>src\ProtocolInfoParser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\PushController\PushController.c">
+      <Filter>src\PushController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\StringUtils\MimeTypes.c">
+      <Filter>src\StringUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\StringUtils\UTF8Utils.c">
+      <Filter>src\StringUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\dlna\UploadController\UploadController.c">
+      <Filter>src\UploadController</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
