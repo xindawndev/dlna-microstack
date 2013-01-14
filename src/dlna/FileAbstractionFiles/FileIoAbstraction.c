@@ -14,13 +14,12 @@
 
 /* Windows 32 */
 #if defined(WIN32)
-#   include <windows.h>
-#   include <time.h>
-#   include <direct.h>
-#   ifdef getcwd
-#   undef getcwd
-#       define getcwd(path, sizeOfBuffers) _getcwd(path,sizeOfBuffers)
-#   endif
+    #include <windows.h>
+    #include <time.h>
+    #include <direct.h>
+#ifndef getcwd
+    #define getcwd(path, sizeOfBuffers) _getcwd(path,sizeOfBuffers)
+#endif
 #endif
 
 
@@ -43,10 +42,6 @@
     #include <Winbase.h>
 #endif
 #include "FileIoAbstraction.h"
-
-#if defined(__SYMBIAN32__)
-#include "ILibSymbianFileIO.h"
-#endif
 
 int EndsWith(/*INOUT*/ const char* str, const char* endsWith, int ignoreCase)
 {
@@ -78,8 +73,6 @@ void ILibFileDir_CloseDir(void* handle)
 #elif defined(_POSIX)
     DIR* dirObj = (DIR*) handle;
     closedir(dirObj);
-#elif defined(__SYMBIAN32__)
-    ILibSymbian_FileDir_CloseDir(handle);
 #endif
 }
 
@@ -181,8 +174,6 @@ void* ILibFileDir_GetDirFirstFile(const char* directory, /*INOUT*/ char* filenam
     }
 
     return dirObj;
-#elif defined(__SYMBIAN32__)
-    return (ILibSymbian_FileDir_GetDirFirstFile(directory, filename, filenamelength, filesize));
 #endif
 }
 
@@ -242,8 +233,6 @@ int ILibFileDir_GetDirNextFile(void* handle, const char* dirName, char* filename
     }
 
     return 0;
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_GetDirNextFile(handle, dirName, filename, filenamelength, filesize));
 #endif
 }
 
@@ -309,19 +298,6 @@ enum ILibFileDir_Type ILibFileDir_GetType(char* directory)
         }
     }
     return retVal;
-#elif defined(__SYMBIAN32__)
-    switch(ILibSymbian_FileDir_GetType(directory))
-    {
-        case ILibSymbian_FileDir_Type_FILE:
-            return(ILibFileDir_Type_FILE);
-            break;
-        case ILibSymbian_FileDir_Type_DIR:
-            return(ILibFileDir_Type_DIRECTORY);
-            break;
-        default:
-            return(ILibFileDir_Type_NOT_FOUND_ERROR);
-            break;
-    }
 #endif
 }
 
@@ -361,8 +337,6 @@ char* ILibFileDir_GetWorkingDir(char *path, size_t sizeOfBuf)
     }
     sprintf(path,"/");
     return(path);
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_GetWorkingDir(path,(int)sizeOfBuf));
 #else
     return getcwd(path, (int)sizeOfBuf);
 #endif
@@ -399,8 +373,6 @@ int ILibFileDir_DeleteFile(char *FileName)
     return(!DeleteFile((LPCTSTR)FileName));
 #elif defined(POSIX)
     return(remove(FileName));
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_DeleteFile(FileName));
 #endif
     return 0;
 }
@@ -442,8 +414,6 @@ int ILibFileDir_DeleteDir(char *path)
     return(!RemoveDirectory((LPCTSTR)path));
 #elif defined(POSIX)
     return(rmdir(path));
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_DeleteDir(path));    
 #endif
     return 0;
 }
@@ -523,8 +493,6 @@ int ILibFileDir_CreateDir(char *path)
     return(!CreateDirectory((LPCTSTR)path,NULL));
 #elif defined(POSIX)
     return(mkdir(path,0));
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_CreateDir(path));
 #endif
     return 0;
 }
@@ -577,8 +545,6 @@ int ILibFileDir_MoveFile(char *OldFileName, char *NewFileName)
     return(!MoveFile((LPCTSTR)OldFileName, (LPCTSTR)NewFileName));
 #elif defined(POSIX)
     return(rename(OldFileName, NewFileName));
-#elif defined(__SYMBIAN32__)
-    return(ILibSymbian_FileDir_MoveFile(OldFileName,NewFileName));
 #endif
     return 0;
 }

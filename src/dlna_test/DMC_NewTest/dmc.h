@@ -24,6 +24,6 @@ void callback_setplaymode( int ErrorCode);
 
 void callback_getmediainfo( int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI);
 void callback_getposition( int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter);
-
+void callback_gettransportinfo( int ErrorCode, char* CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed);
 
 #endif // __DMC_H__

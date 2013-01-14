@@ -25,7 +25,7 @@ struct DH_Data
 
     DH_TransferStatus TransferStatus;
     int SendStatus;
-    sem_t SendStatusLock;
+    lock_t SendStatusLock;
     int Disconnect;
 
     void *OriginalReceivePtr;
@@ -82,9 +82,9 @@ void DH_Disconnect(struct ILibWebServer_Session *session)
 
     if(data!=NULL)
     {
-        sem_wait(&(data->SendStatusLock));
+        lock_wait(&(data->SendStatusLock));
         SendStatus = data->SendStatus;
-        sem_post(&(data->SendStatusLock));
+        lock_post(&(data->SendStatusLock));
         if(SendStatus>0 || SendStatus<0)
         {
             if(data->f!=NULL)
@@ -97,7 +97,7 @@ void DH_Disconnect(struct ILibWebServer_Session *session)
                 data->f = NULL;
             }
             DH_DestroyTransferStatus(data->TransferStatus);
-            sem_destroy(&(data->SendStatusLock));
+            lock_destroy(&(data->SendStatusLock));
             free(data);
         }
         else
@@ -115,7 +115,7 @@ void DH_Pool(ILibThreadPool sender, void *var)
     int paused=0;
     int SendStatus=0;
 
-    sem_wait(&(data->TransferStatus->syncLock));
+    lock_wait(&(data->TransferStatus->syncLock));
     if(data->TransferStatus->Reserved1!=0)
     {
         data->TransferStatus->Reserved2 = 2;
@@ -123,7 +123,7 @@ void DH_Pool(ILibThreadPool sender, void *var)
         paused=1;
         free(buffer);
     }
-    sem_post(&(data->TransferStatus->syncLock));
+    lock_post(&(data->TransferStatus->syncLock));
 
     if(paused)
     {
@@ -133,11 +133,11 @@ void DH_Pool(ILibThreadPool sender, void *var)
 
     if(data->TransferStatus->TotalBytesToBeSent==-1)
     {
-        sem_wait(&(data->TransferStatus->syncLock));
+        lock_wait(&(data->TransferStatus->syncLock));
         fseek(data->f,0,SEEK_END);
         data->TransferStatus->TotalBytesToBeSent = ftell(data->f);
         fseek(data->f,0,SEEK_SET);
-        sem_post(&(data->TransferStatus->syncLock));
+        lock_post(&(data->TransferStatus->syncLock));
     }
 
     bytesRead = (int)fread(buffer,sizeof(char),data->BytesLeft>DHS_READ_BLOCK_SIZE?DHS_READ_BLOCK_SIZE:data->BytesLeft,data->f);
@@ -149,15 +149,15 @@ void DH_Pool(ILibThreadPool sender, void *var)
         data->session->OnSendOK = &DH_SendOK;
         data->session->OnDisconnect = &DH_Disconnect;
 
-        sem_wait(&(data->SendStatusLock));
+        lock_wait(&(data->SendStatusLock));
         SendStatus = data->SendStatus = ILibWebServer_StreamBody(data->session,buffer,bytesRead,ILibAsyncSocket_MemoryOwnership_CHAIN,0);
-        sem_post(&(data->SendStatusLock));
+        lock_post(&(data->SendStatusLock));
 
         if(SendStatus>=0)
         {
-            sem_wait(&(data->TransferStatus->syncLock));
+            lock_wait(&(data->TransferStatus->syncLock));
             data->TransferStatus->ActualBytesSent += (long)bytesRead;
-            sem_post(&(data->TransferStatus->syncLock));
+            lock_post(&(data->TransferStatus->syncLock));
         }
     }
     else
@@ -189,7 +189,7 @@ void DH_Pool(ILibThreadPool sender, void *var)
             }
             fclose(data->f);
             DH_DestroyTransferStatus(data->TransferStatus);
-            sem_destroy(&(data->SendStatusLock));
+            lock_destroy(&(data->SendStatusLock));
             free(data);
         }
         else
@@ -220,7 +220,7 @@ void DH_Pool(ILibThreadPool sender, void *var)
                     data->f = NULL;
                 }
                 DH_DestroyTransferStatus(data->TransferStatus);
-                sem_destroy(&(data->SendStatusLock));
+                lock_destroy(&(data->SendStatusLock));
                 free(data);
             }
 
@@ -423,7 +423,7 @@ DH_TransferStatus DHS_RespondWithLocalFile(struct ILibWebServer_Session *session
         }
         else
         {
-            sem_init(&(data->SendStatusLock),0,1);
+            lock_init(&(data->SendStatusLock),0,1);
             ILibThreadPool_QueueUserWorkItem(pool,data,&DH_Pool);
         }
     }
@@ -443,14 +443,14 @@ void DH_Pool_SavePostToLocalFile(ILibThreadPool pool, void *var)
     struct ILibWebServer_Session *session = data->session;
     int paused=0;
 
-    sem_wait(&(data->TransferStatus->syncLock));
+    lock_wait(&(data->TransferStatus->syncLock));
     if(data->TransferStatus->Reserved1!=0)
     {
         data->TransferStatus->Reserved2 = 1;
         data->TransferStatus->Reserved3 = data;
         paused=1;
     }
-    sem_post(&(data->TransferStatus->syncLock));
+    lock_post(&(data->TransferStatus->syncLock));
 
     if(paused)
     {
@@ -463,9 +463,9 @@ void DH_Pool_SavePostToLocalFile(ILibThreadPool pool, void *var)
         fwrite(data->session->buffer,sizeof(char),data->session->bufferLength,data->f);
     }
 
-    sem_wait(&(data->TransferStatus->syncLock));
+    lock_wait(&(data->TransferStatus->syncLock));
     data->TransferStatus->ActualBytesReceived += data->session->bufferLength;
-    sem_post(&(data->TransferStatus->syncLock));
+    lock_post(&(data->TransferStatus->syncLock));
 
     if(data->session->done!=0)
     {
@@ -680,22 +680,22 @@ DH_TransferStatus DHS_SavePostToLocalFile(struct ILibWebServer_Session *session,
 }
 void DH_Pause(DH_TransferStatus tstatus)
 {
-    sem_wait(&(tstatus->syncLock));
+    lock_wait(&(tstatus->syncLock));
     tstatus->Reserved1=1;
-    sem_post(&(tstatus->syncLock));
+    lock_post(&(tstatus->syncLock));
 }
 void DH_Resume(DH_TransferStatus tstatus)
 {
     int WhatToDo = 0;
     struct DH_Data* data = NULL;
 
-    sem_wait(&(tstatus->syncLock));
+    lock_wait(&(tstatus->syncLock));
     WhatToDo = tstatus->Reserved2;
     data = (struct DH_Data*)tstatus->Reserved3;
     data->TransferStatus->Reserved1=0;
     data->TransferStatus->Reserved2=0;
     data->TransferStatus->Reserved3=NULL;
-    sem_post(&(tstatus->syncLock));
+    lock_post(&(tstatus->syncLock));
 
     switch(WhatToDo)
     {

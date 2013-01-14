@@ -22,7 +22,7 @@ struct CdsObject* CDS_AllocateObject()
     struct CdsObject *cdsObj = (struct CdsObject *) malloc (sizeof(struct CdsObject));
     memset(cdsObj, 0, sizeof(struct CdsObject));
     cdsObj->CpInfo.Reserved.ServiceObject = NULL;
-    sem_init(&(cdsObj->CpInfo.Reserved.ReservedLock), 0, 1);
+    lock_init(&(cdsObj->CpInfo.Reserved.ReservedLock), 0, 1);
 
     return cdsObj;
 }
@@ -259,7 +259,7 @@ void CDS_DestroyObject(struct CdsObject *cds_obj)
 
         CDS_DestroyResources(cdsobj->Res);
     
-        sem_destroy(&cdsobj->CpInfo.Reserved.ReservedLock);
+        lock_destroy(&cdsobj->CpInfo.Reserved.ReservedLock);
 
         if(cdsobj->Source!=NULL)
         {

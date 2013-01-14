@@ -1,3 +1,4 @@
+
 #if defined(WIN32) && !defined(_WIN32_WCE)
     #define _CRTDBG_MAP_ALLOC
 #endif
@@ -25,7 +26,7 @@ typedef struct _PlayListManager_PC
     char*                SortArgs;
     int                    MaxDepth;
 
-    sem_t                LockObject;
+    lock_t                LockObject;
     struct CdsObject*    Objects[MAX_OBJECTS_IN_MEMORY];
     int                    Count;
     int                    StartingTrackNumber;
@@ -82,7 +83,7 @@ int PlayListManager_PC_Create(PlayListManager manager, char* uri)
         return result;
     }
 
-    sem_init(&state->LockObject, 0, 1);
+    lock_init(&state->LockObject, 0, 1);
 
     if(Browse(state, 1) == FALSE)
     {
@@ -101,8 +102,8 @@ void _PLMTPC_Destroy(PlayListManager manager)
     PlayListManager_PC state = (PlayListManager_PC)manager->InternalState;
     if(state != NULL)
     {
-        sem_wait(&state->LockObject);
-        sem_destroy(&state->LockObject);
+        lock_wait(&state->LockObject);
+        lock_destroy(&state->LockObject);
 
         String_Destroy(state->UDN);
         String_Destroy(state->ServiceID);
@@ -122,7 +123,7 @@ void _PLMTPC_Destroy(PlayListManager manager)
     {
         CDS_ObjRef_Release(manager->TrackMetaData);
     }
-    sem_destroy(&manager->LockObject);
+    lock_destroy(&manager->LockObject);
     if(manager->ShuffleArray != NULL)
     {
         BitArray_Destroy(manager->ShuffleArray);
@@ -232,20 +233,20 @@ BOOL ParsePlayContainerUri(PlayListManager_PC state, char* uri)
         pos += 5;
     }
     {
-        char out[4096];
+        char out[4096] = {0};
         sprintf(out, "%s\n", pos);
 #ifdef _POSIX
-        printf(out);
+        printf("%s", out);
 #else
         OutputDebugStringA(out);
 #endif
     }
     tmp = MyStrChr(pos, 0x003f);
     {
-        char out[4096];
+        char out[4096] = {0};
         sprintf(out, "%s\n", tmp);
 #ifdef _POSIX
-        printf(out);
+        printf("%s", out);
 #else
         OutputDebugStringA(out);
 #endif
@@ -391,10 +392,8 @@ char* GetServiceIDFromFullString(char* fullStr)
 
 BOOL Browse(PlayListManager_PC instance, int trackIndex)
 {
-    struct CdsObject* cdsObject = NULL;
     struct UPnPDevice* device = NULL;
     struct UPnPService* service = NULL;
-    char* rawResult = NULL;
     int cdsIndex = instance->FirstItemIndex;
     long ticks = 0;
 
@@ -426,12 +425,12 @@ BOOL Browse(PlayListManager_PC instance, int trackIndex)
         return FALSE;
     }
 
-    sem_wait(&instance->LockObject);
+    lock_wait(&instance->LockObject);
 
     MediaServerCP_Invoke_ContentDirectory_Browse(service, &_Callback2, instance, instance->ContainerID, "BrowseDirectChildren", "*", cdsIndex, MAX_OBJECTS_IN_MEMORY, instance->SortArgs);
 
-    sem_wait(&instance->LockObject);
-    sem_post(&instance->LockObject);
+    lock_wait(&instance->LockObject);
+    lock_post(&instance->LockObject);
 
     if(instance->Error == 0)
     {
@@ -453,7 +452,7 @@ void _Callback2(struct UPnPService *sender, int ErrorCode, void *user,
     state->Error = -ErrorCode;
     if(ErrorCode != 0)
     {
-        sem_post(&state->LockObject);
+        lock_post(&state->LockObject);
         return;
     }
 
@@ -521,7 +520,7 @@ void _Callback2(struct UPnPService *sender, int ErrorCode, void *user,
         state->Error = 2;
     }
 
-    sem_post(&state->LockObject);
+    lock_post(&state->LockObject);
 }
 
 char* PC_UriUnescape(char* uri)

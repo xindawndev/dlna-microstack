@@ -128,7 +128,7 @@ struct FB_FilteringBrowser
     /*
      *    synchronizes access to this object
      */
-    sem_t                    Lock;
+    lock_t                    Lock;
 
     /*
      *    Stores the filtered results
@@ -187,7 +187,7 @@ struct FB_FilteringBrowser
  */
 struct FB_Object
 {
-    sem_t                        SyncLock;
+    lock_t                        SyncLock;
     struct FB_FilteringBrowser    *FB;
     void*                        ControlPointMicroStack;
     void*                        Tag; /* Added by PDA */
@@ -248,7 +248,7 @@ struct FB_FilteringBrowserManager
     /* execute this method to report a change in the list of servers */
     FB_Fn_ServerListUpdated    ServerListCallback;
 
-    sem_t                Lock;
+    lock_t                Lock;
 };
 
 
@@ -593,7 +593,7 @@ void _FB_ClearProcessingState(struct FB_FilteringBrowser *fb)
 
     if (fb != NULL)
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         memset(&(fb->ProcessingState), 0, sizeof(struct FB_ProcessingState));
         memset(&(fb->ProcessingState_Page), 0, sizeof(struct FB_ProcessingState));
         _FB_ClearIndexer(&(fb->Indexer));
@@ -601,13 +601,13 @@ void _FB_ClearProcessingState(struct FB_FilteringBrowser *fb)
 //        {
 //            fb->Indexer.IsDone = 1;
 //        }
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 }
 
 void _FB_FreeFilteringBrowserWrapper(struct FB_Object *fbw)
 {
-    sem_destroy(&(fbw->SyncLock));
+    lock_destroy(&(fbw->SyncLock));
     free(fbw);
 }
 
@@ -628,7 +628,7 @@ void _FB_FreeFilteringBrowser(struct FB_FilteringBrowser *fb)
      */
     _FB_ClearProcessingState(fb);
 
-    sem_wait(&(fb->Lock));
+    lock_wait(&(fb->Lock));
 
     /*
      *    before destroying the filter browser, 
@@ -700,8 +700,8 @@ void _FB_FreeFilteringBrowser(struct FB_FilteringBrowser *fb)
     }
 
     /* free the semaphore last */
-    sem_post(&(fb->Lock));
-    sem_destroy(&(fb->Lock));
+    lock_post(&(fb->Lock));
+    lock_destroy(&(fb->Lock));
     free (fb);
 }
 
@@ -823,7 +823,7 @@ int _FB_BrowseNextStep(struct FB_FilteringBrowser *fb)
     {
 
 
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         fb->Flag_Processing = 1;
         cc = _FB_ContextPeek(fb->CurrentContext);
         if (
@@ -981,7 +981,7 @@ int _FB_BrowseNextStep(struct FB_FilteringBrowser *fb)
             }
         }
 
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -1015,7 +1015,7 @@ int _FB_BrowsePage(struct FB_FilteringBrowser *fb)
     {
 
 
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         fb->Flag_Processing = 1;
         cc = _FB_ContextPeek(fb->CurrentContext);
         if (
@@ -1174,7 +1174,7 @@ int _FB_BrowsePage(struct FB_FilteringBrowser *fb)
             }
         }
 
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -1309,7 +1309,7 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
 
     if ((fb != NULL) && (fb->Results != NULL))
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
 
         /*
          *    Get pointers to the processing state and indexer.
@@ -1354,11 +1354,11 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
                 /* A parsing error has occurred so note the error. */
                 fb->Results->ErrorCode = errorCode;
 
-                sem_post(&(fb->Lock));
+                lock_post(&(fb->Lock));
                 /* report the errors */
                 _FB_ReportResultsEx1(0, fb);
                 stopProcessing = 1;
-                sem_wait(&(fb->Lock));
+                lock_wait(&(fb->Lock));
             }
             
             if ((*results) != NULL)
@@ -1566,10 +1566,10 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
                                 {
                                     ILibLinkedList_UnLock((*results)->LinkedList);
                                     ILibLinkedList_UnLock(fb->Results->LinkedList);
-                                    sem_post(&(fb->Lock));
+                                    lock_post(&(fb->Lock));
                                     /* IDF#6a: report results */
                                     _FB_ReportResultsEx1(0, fb);
-                                    sem_wait(&(fb->Lock));
+                                    lock_wait(&(fb->Lock));
                                     ILibLinkedList_Lock(fb->Results->LinkedList);
                                     ILibLinkedList_Lock((*results)->LinkedList);
                                 }
@@ -1644,7 +1644,7 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
             }
         }
 
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
 
         /*
          *    At this point, we need to figure out we're going to do next.
@@ -1687,7 +1687,7 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
                  *    We're done processing, so inform the app that results are ready 
                  *    unless we've already evented.
                  */
-                sem_wait(&(fb->Lock));
+                lock_wait(&(fb->Lock));
                 
                 fb->Flag_Processing = 0;
 
@@ -1706,7 +1706,7 @@ void _FB_ProcessBrowseResults(struct FB_FilteringBrowser *fb, void *serviceObj, 
                     pi->IsDone = 1;
                 }
 
-                sem_post(&(fb->Lock));
+                lock_post(&(fb->Lock));
                 
                 if (((*results) != NULL) && (resultsLimitReached == 0))
                 {
@@ -1843,7 +1843,7 @@ void _FB_OnDestroy(void *fbManagerObj)
          */
         
 
-        sem_destroy(&(_FB_AllRoots.CpInfo.Reserved.ReservedLock));
+        lock_destroy(&(_FB_AllRoots.CpInfo.Reserved.ReservedLock));
     }
     /* don't call free on fbManagerObj */
 }
@@ -2074,7 +2074,7 @@ void* _FB_CreateFilteringBrowser(FB_Fn_ResultsUpdated resultsUpdated, FB_Fn_Page
     memset(fb, 0, sizeof(struct FB_FilteringBrowser));
     fb->ResultsCallback = resultsUpdated;
     fb->PageCountCallback = pagesCounted;
-    sem_init(&(fb->Lock), 0, 1);
+    lock_init(&(fb->Lock), 0, 1);
 
     /* initialize page info */
     memset(&(fb->PageInfo), 0, sizeof(struct FB_PageInfo));
@@ -2176,9 +2176,9 @@ void _FB_PreventProcessingError(struct FB_Object *fbw)
      */
     if ((fbw != NULL) && (fbw->FB != NULL))
     {
-        sem_wait(&(fbw->SyncLock));
+        lock_wait(&(fbw->SyncLock));
         fb = fbw->FB;
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
 
         if (
             (fb->Flag_Processing != 0) ||
@@ -2196,7 +2196,7 @@ void _FB_PreventProcessingError(struct FB_Object *fbw)
             newFB = _FB_CopyResetFilteringBrowser(fb);
         }
         
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
 
         if (newFB != NULL)
         {
@@ -2209,7 +2209,7 @@ void _FB_PreventProcessingError(struct FB_Object *fbw)
             newFB->Wrapper = fbw;
         }
 
-        sem_post(&(fbw->SyncLock));
+        lock_post(&(fbw->SyncLock));
     }
 }
 
@@ -2250,7 +2250,7 @@ FB_Object FB_CreateFilteringBrowser(void *chain, ILibThreadPool thread_pool, FB_
     {
         /* synchronize access the global objects, this is added to eliminate re-entrance problems*/
 
-        sem_wait(&(FB_TheManager->Lock));
+        lock_wait(&(FB_TheManager->Lock));
 
         if (FB_TheChain == NULL)
         {
@@ -2270,7 +2270,7 @@ FB_Object FB_CreateFilteringBrowser(void *chain, ILibThreadPool thread_pool, FB_
                 */
                 ILibAddToChain(chain, FB_TheManager);
 
-                sem_init(&(_FB_AllRoots.CpInfo.Reserved.ReservedLock), 0, 1);
+                lock_init(&(_FB_AllRoots.CpInfo.Reserved.ReservedLock), 0, 1);
 
                 CDS_ObjRef_Add(&(_FB_AllRoots));
             }
@@ -2285,7 +2285,7 @@ FB_Object FB_CreateFilteringBrowser(void *chain, ILibThreadPool thread_pool, FB_
             fbw->FB = _FB_CreateFilteringBrowser(resultsUpdated, pagesCounted);
             fbw->ControlPointMicroStack = FB_TheManager->ControlPointMicroStack;
             fbw->FB->Wrapper = fbw;
-            sem_init(&(fbw->SyncLock), 0, 1);
+            lock_init(&(fbw->SyncLock), 0, 1);
 
             /* make a key using the memory address */
             /* build a key - ignore compiler warning*/
@@ -2302,7 +2302,7 @@ FB_Object FB_CreateFilteringBrowser(void *chain, ILibThreadPool thread_pool, FB_
             ILibHashTree_UnLock(FB_TheManager->Wrappers);
         }
 
-        sem_post(&(FB_TheManager->Lock));        
+        lock_post(&(FB_TheManager->Lock));        
 
     }
 
@@ -2319,7 +2319,7 @@ void FB_DestroyFilteringBrowser(FB_Object fbObj)
 
     if (fbw != NULL)
     {
-        sem_wait(&(fbw->SyncLock));
+        lock_wait(&(fbw->SyncLock));
 
         if (fbw->FB != NULL)
         {
@@ -2330,7 +2330,7 @@ void FB_DestroyFilteringBrowser(FB_Object fbObj)
              *    before executing the FB_Fn_ResultsUpdated callback.
              */
 
-            sem_wait(&(fbw->FB->Lock));
+            lock_wait(&(fbw->FB->Lock));
             if (fbw->FB->Flag_Processing != 0)
             {
                 /*
@@ -2367,7 +2367,7 @@ void FB_DestroyFilteringBrowser(FB_Object fbObj)
                  */
                 destroyImmediate = 1;
             }
-            sem_post(&(fbw->FB->Lock));
+            lock_post(&(fbw->FB->Lock));
 
             if (destroyImmediate != 0)
             {
@@ -2389,7 +2389,7 @@ void FB_DestroyFilteringBrowser(FB_Object fbObj)
         ILibHashTree_Lock(FB_TheManager->Wrappers);
         ILibDeleteEntry(FB_TheManager->Wrappers, key, keyLen);
         ILibHashTree_UnLock(FB_TheManager->Wrappers);
-        sem_post(&(fbw->SyncLock));
+        lock_post(&(fbw->SyncLock));
 
         _FB_FreeFilteringBrowserWrapper(fbw);
     }
@@ -2450,7 +2450,7 @@ void FB_Refresh(FB_Object fbObj)
         /*
          *    Lock and clear the existing forward contexts.
          */
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         if (fb->ForwardContexts != NULL)
         {
             c = (struct CdsObject*) _FB_LinkedListDeQueue(fb->ForwardContexts);
@@ -2463,14 +2463,14 @@ void FB_Refresh(FB_Object fbObj)
             fb->ForwardContexts = NULL;
         }
         server = fb->Server;
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
 
         /*
          *    Reset the processing state and clear
          *    the results that we have.
          */
 
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         /* destroy results and allocate memory for new results*/
         FB_DestroyResults(fb->Results);
         fb->Results = _FB_CreateBlankResults();
@@ -2512,7 +2512,7 @@ void FB_Refresh(FB_Object fbObj)
             ILibHashTree_UnLock(FB_TheManager->Servers);
         }
 
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
 
         if (FB_ContextIsAllRoots(fb->Wrapper) != 0)
         {
@@ -2630,7 +2630,7 @@ enum FB_SetContextErrors FB_SetContext(FB_Object fbObj, struct CdsObject *cdsCon
 
             if (udn != NULL)
             {
-                sem_wait(&(fb->Lock));
+                lock_wait(&(fb->Lock));
 
                 ILibHashTree_Lock(FB_TheManager->Servers);
                 serverInfo = (struct FB_Server*) ILibGetEntry(FB_TheManager->Servers, udn, (int)strlen(udn));
@@ -2815,7 +2815,7 @@ enum FB_SetContextErrors FB_SetContext(FB_Object fbObj, struct CdsObject *cdsCon
                 }
                 ILibHashTree_UnLock(FB_TheManager->Servers);
 
-                sem_post(&(fb->Lock));
+                lock_post(&(fb->Lock));
             }
 
             else
@@ -2824,7 +2824,7 @@ enum FB_SetContextErrors FB_SetContext(FB_Object fbObj, struct CdsObject *cdsCon
                  *    Setting the context to FB_AllRoots.
                  *    Pop the context to the bottom element and refresh.
                  */
-                sem_wait(&(fb->Lock));
+                lock_wait(&(fb->Lock));
                 ILibLinkedList_Lock(fb->CurrentContext);
 
                 while (ILibLinkedList_GetCount(fb->CurrentContext) > 1)
@@ -2846,7 +2846,7 @@ enum FB_SetContextErrors FB_SetContext(FB_Object fbObj, struct CdsObject *cdsCon
                 retVal = FB_SCE_None;
 
                 ILibLinkedList_UnLock(fb->CurrentContext);
-                sem_post(&(fb->Lock));
+                lock_post(&(fb->Lock));
             }
         }
     }
@@ -2880,7 +2880,7 @@ struct FB_ResultsInfo* FB_GetResults(FB_Object fbObj)
     if ((fb != NULL) && (FB_TheChain != NULL) && (FB_TheManager != NULL))
     {
         /* clone all of the objects and return through retVal */
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
 
         if (fb->Results != NULL)
         {
@@ -2906,7 +2906,7 @@ struct FB_ResultsInfo* FB_GetResults(FB_Object fbObj)
             ILibLinkedList_UnLock(fb->Results->LinkedList);
         }
 
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -2929,9 +2929,9 @@ struct CdsObject* FB_GetContext_Parent(FB_Object fbObj)
 
     if ((fb != NULL) && (fb->Parent != NULL))
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         retVal = CDS_CloneMediaObject(fb->Parent);
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -2968,9 +2968,9 @@ void FB_SetPageInfo (FB_Object fbObj, const struct FB_PageInfo *page)
 
     if (fb != NULL)
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         memcpy(&(fb->PageInfo), page, sizeof(struct FB_PageInfo));
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 }
 
@@ -3004,10 +3004,10 @@ void* FB_GetContext_EntireAsLinkedListCopy(FB_Object fbObj)
     }
     if ((fb != NULL) && (fb->CurrentContext != NULL))
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         /* get a copy of the linked list */
         retVal = _FB_CopyLinkedList(fb->CurrentContext);
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -3063,9 +3063,9 @@ int FB_GetPageInfo(FB_Object fbObj, /*INOUT*/ struct FB_PageInfo *pi)
     }
     if (fb != NULL)
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         memcpy(pi, &(fb->PageInfo), sizeof(struct FB_PageInfo));
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
         retVal = 1;
     }
 
@@ -3086,7 +3086,7 @@ int FB_GetPageCount(FB_Object fbObj)
     }
     if (fb != NULL)
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         /* use ceil instead of floor() */
         if (contextIsAllRoots != 0)
         {
@@ -3117,7 +3117,7 @@ int FB_GetPageCount(FB_Object fbObj)
                 retVal += (fb->Results->TotalInContainer % fb->PageInfo.PageSize)? 1: 0;
             }
         }
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -3141,13 +3141,13 @@ struct CdsObject* FB_GetContext_Current(FB_Object fbObj)
 
     if ((fb != NULL) && (fb->Parent != NULL))
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         obj = _FB_ContextPeek(fb->CurrentContext);
         if (obj != NULL)
         {
             retVal = CDS_CloneMediaObject(obj);
         }
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -3166,9 +3166,9 @@ struct CdsObject* FB_GetContext_CurrentPtr(FB_Object fbObj)
 
     if ((fb != NULL) && (fb->Parent != NULL))
     {
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         retVal = _FB_ContextPeek(fb->CurrentContext);
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
     }
 
     return retVal;
@@ -3179,7 +3179,7 @@ void _FB_SetPage(struct FB_FilteringBrowser *fb, unsigned int targetPage)
     int i;
     struct FB_SnapShot restoreThisState;
 
-    sem_wait(&(fb->Lock));
+    lock_wait(&(fb->Lock));
 
     /* mustdo: check for page violations */
     fb->PageInfo.Page = targetPage;
@@ -3222,7 +3222,7 @@ void _FB_SetPage(struct FB_FilteringBrowser *fb, unsigned int targetPage)
     FB_DestroyResults(fb->Results);
     fb->Results = _FB_CreateBlankResults();
 
-    sem_post(&(fb->Lock));
+    lock_post(&(fb->Lock));
     
     _FB_BrowsePage(fb);
 }
@@ -3238,9 +3238,9 @@ void FB_SetPage(FB_Object fbObj, unsigned int targetPage)
      */
     if ((fbw != NULL) && (fbw->FB != NULL))
     {
-        sem_wait(&(fbw->SyncLock));    
+        lock_wait(&(fbw->SyncLock));    
         fb = fbw->FB;
-        sem_wait(&(fb->Lock));
+        lock_wait(&(fb->Lock));
         if (
             (fb->Flag_Processing != 0) ||
             (fb->PendingRequest_Page != NULL)
@@ -3254,10 +3254,10 @@ void FB_SetPage(FB_Object fbObj, unsigned int targetPage)
             free(fb->PendingRequest_Page);
         }
         
-        sem_post(&(fb->Lock));
+        lock_post(&(fb->Lock));
 
         _FB_SetPage(fb, targetPage);
-        sem_post(&(fbw->SyncLock));
+        lock_post(&(fbw->SyncLock));
     }
 }
 
@@ -3310,7 +3310,7 @@ void FB_Init()
 
         /* setup clean up method */
         FB_TheManager->Destroy = _FB_OnDestroy;
-        sem_init(&(FB_TheManager->Lock), 0, 1);
+        lock_init(&(FB_TheManager->Lock), 0, 1);
     }
 }
 

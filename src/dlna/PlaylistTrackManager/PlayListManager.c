@@ -40,7 +40,7 @@ PlayListManager PlayListManager_Create(ILibThreadPool pool, ILibWebClient_Reques
     token->URI = (char*)token + sizeof(struct PlayListManangerToken);
     strcpy(token->URI, uri);
     token->Mode = mode;
-    sem_init(&token->LockObject, 0, 1);
+    lock_init(&token->LockObject, 0, 1);
     token->ShuffleArray = BitArray_Create(8192, 0);
     BitArray_ChangeSize(token->ShuffleArray, 0);
 

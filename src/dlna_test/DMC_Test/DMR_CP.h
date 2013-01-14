@@ -155,6 +155,17 @@ void OnGetPositionSink(struct AVRendererConnection * avrc, int ErrorCode, int Re
     }
 }
 
+void OnGetTransportInfoSink(struct AVRendererConnection * avrc, int ErrorCode, char * CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed,void * Tag )
+{
+    printf( "(%d) %s: ErrorCode:%d\n", __LINE__, __FUNCTION__, ErrorCode );
+    if ( !ErrorCode )
+    {
+        printf("CurrentTransportState = %s\n", CurrentTransportState ? CurrentTransportState : "");
+        printf("CurrentTransportStatus = %s\n", CurrentTransportStatus ? CurrentTransportStatus : "");
+        printf("CurrentSpeed = %s\n", CurrentSpeed ? CurrentSpeed : "");
+    }
+}
+
 /************************************************************************/
 /* Interface Test Functions                                             */
 /************************************************************************/
@@ -398,6 +409,22 @@ void GetPosition( int arg1 )
         return;
     }
     RCP_GetPosition( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetPositionSink );
+}
+
+void GetTransportInfo( int arg1 )
+{
+    struct _tDmrInfo * Val = _getDmrInfo( arg1 );
+    if ( Val == NULL )
+    {
+        printf( "You choiced a invalid device!\n" );
+        return;
+    }
+    RCP_GetTransportInfo( ((struct AVRenderer *)(Val->render))->Connection, NULL, OnGetTransportInfoSink );
+}
+
+void RefreshDevice()
+{
+    RCP_SearchDevice();
 }
 
 /************************************************************************/

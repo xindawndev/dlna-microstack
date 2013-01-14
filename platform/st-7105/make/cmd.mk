@@ -1,0 +1,5 @@
+PLATFORM_TOOL_PATH	:= /devkit/sh4/bin 
+
+PLATFORM_TOOL_NAME	:= gcc42
+
+PLATFORM_TOOL_PREFIX	:= sh4-linux-

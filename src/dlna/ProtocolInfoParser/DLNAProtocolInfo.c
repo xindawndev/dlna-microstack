@@ -3,13 +3,13 @@
 #endif
 
 #include <stdlib.h>
-#if !defined(__SYMBIAN32__)
+
 #if defined(__APPLE__)
     #include <malloc/malloc.h>
 #else
     #include <malloc.h>
 #endif
-#endif
+
 #include "DLNAProtocolInfo.h"
 #include "ILibParsers.h"
 

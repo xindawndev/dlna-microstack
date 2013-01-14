@@ -26,4 +26,4 @@ PACKET_VERSION_DEPEND		:=
 
 ## 该项目默认的配置类型
 
-PACKET_CONFIG			:= release
+PACKET_CONFIG			:=

@@ -1,0 +1,2 @@
+PLATFORM_COMPILE_FLAGS          := $(PLATFORM_COMPILE_FLAGS) -fpermissive
+PLATFORM_LINK_FLAGS             := $(PLATFORM_LINK_FLAGS) -fpermissive

@@ -36,27 +36,8 @@ PROJECT_HEADER_DIRECTORY	:= \
 
 PROJECT_COMMON_HEADERS  	:=
 
-##PROJECT_INTERNAL_INCLUDES	:= $(PROJECT_INTERNAL_INCLUDES) dlna \
-				$(sort $(patsubst $(ROOT_INCLUDE_DIRECTORY)%,%,$(dir $(wildcard $(addsuffix /*.h,$(addprefix $(ROOT_INCLUDE_DIRECTORY)$(LOCAL_NAME)/,* */* */*/* */*/*/* */*/*/*/*))))))
-
-PROJECT_INTERNAL_INCLUDES	:= $(PROJECT_INTERNAL_INCLUDES) dlna \
-				../include/dlna/CdsObjects \
-				../include/dlna/DmsIntegration \
-				../include/dlna/DmsIntegration/FileSystemEnumerator \
-				../include/dlna/DownloadController \
-				../include/dlna/FileAbstractionFiles \
-				../include/dlna/Functional \
-				../include/dlna/HttpFiles \
-				../include/dlna/MediaRenderer \
-				../include/dlna/MediaRendererCP \
-				../include/dlna/MediaServerAbstraction \
-				../include/dlna/MediaServerBrowser \
-				../include/dlna/PlaySingleUri \
-				../include/dlna/PlaylistTrackManager \
-				../include/dlna/ProtocolInfoParser \
-				../include/dlna/PushController \
-				../include/dlna/StringUtils \
-				../include/dlna/UploadController
+PROJECT_INTERNAL_INCLUDES	:= \
+				../include/dlna
 
 ## 额外包含目录（多个，相对于包含根目录ROOT_INCLUDE_DIRECTORY）
 
@@ -70,7 +51,7 @@ PROJECT_COMPILE_FLAGS		:= \
 				-DINCLUDE_FEATURE_DISPLAY \
 				-DINCLUDE_FEATURE_VOLUME \
 				-DMICROSTACK_NO_STDAFX \
-				-DMSCP -DMICROSTACK_ -D_POSIX -D_VERBOSE
+				-DMSCP -DMICROSTACK_ -D_POSIX -D_VERBOSE -DMEMORY_CHECK -DUPNP_DEBUG
 
 
 ## 该项目特点的链接选项
@@ -85,6 +66,8 @@ PROJECT_DEPENDS			:= \
 ## 该项目特定的引用库
 
 PROJECT_DEPEND_LIBRARYS		:= $(PROJECT_DEPEND_LIBRARYS)
+
+PROJECT_DEPEND_SHELL        	:= version.sh
 
 SOURCE_SUFFIX			:= .c
 

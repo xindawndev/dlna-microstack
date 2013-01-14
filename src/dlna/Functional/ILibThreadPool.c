@@ -8,6 +8,40 @@
 
 #include "ILibParsers.h"
 
+#if defined(_POSIX)
+    #include <semaphore.h>
+
+#    if defined(lock_t)
+#    undef lock_t
+#    define lock_t sem_t
+#    endif
+
+#    if defined(lock_init)
+#    undef lock_init
+#    define lock_init sem_init
+#    endif
+
+#    if defined(lock_destroy)
+#    undef lock_destroy
+#    define lock_destroy sem_destroy
+#    endif
+
+#    if defined(lock_wait)
+#    undef lock_wait
+#    define lock_wait sem_wait
+#    endif
+
+#    if defined(lock_trywait)
+#    undef lock_trywait
+#    define lock_trywait sem_trywait
+#    endif
+
+#    if defined(lock_post)
+#    undef lock_post
+#    define lock_post sem_post
+#    endif
+#endif
+
 struct ILibThreadPool_WorkItem
 {
     ILibThreadPool_Handler Callback;
@@ -18,8 +52,8 @@ struct ILibThreadPool_ThreadState
     int NumThreads;
     int Terminate;
     void *WorkItemQueue;
-    sem_t SyncHandle;
-    sem_t AbortHandle;
+    lock_t SyncHandle;
+    lock_t AbortHandle;
 };
 
 /*! \fn ILibThreadPool ILibThreadPool_Create()
@@ -32,8 +66,8 @@ ILibThreadPool ILibThreadPool_Create()
     memset(ts,0,sizeof(struct ILibThreadPool_ThreadState));
 
     ts->WorkItemQueue = ILibQueue_Create();
-    sem_init(&(ts->SyncHandle),0,0);
-    sem_init(&(ts->AbortHandle),0,0);
+    lock_init(&(ts->SyncHandle),0,0);
+    lock_init(&(ts->AbortHandle),0,0);
     return(ts);
 }
 int ILibThreadPool_GetThreadCount(ILibThreadPool pool)
@@ -59,17 +93,17 @@ void ILibThreadPool_Destroy(ILibThreadPool pool)
 
     while(count!=0)
     {
-        sem_post(&(ts->SyncHandle));
+        lock_post(&(ts->SyncHandle));
         --count;
     }
 
     if(ok!=0)
     {
-        sem_wait(&(ts->AbortHandle));
+        lock_wait(&(ts->AbortHandle));
     }
 
-    sem_destroy(&(ts->SyncHandle));
-    sem_destroy(&(ts->AbortHandle));
+    lock_destroy(&(ts->SyncHandle));
+    lock_destroy(&(ts->AbortHandle));
     ILibQueue_Destroy(ts->WorkItemQueue);
 
     free(pool);
@@ -96,7 +130,7 @@ void ILibThreadPool_AddThread(ILibThreadPool pool)
 
     do
     {
-        sem_wait(&(ts->SyncHandle));
+        lock_wait(&(ts->SyncHandle));
 
         ILibQueue_Lock(ts->WorkItemQueue);
         wi = (struct ILibThreadPool_WorkItem*)ILibQueue_DeQueue(ts->WorkItemQueue);    
@@ -126,7 +160,7 @@ void ILibThreadPool_AddThread(ILibThreadPool pool)
 
     if(ok==0)
     {
-        sem_post(&(ts->AbortHandle));
+        lock_post(&(ts->AbortHandle));
     }
 }
 
@@ -153,7 +187,7 @@ void ILibThreadPool_QueueUserWorkItem(ILibThreadPool pool, void *var, ILibThread
     {
         NumThreads = ts->NumThreads;
         ILibQueue_EnQueue(ts->WorkItemQueue,wi);
-        sem_post(&(ts->SyncHandle));
+        lock_post(&(ts->SyncHandle));
     }
     ILibQueue_UnLock(ts->WorkItemQueue);
 

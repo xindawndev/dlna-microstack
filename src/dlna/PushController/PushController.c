@@ -21,7 +21,7 @@ struct _PC_Token
     ILibWebServer_ServerToken   Server;
 
     void*                       SessionsList;
-    sem_t                       SessionListSync;
+    lock_t                       SessionListSync;
 #if defined(_POSIX)
     int             sem_ret;
 #endif
@@ -59,9 +59,9 @@ void _destroyFromChain(void* object)
     while(node != NULL)
     {
         PC_Session session = NULL;
-        sem_wait(&instance->SessionListSync);
+        lock_wait(&instance->SessionListSync);
         session = (PC_Session)ILibLinkedList_GetDataFromNode(node);
-        sem_post(&instance->SessionListSync);
+        lock_post(&instance->SessionListSync);
         ILibLinkedList_AddTail(localList, session);
 
         node = ILibLinkedList_GetNextNode(node);
@@ -74,7 +74,7 @@ void _destroyFromChain(void* object)
         node = ILibLinkedList_GetNextNode(node);
     }
     ILibLinkedList_Destroy(localList);
-    sem_destroy(&instance->SessionListSync);
+    lock_destroy(&instance->SessionListSync);
 #if defined(_POSIX)
     instance->sem_ret = -1;
 #else
@@ -97,9 +97,9 @@ PC_Token PushController_Create(void* chain, ILibThreadPool threadPool, void* tag
     instance->ThreadPool = threadPool;
     instance->Tag = tag;
 #if defined(_POSIX)
-    instance->sem_ret = sem_init(&instance->SessionListSync, 0, 1);
+    instance->sem_ret = lock_init(&instance->SessionListSync, 0, 1);
 #else
-    sem_init(&instance->SessionListSync, 0, 1);
+    lock_init(&instance->SessionListSync, 0, 1);
 #endif
     instance->SessionsList = ILibLinkedList_Create();
     instance->Destroy = &_destroyFromChain;
@@ -148,7 +148,7 @@ struct _PC_Session* _findSessionByServerSessionPtr(struct _PC_Token* instance, s
 {
     struct _PC_Session* result = NULL;
     void* node = ILibLinkedList_GetNode_Head(instance->SessionsList);
-    sem_wait(&instance->SessionListSync);
+    lock_wait(&instance->SessionListSync);
     while(node != NULL)
     {
         struct _PC_Session* current = (struct _PC_Session*)ILibLinkedList_GetDataFromNode(node);
@@ -159,7 +159,7 @@ struct _PC_Session* _findSessionByServerSessionPtr(struct _PC_Token* instance, s
         }
         node = ILibLinkedList_GetNextNode(node);
     }
-    sem_post(&instance->SessionListSync);
+    lock_post(&instance->SessionListSync);
 
     return result;
 }
@@ -216,7 +216,6 @@ void _onReceive(struct ILibWebServer_Session *sender, int InterruptFlag, struct 
 void _onResponseDone(struct ILibWebServer_Session *session, DH_TransferStatus transfer_status_handle, enum DHS_Errors dhs_error_code, void *user_obj)
 {
     struct _PC_Session* pcSession = (struct _PC_Session*)user_obj;
-    struct _PC_Token* instance = pcSession->Token;
     long sendTotal = 0;
     long sendExpected = 0;
 
@@ -230,7 +229,7 @@ struct _PC_Session* _findSessionByUri(struct _PC_Token* instance, char* uri)
 {
     struct _PC_Session* result = NULL;
     void* node = ILibLinkedList_GetNode_Head(instance->SessionsList);
-    sem_wait(&instance->SessionListSync);
+    lock_wait(&instance->SessionListSync);
     while(node != NULL)
     {
         struct _PC_Session* current = (struct _PC_Session*)ILibLinkedList_GetDataFromNode(node);
@@ -241,7 +240,7 @@ struct _PC_Session* _findSessionByUri(struct _PC_Token* instance, char* uri)
         }
         node = ILibLinkedList_GetNextNode(node);
     }
-    sem_post(&instance->SessionListSync);
+    lock_post(&instance->SessionListSync);
 
     return result;
 }
@@ -251,7 +250,6 @@ char* _createUriFromPacketHeader(struct packetheader* header)
     char* result = NULL;
     char tmp[1024];
     char* host = ILibGetHeaderLine(header, "Host", 4);
-    char* address = NULL;
     char* object = NULL;
     //object = ILibString_Copy(header->DirectiveObj, header->DirectiveObjLength);
 
@@ -352,12 +350,12 @@ void PC_Session_Release(PC_Session session)
 #endif
           )
             {
-                sem_wait(&instance->SessionListSync);
+                lock_wait(&instance->SessionListSync);
                 if(instance->SessionsList != NULL)
                 {
                     ILibLinkedList_Remove_ByData(instance->SessionsList, pcSession);
                 }
-                sem_post(&instance->SessionListSync);
+                lock_post(&instance->SessionListSync);
             }
 
             free(pcSession);
@@ -420,9 +418,9 @@ PC_Session PushController_PushFile(PC_Token token,
             pcSession->FileLength = ILibFileDir_GetFileSize(filename);
             pcSession->URI = uri;
 
-            sem_wait(&instance->SessionListSync);
+            lock_wait(&instance->SessionListSync);
             ILibLinkedList_AddTail(instance->SessionsList, pcSession);
-            sem_post(&instance->SessionListSync);
+            lock_post(&instance->SessionListSync);
 
             pcSession->_reserved_1 = callback;
             RCP_SetUri(rendererConnection, uri, pcSession, &_onSetUriCallback);

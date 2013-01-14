@@ -18,17 +18,52 @@ directory		= $(patsubst %/,%,$(dir $(1)))
 # argment2: 	原先被相对的目录（默认，pwd）
 # return:	反向相对目录路径
 # desc:
-#   a=revert($(2))
-#   b=addsuffix(..,a)
-#   c=split(/,c)
-#   d=addsuffix(.,c)
-#   e=join(b,d)
-#   f=patsubst(%.....,%,e)
-#   g=patsubst(%..,,f)
-#   h=patsubst(%.,..,g)
-#   return joinlist(/,h) 
+#   a=split(/,$(2))
+#   b=revert(a)
+#   c=addsuffix(..,b)
+#   d=split(/,$(1))
+#   e=addsuffix(.,d)
+#   f=join(b,e)
+#   g=patsubst(%.....,%,f)
+#   h=patsubst(%..,,g)
+#   i=revert(h)
+#   j=revert_directory_simple(i)
+#   k=patsubst(%.,..,j)
+#   return joinlist(/,k) 
 
-revert_directory    	= $(call joinlist,/,$(call revert,$(patsubst %.,..,$(patsubst %..,,$(patsubst %.....,%,$(join $(addsuffix ..,$(call revert,$(subst /, ,$(if $(2),$(2),$(shell pwd))))),$(addsuffix .,$(filter-out .,$(call split,/,$(1))))))))))  
+revert_directory_simple	= $(if \
+	$(findstring ..$(word 2,$(1)).,$(word 1,$(1))), \
+	$(call revert_directory_simple, \
+		$(wordlist 3,$(words $(1)),$(1))), \
+	$(1) \
+)
+
+revert_directory        = $(strip $(call joinlist,/, \
+	$(patsubst %.,.., \
+		$(call revert_directory_simple, \
+			$(call revert, \
+				$(patsubst %..,, \
+					$(patsubst %.....,%, \
+						$(join  \
+							$(addsuffix .., \
+								$(call revert, \
+									$(call split,/, \
+										$(if $(2),$(2),$(shell pwd)) \
+									) \
+								) \
+							), \
+							$(addsuffix ., \
+								$(filter-out ., \
+									$(call split,/,$(1)) \
+								) \
+							) \
+						) \
+					) \
+				) \
+			) \
+		) \
+	) \
+))
 
 # 计算相对路径作用后的结果
 # argment1:	相对目录路径（列表）
