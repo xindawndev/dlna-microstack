@@ -3,8 +3,6 @@
 #        include "stdafx.h"
 #    endif
 char* MediaServerCP_PLATFORM = "WINDOWS UPnP/1.0 PPTV MicroStack/1.0.2777";
-#elif defined(__SYMBIAN32__)
-char* MediaServerCP_PLATFORM = "SYMBIAN UPnP/1.0 PPTV MicroStack/1.0.2777";
 #else
 char* MediaServerCP_PLATFORM = "POSIX UPnP/1.0 PPTV MicroStack/1.0.2777";
 #endif
@@ -75,7 +73,7 @@ struct MediaServerCP_CP
    void *WebServer;
    void *User;
    
-   sem_t DeviceLock;
+   lock_t DeviceLock;
    void* SIDTable;
    void* DeviceTable_UDN;
    void* DeviceTable_Tokens;
@@ -262,10 +260,10 @@ void MediaServerCP_AddRef(struct UPnPDevice *device)
 {
    struct MediaServerCP_CP *CP = (struct MediaServerCP_CP*)device->CP;
    struct UPnPDevice *d = device;
-   sem_wait(&(CP->DeviceLock));
+   lock_wait(&(CP->DeviceLock));
    while(d->Parent!=NULL) {d = d->Parent;}
    ++d->ReferenceCount;
-   sem_post(&(CP->DeviceLock));
+   lock_post(&(CP->DeviceLock));
 }
 
 void MediaServerCP_CheckfpDestroy(struct UPnPDevice *device)
@@ -287,7 +285,7 @@ void MediaServerCP_Release(struct UPnPDevice *device)
 {
    struct MediaServerCP_CP *CP = (struct MediaServerCP_CP*)device->CP;
    struct UPnPDevice *d = device;
-   sem_wait(&(CP->DeviceLock));
+   lock_wait(&(CP->DeviceLock));
    while(d->Parent!=NULL) {d = d->Parent;}
    --d->ReferenceCount;
    if(d->ReferenceCount<=0)
@@ -295,7 +293,7 @@ void MediaServerCP_Release(struct UPnPDevice *device)
       MediaServerCP_CheckfpDestroy(device);
       MediaServerCP_DestructUPnPDevice(d);
    }
-   sem_post(&(CP->DeviceLock));
+   lock_post(&(CP->DeviceLock));
 }
 //void UPnPDeviceDescriptionInterruptSink(void *sender, void *user1, void *user2)
 //{
@@ -780,7 +778,7 @@ void MediaServerCP_ProcessSCPD(char* buffer, int length, struct UPnPService *ser
       //
       // Iterate all the StateVariables in the state table
       //
-      if ( !xml ) return;
+      if (!xml) return;
       if(xml->NameLength==17 && memcmp(xml->Name,"serviceStateTable",17)==0)
       {
          if(xml->Next->StartTag!=0)
@@ -2818,7 +2816,7 @@ void MediaServerCP_StopCP(void *v_CP)
    
    free(CP->AddressList);
    
-   sem_destroy(&(CP->DeviceLock));
+   lock_destroy(&(CP->DeviceLock));
 }
 
 /*! \fn MediaServerCP__CP_IPAddressListChanged(void *CPToken)
@@ -3230,7 +3228,7 @@ void *MediaServerCP_CreateControlPoint(void *Chain, void(*A)(struct UPnPDevice*)
    cp->DiscoverSink = A;
    cp->RemoveSink = R;
    
-   sem_init(&(cp->DeviceLock),0,1);
+   lock_init(&(cp->DeviceLock),0,1);
    cp->WebServer = ILibWebServer_Create(Chain,5,0,&MediaServerCP_OnSessionSink,cp);
    cp->SIDTable = ILibInitHashTree();
    cp->DeviceTable_UDN = ILibInitHashTree();

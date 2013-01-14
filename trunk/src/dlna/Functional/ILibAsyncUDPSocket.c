@@ -99,59 +99,47 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
     data->OnSendOK = OnSendOK;
     data->user1 = user;
 
-
-#if !defined(__SYMBIAN32__)
     newSocket = socket(AF_INET, SOCK_DGRAM, 0);
-#else
-    newSocket = ILibSocketWrapper_socket(SOCK_DGRAM);
-#endif
     memset(&local,0,sizeof(struct sockaddr_in));
 
     local.sin_addr.s_addr = localInterface;
     local.sin_family = AF_INET;
     local.sin_port = htons(localPortStartRange);
 
-#if !defined(__SYMBIAN32__)
+
 #if defined(__APPLE__)
-    if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEPORT, (char*)&ra, sizeof(ra)) < 0)
+    // add by leochen
+    rv=setsockopt(newSocket, SOL_SOCKET, SO_REUSEPORT,(char*)&ra, sizeof(ra));
 #else
     rv=setsockopt(newSocket, SOL_SOCKET, SO_REUSEADDR,(char*)&ra, sizeof(ra));
-#endif
-#else
-    rv=ILibSocketWrapper_SetReuseAddr(newSocket,1);
 #endif
 
     if(localPortStartRange!=localPortEndRange)
     {
         do
         {
+            //
             // Choose a random port from 50000 to 65500, which is what IANA says to use
             // for non standard ports
+            //
             if (++count >= 20) break;
             local.sin_port =  htons((unsigned short)(localPortStartRange + ((unsigned short)rand() % (localPortEndRange-localPortStartRange))));
         }
-        #if !defined(__SYMBIAN32__)
+
         while(bind(newSocket, (struct sockaddr *) &(local), sizeof(local))!=0);
-        #else
-        while(ILibSocketWrapper_bind(newSocket, (struct sockaddr *) &(local))!=0);
-        #endif
         if (count >= 20)
         {
             // 超出绑定次数
 #if defined(WIN32)
             closesocket(newSocket);
 #else
-            close(newSocket);
+                        close(newSocket);
 #endif
-            freesafe(data);
+            Safefree(data);
             return NULL;
         }
     }
-    #if !defined(__SYMBIAN32__)
     else if(bind(newSocket, (struct sockaddr *) &(local), sizeof(local))!=0)
-    #else
-    else if(ILibSocketWrapper_bind(newSocket, (struct sockaddr *) &(local))!=0)
-    #endif
     {
         //
         // Could not bind to this port
@@ -159,9 +147,9 @@ ILibAsyncUDPSocket_SocketModule ILibAsyncUDPSocket_CreateEx(void *Chain, int Buf
 #if defined(WIN32)
         closesocket(newSocket);
 #else
-        close(newSocket);
+                close(newSocket);
 #endif
-        freesafe(data);
+        Safefree(data);
         return(NULL);
     }
 
@@ -194,11 +182,8 @@ int ILibAsyncUDPSocket_JoinMulticastGroup(ILibAsyncUDPSocket_SocketModule module
     //
     // Join the multicast group
     //
-    #if !defined(__SYMBIAN32__)
     RetVal = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP,(char*)&mreq, sizeof(mreq));
-    #else
-    RetVal = ILibSocketWrapper_joinmulticastgroup(s, remoteInterface, localInterface);
-    #endif
+
     if(RetVal==0)
     {
         ILibAsyncSocket_SetLocalInterface2(module,localInterface);
@@ -217,24 +202,20 @@ int ILibAsyncUDPSocket_JoinMulticastGroup(ILibAsyncUDPSocket_SocketModule module
 */
 int ILibAsyncUDPSocket_SetMulticastInterface(ILibAsyncUDPSocket_SocketModule module, int localInterface)
 {
-#if defined(__SYMBIAN32__)
-    return(0);
-#else
-#if !defined(_WIN32_WCE) || (defined(_WIN32_WCE) && _WIN32_WCE>=400)
-    struct in_addr interface_addr;
-#if defined(WIN32) || defined(_WIN32_WCE)
-    SOCKET s = *((SOCKET*)ILibAsyncSocket_GetSocket(module));
-#else
-    int s = *((int*)ILibAsyncSocket_GetSocket(module));
-#endif
-    memset((char *)&interface_addr, 0, sizeof(interface_addr));
+    #if !defined(_WIN32_WCE) || (defined(_WIN32_WCE) && _WIN32_WCE>=400)
+        struct in_addr interface_addr;
+        #if defined(WIN32) || defined(_WIN32_WCE)
+            SOCKET s = *((SOCKET*)ILibAsyncSocket_GetSocket(module));
+        #else
+            int s = *((int*)ILibAsyncSocket_GetSocket(module));
+        #endif
+            memset((char *)&interface_addr, 0, sizeof(interface_addr));
 
-    interface_addr.s_addr = localInterface;
-    return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,(char*)&interface_addr, sizeof(interface_addr)));
-#else
-    return(1);
-#endif
-#endif
+        interface_addr.s_addr = localInterface;
+        return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,(char*)&interface_addr, sizeof(interface_addr)));
+    #else
+        return(1);
+    #endif
 }
 /*! \fn int ILibAsyncUDPSocket_SetMulticastTTL(ILibAsyncUDPSocket_SocketModule module, unsigned char TTL)
     \brief Sets the Multicast TTL value
@@ -244,14 +225,10 @@ int ILibAsyncUDPSocket_SetMulticastInterface(ILibAsyncUDPSocket_SocketModule mod
 */
 int ILibAsyncUDPSocket_SetMulticastTTL(ILibAsyncUDPSocket_SocketModule module, unsigned char TTL)
 {
-#if defined(__SYMBIAN32__)
-    return(0);
-#else
     #if defined(WIN32) || defined(_WIN32_WCE)
-    SOCKET s = *((SOCKET*)ILibAsyncSocket_GetSocket(module));
-#else
-    int s = *((int*)ILibAsyncSocket_GetSocket(module));
-#endif
+        SOCKET s = *((SOCKET*)ILibAsyncSocket_GetSocket(module));
+    #else
+        int s = *((int*)ILibAsyncSocket_GetSocket(module));
+    #endif
     return(setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL,(char*)&TTL, sizeof(TTL)));
-#endif
 }

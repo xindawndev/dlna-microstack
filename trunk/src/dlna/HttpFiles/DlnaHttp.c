@@ -188,35 +188,35 @@ void* DH_GetUserObject(DH_TransferStatus transfer_status_handle)
 
 void DH_QueryTransferStatus(DH_TransferStatus transfer_status_handle, long* send_total, long* send_expected, long* receive_total, long* receive_expected)
 {
-    sem_wait(&(transfer_status_handle->syncLock));
+    lock_wait(&(transfer_status_handle->syncLock));
     if(send_total!=NULL){*send_total = transfer_status_handle->ActualBytesSent;}
     if(send_expected!=NULL){*send_expected = transfer_status_handle->TotalBytesToBeSent;}
     if(receive_total!=NULL){*receive_total = transfer_status_handle->ActualBytesReceived;}
     if(receive_expected!=NULL){*receive_expected = transfer_status_handle->TotalBytesToBeReceived;}
-    sem_post(&(transfer_status_handle->syncLock));
+    lock_post(&(transfer_status_handle->syncLock));
 }
 DH_TransferStatus DH_CreateNewTransferStatus()
 {
     DH_TransferStatus retval = (struct DH_TransferStatus_StateObject*)malloc(sizeof(struct DH_TransferStatus_StateObject));
     memset(retval,0,sizeof(struct DH_TransferStatus_StateObject));
-    sem_init(&(retval->syncLock),0,1);
+    lock_init(&(retval->syncLock),0,1);
     retval->TotalBytesToBeSent = -1;
     retval->TotalBytesToBeReceived = -1;
     return(retval);
 }
 void DH_DestroyTransferStatus(DH_TransferStatus status)
 {
-    sem_destroy(&(status->syncLock));
+    lock_destroy(&(status->syncLock));
     free(status);
 }
 void DH_AbortTransfer(DH_TransferStatus transfer_status_handle)
 {
-    sem_wait(&(transfer_status_handle->syncLock));
+    lock_wait(&(transfer_status_handle->syncLock));
     if(transfer_status_handle->RequestToken != NULL)
     {
         transfer_status_handle->Reserved4 = 1;
     }
-    sem_post(&(transfer_status_handle->syncLock));
+    lock_post(&(transfer_status_handle->syncLock));
     if(transfer_status_handle->ServerSession!=NULL)
     {
         if(transfer_status_handle->SessionFlag!=0)

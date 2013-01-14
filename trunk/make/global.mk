@@ -10,7 +10,7 @@ include $(ROOT_MAKE_DIRECTORY)/func/dirs.mk
 GLOBAL_COMPILE_FLAGS		:= $(GLOBAL_COMPILE_FLAGS) -DBOOST_USER_CONFIG=\<boost_config.h\>
 GLOBAL_COMPILE_FLAGS		:= $(GLOBAL_COMPILE_FLAGS) -DFRAMEWORK_USER_CONFIG=\<framework_config.h\>
 
-PLATFORM_LOCAL_NAME		:= $(patsubst $(shell cd $(ROOT_BUILD_DIRECTORY) ; pwd)%,%,$(shell pwd))
+PLATFORM_LOCAL_NAME		:= /$(call revert_directory,$(ROOT_BUILD_DIRECTORY))
 
 PLATFORM_STRATEGY_NAME		:= $(firstword $(subst /, ,$(PLATFORM_LOCAL_NAME)))
 
@@ -31,7 +31,6 @@ PLATFORM_TOOL_DIRECTORY		:= $(ROOT_TOOL_DIRECTORY)/$(PLATFORM_NAME)
 include $(wildcard $(PLATFORM_DIRECTORY)/make/*.mk)
 
 PLATFORM_TOOL_PATH		:= $(addprefix $(PLATFORM_TOOL_DIRECTORY),$(PLATFORM_TOOL_PATH))
-PLATFORM_TOOL_PATH		:= $(foreach path,$(PLATFORM_TOOL_PATH),$(shell cd $(path) ; pwd))
 $(foreach path,$(PLATFORM_TOOL_PATH),$(eval PATH:=$(path):$(PATH)))
 export PATH
 
@@ -69,3 +68,5 @@ COMMON_MAKE_FILES		:= $(addprefix $(ROOT_PROJECT_DIRECTORY),$(addsuffix /Common.
 ifneq ($(STRATEGY_NAME),)
         include $(ROOT_STRATEGY_DIRECTORY)/$(STRATEGY_NAME).mk
 endif
+
+include $(wildcard $(PLATFORM_DIRECTORY)/make2/*.mk)

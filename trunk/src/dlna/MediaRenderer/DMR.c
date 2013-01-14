@@ -121,7 +121,7 @@ typedef struct _internalState
     /**********************************************************************/
 
     /* Used to allow single access to this struct. */
-    sem_t   resourceLock;
+    lock_t   resourceLock;
 } *DMR_InternalState;
 /****************************************************************************/
 
@@ -505,7 +505,7 @@ void DMR_Lock(DMR instance)
     if(CheckThis(instance) == DMR_ERROR_OK)
     {
         DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-        sem_wait(&state->resourceLock);
+        lock_wait(&state->resourceLock);
     }
 }
 
@@ -514,7 +514,7 @@ void DMR_Unlock(DMR instance)
     if(CheckThis(instance) == DMR_ERROR_OK)
     {
         DMR_InternalState state = (DMR_InternalState)instance->internal_state;
-        sem_post(&state->resourceLock);
+        lock_post(&state->resourceLock);
     }
 }
 /****************************************************************************/
@@ -541,9 +541,7 @@ void DMR_ConnectionManager_GetCurrentConnectionInfo(DMR_SessionToken upnptoken, 
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
-
     if(ConnectionID != 0)
     {
         DMR_Response_Error(upnptoken, 706, "Invalid connection reference");
@@ -574,7 +572,6 @@ void DMR_ConnectionManager_GetProtocolInfo(DMR_SessionToken upnptoken)
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Response_ConnectionManager_GetProtocolInfo(upnptoken, "", state->ProtocolInfo);
 }
@@ -602,7 +599,6 @@ void DMR_AVTransport_GetCurrentTransportActions(DMR_SessionToken upnptoken,unsig
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     actions = FromTransportActionsToString(state->CurrentTransportActions);
@@ -631,7 +627,6 @@ void DMR_AVTransport_GetDeviceCapabilities(DMR_SessionToken upnptoken,unsigned i
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Response_AVTransport_GetDeviceCapabilities(upnptoken, state->PlayMedia, state->RecMedia, state->RecQualityModes);
 }
@@ -876,7 +871,6 @@ void DMR_AVTransport_GetMediaInfo(DMR_SessionToken upnptoken,unsigned int Instan
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     maxTracks = state->NumberOfTracks;
@@ -925,7 +919,6 @@ void DMR_AVTransport_GetPositionInfo(DMR_SessionToken upnptoken,unsigned int Ins
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     track = state->CurrentTrack;
@@ -980,7 +973,6 @@ void DMR_AVTransport_GetTransportInfo(DMR_SessionToken upnptoken,unsigned int In
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     transportState = FromPlayStateToString(state->TransportState);
@@ -1014,7 +1006,6 @@ void DMR_AVTransport_GetTransportSettings(DMR_SessionToken upnptoken,unsigned in
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     playMode = FromMediaPlayModeToString(state->CurrentPlayMode);
@@ -1354,7 +1345,6 @@ void DMR_RenderingControl_GetBrightness(DMR_SessionToken upnptoken, unsigned int
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-    
     state = (DMR_InternalState)instance->internal_state;
     DMR_Response_RenderingControl_GetBrightness(upnptoken, state->Brightness);
 }
@@ -1377,7 +1367,6 @@ void DMR_RenderingControl_GetContrast(DMR_SessionToken upnptoken,unsigned int In
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-    
     state = (DMR_InternalState)instance->internal_state;
     DMR_Response_RenderingControl_GetContrast(upnptoken, state->Contrast);
 }
@@ -1436,8 +1425,8 @@ void DMR_RenderingControl_SetContrast(DMR_SessionToken upnptoken, unsigned int I
 #if defined(INCLUDE_FEATURE_VOLUME)
 void DMR_RenderingControl_GetMute(DMR_SessionToken upnptoken, unsigned int InstanceID, char* Channel)
 {
+    DMR_InternalState state;
     DMR instance = GetDMRFromSessionToken(upnptoken);
-    DMR_InternalState state ;
 
     ERROROUT3("Invoke: DMR_RenderingControl_GetMute(%u,%s);\r\n",InstanceID,Channel);
     
@@ -1452,7 +1441,6 @@ void DMR_RenderingControl_GetMute(DMR_SessionToken upnptoken, unsigned int Insta
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     if(strcmp(Channel, "Master") != 0)
     {
@@ -1465,8 +1453,8 @@ void DMR_RenderingControl_GetMute(DMR_SessionToken upnptoken, unsigned int Insta
 
 void DMR_RenderingControl_GetVolume(DMR_SessionToken upnptoken, unsigned int InstanceID, char* Channel)
 {
-    DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state;
+    DMR instance = GetDMRFromSessionToken(upnptoken);
 
     ERROROUT3("Invoke: DMR_RenderingControl_GetVolume(%u,%s);\r\n", InstanceID, Channel);
     
@@ -1481,7 +1469,6 @@ void DMR_RenderingControl_GetVolume(DMR_SessionToken upnptoken, unsigned int Ins
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     if(strcmp(Channel, "Master") != 0)
     {
@@ -1494,9 +1481,9 @@ void DMR_RenderingControl_GetVolume(DMR_SessionToken upnptoken, unsigned int Ins
 
 void DMR_RenderingControl_SetMute(DMR_SessionToken upnptoken,unsigned int InstanceID,char* Channel,int DesiredMute)
 {
-    DMR instance = GetDMRFromSessionToken(upnptoken);
     DMR_InternalState state;
     ContextMethodCall method = NULL;
+    DMR instance = GetDMRFromSessionToken(upnptoken);
 
     ERROROUT4("Invoke: DMR_RenderingControl_SetMute(%u,%s,%d);\r\n", InstanceID, Channel, DesiredMute);
     
@@ -1511,7 +1498,6 @@ void DMR_RenderingControl_SetMute(DMR_SessionToken upnptoken,unsigned int Instan
         DMR_Response_Error(upnptoken, 501, "Action Failed");
         return;
     }
-
     state = (DMR_InternalState)instance->internal_state;
     if(strcmp(Channel, "Master") != 0)
     {
@@ -1528,7 +1514,6 @@ void DMR_RenderingControl_SetMute(DMR_SessionToken upnptoken,unsigned int Instan
 void DMR_RenderingControl_SetVolume(DMR_SessionToken upnptoken,unsigned int InstanceID,char* Channel,unsigned short DesiredVolume)
 {
     DMR instance = GetDMRFromSessionToken(upnptoken);
-    DMR_InternalState state = (DMR_InternalState)instance->internal_state;
     ContextMethodCall method = NULL;
 
     ERROROUT4("Invoke: DMR_RenderingControl_SetVolume(%u,%s,%u);\r\n",InstanceID,Channel,DesiredVolume);
@@ -1553,8 +1538,9 @@ void DMR_RenderingControl_SetVolume(DMR_SessionToken upnptoken,unsigned int Inst
 #endif /* INCLUDE_FEATURE_VOLUME */
 /****************************************************************************/
 
-void DMRDestroyFromChain(DMR instance)
+void DMRDestroyFromChain(void * inst)
 {
+    DMR instance = (DMR)(inst);
     if(instance != NULL)
     {
         DMR_InternalState state = (DMR_InternalState)instance->internal_state;
@@ -1581,7 +1567,7 @@ void DMRDestroyFromChain(DMR instance)
                 String_Destroy(state->PresetNames[i]);
             }
 
-            sem_destroy(&state->resourceLock);
+            lock_destroy(&state->resourceLock);
 
             /* Destroy the internal state structure */
             FREE(instance->internal_state);
@@ -1651,7 +1637,7 @@ DMR DMR_Method_Create(void* chain, unsigned short port, char* friendlyName, char
     state->Brightness = (unsigned char)BRIGHTNESS_FACTORYDEFAULT;
 #endif /* INCLUDE_FEATURE_DISPLAY */
 
-    sem_init(&state->resourceLock, 0, 1);
+    lock_init(&state->resourceLock, 0, 1);
 
     /* Create the microstack state structures */
     state->DMR_microStack = DMR_CreateMicroStack(state->DMR_microStackChain, state->FriendlyName, state->udn, state->SerialNumber, state->seconds, state->port, open2thirdparty);
@@ -1765,7 +1751,6 @@ DMR_Error DMR_Method_SetEventContextMask(DMR instance, DMR_EventContextSwitch bi
     {
         return err;
     }
-
     istate = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     istate->EventsOnThreadBitMask = bitFlags;
@@ -1783,7 +1768,6 @@ DMR_Error DMR_Method_SetDeviceCapabilities(DMR instance, const char * PlayMedia,
     {
         return err;
     }
-
     istate = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     if ( istate->PlayMedia )
@@ -1955,9 +1939,8 @@ void DMR_LastChangeTimerEvent(void* object)
     DMR_Error err = CheckThis(dmr);
     if (err != DMR_ERROR_OK)
         return;
-
+ 
     state = (DMR_InternalState)dmr->internal_state;
-
     if(state->LastChangeMask != 0)
     {
         FireGenaLastChangeEvent(dmr);
@@ -2053,9 +2036,7 @@ void FireGenaLastChangeEvent(DMR instance)
 
     { /* AVTransport */
         char* transportDidl = NULL;
-        int transportDidlLen = 0;
         char* trackDidl = NULL;
-        int trackDidlLen = 0;
         int AVTransportDataLen = 126;
         char* AVTransportData = NULL;
         DMR_Lock(instance);
@@ -2364,7 +2345,6 @@ void FireGenaLastChangeEvent(DMR instance)
         {
             if(state->CurrentTrackURI != NULL)
             {
-                char* uri = NULL;
                 char* localUri = String_CreateSize(ILibXmlEscapeLength(state->CurrentTrackURI));
                 ILibXmlEscape(localUri, state->CurrentTrackURI);
                 strcat(AVTransportData, "<CurrentTrackURI val=\"");
@@ -2378,7 +2358,6 @@ void FireGenaLastChangeEvent(DMR instance)
         {
             if(state->AVTransportURI != NULL)
             {
-                char* uri = NULL;
                 char* localUri = String_CreateSize(ILibXmlEscapeLength(state->AVTransportURI));
                 ILibXmlEscape(localUri, state->AVTransportURI);
                 strcat(AVTransportData, "<AVTransportURI val=\"");
@@ -2627,7 +2606,7 @@ DMR_Error DMR_StateChange_CurrentPlayMode(DMR instance, DMR_MediaPlayMode mode)
     {
         return err;
     }
-    if(mode < 0 || mode > 6)
+    if(mode > 6)
     {
         return DMR_ERROR_INVALIDARGUMENT;
     }
@@ -2678,7 +2657,6 @@ DMR_Error DMR_StateChange_CurrentTrackMetaData(DMR instance, struct CdsObject* t
     {
         return err;
     }
-
     istate = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     if(trackMetadata != NULL)
@@ -2875,7 +2853,6 @@ DMR_Error DMR_StateChange_AVTransportURIMetaData(DMR instance, struct CdsObject*
     {
         return err;
     }
-
     istate = (DMR_InternalState)instance->internal_state;
     DMR_Lock(instance);
     if(metadata != NULL)

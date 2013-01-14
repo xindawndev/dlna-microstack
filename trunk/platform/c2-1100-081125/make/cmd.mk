@@ -1,0 +1,5 @@
+PLATFORM_TOOL_PATH	:= /c2/daily/bin
+
+PLATFORM_TOOL_NAME	:= gcc40
+
+PLATFORM_TOOL_PREFIX	:= c2-linux-

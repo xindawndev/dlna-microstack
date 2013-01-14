@@ -1,0 +1,5 @@
+PLATFORM_TOOL_PATH	:= /msdk-4.3.6-mips-EL-2.6.12.6-0.9.30.3/bin
+
+PLATFORM_TOOL_NAME	:= gcc43
+
+PLATFORM_TOOL_PREFIX	:= msdk-linux-

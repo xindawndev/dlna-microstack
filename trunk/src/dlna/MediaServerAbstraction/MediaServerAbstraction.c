@@ -41,12 +41,6 @@
 #endif
 #endif
 
-#ifdef _POSIX
-#include "assert.h"
-#include <semaphore.h>
-#define strnicmp strncasecmp
-#endif
-
 #ifndef _WIN32_WCE
 #define ASSERT(x)
 #endif
@@ -56,7 +50,7 @@ struct MSA_InternalState
     /*
      *    Lock for thread-safety.
      */
-    sem_t                Lock;
+    lock_t                Lock;
 
     /*
      *    SystemUpdateID value of the media server.
@@ -175,7 +169,7 @@ void MSA_DestroyMediaServer(void *msa_obj)
     state = (struct MSA_InternalState*) msa->InternalState;
 
     /* properly deallocate the objects for the container UpdateIDs */
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
     msa->ThreadPool = NULL;
 
     if(state->Statistics != NULL)
@@ -220,8 +214,8 @@ void MSA_DestroyMediaServer(void *msa_obj)
         cu = nextCu;
     }
 
-    sem_post(&(state->Lock));
-    sem_destroy(&(state->Lock));
+    lock_post(&(state->Lock));
+    lock_destroy(&(state->Lock));
 
     free(state);
     msa->InternalState = NULL;
@@ -243,12 +237,12 @@ void _MSA_Helper_PopulateIpInfo(MSA_State msa_state, void* upnp_session, struct 
       *    Microstack allows us to assume that the port number
      *    will be the same for all IP addresses.
      */
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
     cdsQuery->IpAddrListLen = state->IpAddrListLen;
     size = (int) (sizeof(int) * cdsQuery->IpAddrListLen);
     cdsQuery->IpAddrList = (int*) malloc(size);
     memcpy(cdsQuery->IpAddrList, state->IpAddrList, size);
-    sem_post(&(state->Lock));
+    lock_post(&(state->Lock));
 
     /*
      *    Reorder the list of active IP addresses so that the
@@ -342,12 +336,12 @@ void MSA_Helper_ModerationSink_ContainerUpdateID(MSA msa_obj)
     printf("MSA_Helper_ModerationSink_ContainerUpdateID()\r\n");
     #endif
 
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
 
     MSA_Helper_UpdateImmediate_ContainerUpdateID(msa_obj);
     state->ModerationFlag = 0;
 
-    sem_post(&(state->Lock));
+    lock_post(&(state->Lock));
 }
 
 /*
@@ -728,12 +722,12 @@ void _MSA_Helper_PopulateIpInfoEx(MSA_State msa_state, void* upnp_session, struc
       *    Microstack allows us to assume that the port number
      *    will be the same for all IP addresses.
      */
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
     create_obj_arg->IpAddrListLen = state->IpAddrListLen;
     size = (int) (sizeof(int) * create_obj_arg->IpAddrListLen);
     create_obj_arg->IpAddrList = (int*) malloc(size);
     memcpy(create_obj_arg->IpAddrList, state->IpAddrList, size);
-    sem_post(&(state->Lock));
+    lock_post(&(state->Lock));
 
     /*
      *    Reorder the list of active IP addresses so that the
@@ -1089,7 +1083,7 @@ MSA MSA_CreateMediaServer(void* chain, MediaServer_MicroStackToken upnp_stack, v
     memset(internalState->Statistics, 0, sizeof(struct MSA_Stats*));
 
     internalState->UserObject = msa_user_obj;
-    sem_init(&(internalState->Lock), 0, 1);
+    lock_init(&(internalState->Lock), 0, 1);
 
     MediaServer_SetState_ContentDirectory_SystemUpdateID(upnp_stack, internalState->SystemUpdateID);
     MediaServer_SetState_ContentDirectory_ContainerUpdateIDs(upnp_stack, "");
@@ -1328,7 +1322,7 @@ void MSA_UpdateContainerID(MSA msa_obj, const char *container_id, unsigned int c
     if(state == NULL) return;
 
     /* lock state */
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
 
     /*
      *    Attempt to find an existing ContainerUpdate
@@ -1379,7 +1373,7 @@ void MSA_UpdateContainerID(MSA msa_obj, const char *container_id, unsigned int c
     MSA_Helper_UpdateImmediate_ContainerUpdateID(msa_obj);
 
     /* unlock */
-    sem_post(&(state->Lock));
+    lock_post(&(state->Lock));
 }
 
 void MSA_UpdateIpInfo(MSA msa_obj, int *ip_addr_list, int ip_addr_list_len)
@@ -1390,7 +1384,7 @@ void MSA_UpdateIpInfo(MSA msa_obj, int *ip_addr_list, int ip_addr_list_len)
 
     /* copy the ip addresses to the msa object */
 
-    sem_wait(&(state->Lock));
+    lock_wait(&(state->Lock));
 
     if (state->IpAddrList != NULL)
     {
@@ -1401,7 +1395,7 @@ void MSA_UpdateIpInfo(MSA msa_obj, int *ip_addr_list, int ip_addr_list_len)
     memcpy(state->IpAddrList, ip_addr_list, size);
     state->IpAddrListLen = ip_addr_list_len;
 
-    sem_post(&(state->Lock));
+    lock_post(&(state->Lock));
 }
 
 
@@ -1439,7 +1433,7 @@ void MSA_LockState(MSA msa_obj)
     if(msa_obj!=NULL)
     {
         state = (struct MSA_InternalState*) msa_obj->InternalState;
-        sem_wait(&(state->Lock));
+        lock_wait(&(state->Lock));
     }
 }
 
@@ -1450,7 +1444,7 @@ void MSA_UnLockState(MSA msa_obj)
     if(msa_obj!=NULL)
     {
         state = (struct MSA_InternalState*) msa_obj->InternalState;
-        sem_post(&(state->Lock));
+        lock_post(&(state->Lock));
     }
 }
 
@@ -1875,8 +1869,12 @@ MSA_Error _ExecuteCallbackThroughThreadPool(MSA msa_obj, ContextSwitchCall conte
 
     if(msa_obj->ContextSwitchBitMask & context_switch->ActionId)
     {
-        /* bit mask indicates that this action handler will be called using context switch through ThreadPool */
-        ILibThreadPool_QueueUserWorkItem(msa_obj->ThreadPool, (void*)context_switch, &_ExecuteCallback);
+        if (msa_obj->ThreadPool == NULL) { // 不使用线程池
+            _ExecuteCallback(NULL, (void*)context_switch);
+        } else {
+            /* bit mask indicates that this action handler will be called using context switch through ThreadPool */
+            ILibThreadPool_QueueUserWorkItem(msa_obj->ThreadPool, (void*)context_switch, &_ExecuteCallback);
+        }
     }
     else
     {

@@ -5,17 +5,17 @@
 ## @version     1.0
 ###############################################################################
 
-ifneq ($(CONFIG_LIB)-$(CONFIG_combine_static_lib),static-no)
+ifneq ($(CONFIG_LIB),static)
 
 include $(PROJ_MAKE_DIRECTORY)/depends.mk
 
 LIB_PATHS               := $(addprefix -L,$(dir $(DEPEND_FILES)))
 LIB_NAMES               := $(notdir $(DEPEND_FILES))
 LIB_NAMES               := $(patsubst lib%.a,%,$(LIB_NAMES))
-LIB_NAMES               := $(patsubst lib%.so,%,$(LIB_NAMES))
+LIB_NAMES               := $(patsubst lib%$(DYNAMIC_NAME_SUFFIX),%,$(LIB_NAMES))
 LIB_NAMES               := $(addprefix -l,$(LIB_NAMES))
 
-ifneq ($(CONFIG_LIB)-$(CONFIG_combine_static_lib),static-yes)
+ifneq ($(CONFIG_LIB),static2)
 
 LIB_NAMES               := $(LIB_NAMES) $(addprefix -l,$(SYSTEM_LIB))
 LIB_NAMES               := $(LIB_NAMES) $(addprefix -l,$(PLATFORM_DEPEND_LIBRARYS))
@@ -33,10 +33,12 @@ endif
 
 LINK_FLAGS		:= $(LINK_FLAGS) -Wl,-rpath=.
 
-endif # ifneq ($(CONFIG_LIB)-$(CONFIG_combine_static_lib),static-yes)
+LINK_FLAGS		:= $(filter-out $(addsuffix %,$(PLATFORM_DISABLE_FLAGS)),$(LINK_FLAGS))
+
+endif # ifneq ($(CONFIG_LIB),static2)
 
 LINK_FLAGS		:= $(strip $(LINK_FLAGS))
 
-endif # ifneq ($(CONFIG_LIB)-$(CONFIG_combine_static_lib),static-no)
+endif # ifneq ($(CONFIG_LIB),static)
 
 SOURCE_OBJECTS_FULL	:= $(addprefix $(OBJECT_DIRECTORY)/, $(SOURCE_OBJECTS))

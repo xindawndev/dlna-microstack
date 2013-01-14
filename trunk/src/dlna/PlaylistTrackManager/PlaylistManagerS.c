@@ -28,8 +28,8 @@ typedef struct _PlayListManager_S
 
     IndexBlocks        Blocks;                /* PlayList Block Information for fast random access. */
 
-    sem_t            FirstBlockFinished;    /* Locked if processing first block is not done; Unlocked if processing first block is finished. */
-    sem_t            BlocksFinished;        /* Locked if processing blocks is not done; Unlocked if processing blocks is finished. */
+    lock_t            FirstBlockFinished;    /* Locked if processing first block is not done; Unlocked if processing first block is finished. */
+    lock_t            BlocksFinished;        /* Locked if processing blocks is not done; Unlocked if processing blocks is finished. */
 
     /* Buffer State Vars */
     CircularBuffer    _buffer;            /* Circular buffer for processing a network stream. */
@@ -63,8 +63,8 @@ int PlayListManager_S_Create(PlayListManager manager)
     memset(state, 0, sizeof(struct _PlayListManager_S));
     state->Parent = manager;
 
-    sem_init(&state->FirstBlockFinished, 0, 1);
-    sem_init(&state->BlocksFinished, 0, 1);
+    lock_init(&state->FirstBlockFinished, 0, 1);
+    lock_init(&state->BlocksFinished, 0, 1);
 
     state->_buffer = CircularBuffer_Create(DIDL_S_BUFFER_SIZE);
 
@@ -88,11 +88,11 @@ void _PLMTS_Destroy(PlayListManager manager)
     PlayListManager_S state = (PlayListManager_S)manager->InternalState;
     if(state != NULL)
     {
-        sem_wait(&state->FirstBlockFinished);
-        sem_destroy(&state->FirstBlockFinished);
+        lock_wait(&state->FirstBlockFinished);
+        lock_destroy(&state->FirstBlockFinished);
 
-        sem_wait(&state->BlocksFinished);
-        sem_destroy(&state->BlocksFinished);
+        lock_wait(&state->BlocksFinished);
+        lock_destroy(&state->BlocksFinished);
 
         CircularBuffer_Destroy(state->_buffer);
         IndexBlocks_Destroy(state->Blocks);
@@ -107,7 +107,7 @@ void _PLMTS_Destroy(PlayListManager manager)
     {
         CDS_ObjRef_Release(manager->TrackMetaData);
     }
-    sem_destroy(&manager->LockObject);
+    lock_destroy(&manager->LockObject);
     if(manager->ShuffleArray != NULL)
     {
         BitArray_Destroy(manager->ShuffleArray);
@@ -189,13 +189,13 @@ BOOL _PLMTS_Seek(PlayListManager manager, int trackNumber)
 /* Implementation */
 void _StartPlayListProcessing(PlayListManager_S state)
 {
-    sem_wait(&state->FirstBlockFinished);
-    sem_wait(&state->BlocksFinished);
+    lock_wait(&state->FirstBlockFinished);
+    lock_wait(&state->BlocksFinished);
 
     ILibThreadPool_QueueUserWorkItem(state->Parent->ThreadPool, (void*)state, (ILibThreadPool_Handler)&_ThreadCallback);
 
-    sem_wait(&state->FirstBlockFinished);
-    sem_post(&state->FirstBlockFinished);
+    lock_wait(&state->FirstBlockFinished);
+    lock_post(&state->FirstBlockFinished);
 }
 
 void _ThreadCallback(ILibThreadPool pool, void* var)
@@ -244,7 +244,6 @@ void _StartPlayListProcessingFromThread(PlayListManager_S state)
 void _RequestResponseCallback(ILibWebClient_StateObject WebStateObject, int InterruptFlag, struct packetheader *header, char *bodyBuffer, int *beginPointer, int endPointer, int done, void *user1, void *user2, int *PAUSE)
 {
     int length = 0;
-    int need = 0;
     PlayListManager_S state = (PlayListManager_S)user1;
 
     // Is there an error?
@@ -252,7 +251,7 @@ void _RequestResponseCallback(ILibWebClient_StateObject WebStateObject, int Inte
     {
         // Yes, unlock and either return failure (0) or signal to try again (-99) based on the error and the state object.
         state->Error = header->StatusCode;
-        sem_post(&state->FirstBlockFinished);
+        lock_post(&state->FirstBlockFinished);
     }
 
     // No Error so continue....
@@ -303,7 +302,7 @@ void _ProcessBuffer(PlayListManager_S state, int done)
         state->_streamOffset += (bufferLength - 4);
         if(done == 1)
         {
-            sem_post(&state->BlocksFinished);
+            lock_post(&state->BlocksFinished);
         }
         return;
     }
@@ -333,10 +332,10 @@ void _ProcessBuffer(PlayListManager_S state, int done)
     free(usableBuffer);
 
 
-    sem_post(&state->FirstBlockFinished);
+    lock_post(&state->FirstBlockFinished);
     if(done == 1)
     {
-        sem_post(&state->BlocksFinished);
+        lock_post(&state->BlocksFinished);
     }
 
     if(state->Parent->OnTrackCountChanged != NULL)
@@ -348,7 +347,7 @@ void _ProcessBuffer(PlayListManager_S state, int done)
 struct __TMData
 {
     PlayListManager_S    State;
-    sem_t                Sync;
+    lock_t                Sync;
     int                    LocalTrackNumber;
     char*                Metadata;
     int                    _offset;
@@ -399,12 +398,12 @@ char* _GetTrackMetadata(PlayListManager_S state, int trackNumber, int* offset, i
         data->Metadata = (char*)malloc((size_t)rangeLength);
         metadata = data->Metadata;
 
-        sem_init(&data->Sync, 0, 0);
+        lock_init(&data->Sync, 0, 0);
 
         token = ILibWebClient_PipelineRequest(state->Parent->RequestManager, &dest, header, &_GetMetadataResponseCallback, data, NULL);
 
-        sem_wait(&data->Sync);
-        sem_destroy(&data->Sync);
+        lock_wait(&data->Sync);
+        lock_destroy(&data->Sync);
 
         metadata = data->Metadata;
 
@@ -475,13 +474,12 @@ char* _GetTrackMetadata(PlayListManager_S state, int trackNumber, int* offset, i
 void _GetMetadataResponseCallback(ILibWebClient_StateObject WebStateObject, int InterruptFlag, struct packetheader *header, char *bodyBuffer, int *beginPointer, int endPointer, int done, void *user1, void *user2, int *PAUSE)
 {
     struct __TMData* data = (struct __TMData*)user1;
-    PlayListManager_S state = data->State;
 
     if(InterruptFlag != 0)
     {
         free(data->Metadata);
         data->Metadata = NULL;
-        sem_post(&data->Sync);
+        lock_post(&data->Sync);
 
         return;
     }
@@ -489,7 +487,7 @@ void _GetMetadataResponseCallback(ILibWebClient_StateObject WebStateObject, int 
     {
         free(data->Metadata);
         data->Metadata = NULL;
-        sem_post(&data->Sync);
+        lock_post(&data->Sync);
 
         return;
     }
@@ -501,6 +499,6 @@ void _GetMetadataResponseCallback(ILibWebClient_StateObject WebStateObject, int 
 
     if(done != 0)
     {
-        sem_post(&data->Sync);
+        lock_post(&data->Sync);
     }
 }

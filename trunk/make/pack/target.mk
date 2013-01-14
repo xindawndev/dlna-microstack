@@ -5,9 +5,18 @@
 ## @version     1.0
 ###############################################################################
 
-include $(PACK_MAKE_DIRECTORY)/depends.mk
+FULL_TARGE_DIR               := $(PLATFORM_STRATEGY_NAME)_symbol
+MAKE_DIRECTORYS         := $(TARGET_DIRECTORY) $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME) $(TARGET_DIRECTORY)/$(FULL_TARGE_DIR)
 
-MAKE_DIRECTORYS         := $(TARGET_DIRECTORY) $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)
+ifneq ($(CONFIG_packet),)
+include $(ROOT_STRATEGY_DIRECTORY)/packet/$(CONFIG_packet).mk
+endif
+
+ifneq ($(CONFIG_extend),)
+	include $(ROOT_STRATEGY_DIRECTORY)/extend/$(CONFIG_extend).mk
+endif
+
+call_post_action	= $(foreach action,$(2),$(call $(action),$(1)) && )true
 
 .PHONY: target
 target: $(TARGET_FILE_FULL)
@@ -21,10 +30,45 @@ $(PACKET_DEPEND_FILES): mkdirs
 	@svn up $(ROOT_DIRECTORY)$@ 2>&0 > /dev/null
 	@svn export $(ROOT_DIRECTORY)$@ $(TARGET_DIRECTORY)/$(notdir $@) 2>&0 > /dev/null
 
-.PHONY: $(DEPEND_FILES)
-$(DEPEND_FILES): mkdirs
+.PHONY: $(PACKET_DEPEND_FILES2)
+$(PACKET_DEPEND_FILES2): mkdirs
 	@$(ECHO) $@
-	@$(STRIP) $@ -o $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/$(notdir $@)
+	@$(RM) $(TARGET_DIRECTORY)/$(notdir $@)
+	$(CP) -r $(PLATFORM_BUILD_DIRECTORY)$@ $(TARGET_DIRECTORY)/$(notdir $@) 2>&0 > /dev/null
 
-$(TARGET_FILE_FULL): $(DEPEND_FILES) $(PACKET_DEPEND_FILES) $(MAKEFILE_LIST) 
-	@$(CD) $(TARGET_DIRECTORY) ; tar -czv -f $(TARGET_FILE) $(addprefix $(PLATFORM_STRATEGY_NAME)/,$(notdir $(DEPEND_FILES))) $(notdir $(PACKET_DEPEND_FILES)) 2>&0 > /dev/null
+define packet_depend3
+$(if $(findstring dynamic,$(call get_item_type,$(1))), \
+	$(if $(findstring .so,$(DYNAMIC_NAME_SUFFIX)), \
+		ln -f -s $(notdir $(call get_item_file,$(1))) $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/libppbox-$(PLATFORM_NAME)$(DYNAMIC_NAME_SUFFIX),) ,)
+endef
+
+.PHONY: EXTEND
+EXTEND:
+	$(call packet_depend3,/ppbox/ppbox)
+	touch $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/$(TARGET_FILE_3)
+
+.PHONY: CLEAN
+CLEAN:
+	$(RM) $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/*
+	$(RM) $(TARGET_DIRECTORY)/$(FULL_TARGE_DIR)/*
+
+define pack_depend
+$(call pack_depend2,$(1),$(call get_item_type,$(1)),$(call get_item_file,$(1)))
+endef
+
+# pack_depend2 name type  file
+define pack_depend2
+$(if $(findstring static,$(2)), \
+    $(CP) $(PLATFORM_BUILD_DIRECTORY)$(1)/$(3) $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/$(notdir $(3)), \
+    $(CP) $(PLATFORM_BUILD_DIRECTORY)$(1)/$(3) $(TARGET_DIRECTORY)/$(FULL_TARGE_DIR)/$(notdir $3) && $(STRIP) $(PLATFORM_BUILD_DIRECTORY)$(1)/$(3) -o $(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/$(notdir $(3))) && \
+$(call call_post_action,$(TARGET_DIRECTORY)/$(PLATFORM_STRATEGY_NAME)/$(notdir $(3)),$(PACKET_POST_ACTION))
+endef
+
+.PHONY: $(PACKET_DEPENDS)
+$(PACKET_DEPENDS): mkdirs
+	@$(ECHO) $@
+	$(call pack_depend,$@)
+
+$(info TARGET_FILE_2=$(TARGET_FILE_2))
+$(TARGET_FILE_FULL): CLEAN $(PACKET_DEPENDS) $(PACKET_DEPEND_FILES) $(PACKET_DEPEND_FILES2) $(MAKEFILE_LIST) EXTEND
+	$(CD) $(TARGET_DIRECTORY) ; tar -czv -f $(TARGET_FILE_3) $(FULL_TARGE_DIR);tar -czv -f $(TARGET_FILE_2) $(PLATFORM_STRATEGY_NAME) $(notdir $(PACKET_DEPEND_FILES)) $(notdir $(PACKET_DEPEND_FILES2)) 2>&0 > /dev/null

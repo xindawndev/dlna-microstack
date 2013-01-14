@@ -20,16 +20,10 @@
 #include "DLNAProtocolInfo.h"
 #include "CdsDidlSerializer.h"
 
-#ifdef _POSIX
-#include <semaphore.h>
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-#endif
-
 struct AVR_Object *UPnP_CP;
 void *UPnP_CP_chain;
 void (*RendererAdded)(void *token, struct AVRenderer* r);
-void (*RendererRemoved)(void *token, struct AVRenderer *r);
+void (*RendererRemoved)(void *token, struct AVRenderer *r, int error_code);
 
 void HookupEvents(struct AVRenderer *);
 void UpdateConnectionInfo(struct AVRendererConnection *connection);
@@ -56,7 +50,7 @@ struct AVR_Object
     void (*PostSelect)(void* object,int slct, fd_set *readset, fd_set *writeset, fd_set *errorset);
     void (*Destroy)(void* object);
     void *CP;
-    sem_t GlobalLock;
+    lock_t GlobalLock;
     void *Chain;
 
     /* >>> Added by PDA */
@@ -90,14 +84,14 @@ unsigned short RCS_GetMaxVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Max));
+            if (SV->Max == NULL) return 100;
+            return((unsigned short)atoi(SV->Max));        
         }
         SV = SV->Next;
     }
 
     return(0);
 }
-
 unsigned short RCS_GetMinVolume(struct AVRenderer *r)
 {
     struct UPnPStateVariable *SV = r->RCS->Variables;
@@ -106,13 +100,15 @@ unsigned short RCS_GetMinVolume(struct AVRenderer *r)
     {
         if(strcmp(SV->Name,"Volume")==0)
         {
-            return((unsigned short)atoi(SV->Min));
+            if (SV->Min == NULL) return 0;
+            return((unsigned short)atoi(SV->Min));        
         }
         SV = SV->Next;
     }
 
     return(0);
 }
+
 
 /* Event Processing */
 void ProcessRCS_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long InstanceID)
@@ -175,8 +171,10 @@ void ProcessRCS_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
                     ILibDestructXMLAttributeList(rootATTR);
                     if(volume_value != -1 && volume_channel_index != -1)
                     {
-                        c->Volume[volume_channel_index] = (char)volume_value;
-                        StateChanged = -1;
+                        if (c->Volume != NULL) {
+                            c->Volume[volume_channel_index] = (char)volume_value;
+                            StateChanged = -1;
+                        }
                     }
                 }
                 else if(xml->NameLength==4 && memcmp(xml->Name,"Mute",4)==0)
@@ -214,8 +212,10 @@ void ProcessRCS_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
                     ILibDestructXMLAttributeList(rootATTR);
                     if(volume_value != -1 && volume_channel_index != -1)
                     {
-                        c->Mute[volume_channel_index] = volume_value;
-                        StateChanged = -1;
+                        if (c->Mute != NULL) {
+                            c->Mute[volume_channel_index] = volume_value;
+                            StateChanged = -1;
+                        }
                     }
                 }
                 xml = xml->Peer;
@@ -227,7 +227,6 @@ void ProcessRCS_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
         }
     }
 }
-
 void ProcessAVT_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long InstanceID)
 {
     struct AVRendererConnection *c=NULL,*temp=NULL;
@@ -537,7 +536,6 @@ void ProcessAVT_Event(struct AVRenderer *r,struct ILibXMLNode *xml,long Instance
         }
     }
 }
-
 void UPnPEventSink_RenderingControl_LastChange(struct UPnPService* Service,char* LastChange)
 {
     struct ILibXMLNode *rootXML,*xml;
@@ -574,7 +572,6 @@ void UPnPEventSink_RenderingControl_LastChange(struct UPnPService* Service,char*
     }
     ILibDestructXMLNodeList(rootXML);
 }
-
 void UPnPEventSink_AVTransport_LastChange(struct UPnPService* Service,char* LastChange)
 {
     struct ILibXMLNode *rootXML,*xml;
@@ -614,11 +611,12 @@ void UPnPEventSink_AVTransport_LastChange(struct UPnPService* Service,char* Last
     //printf("UPnP Event from %s/AVTransport/LastChange: %s\r\n",Service->Parent->FriendlyName,LastChange);
 }
 
+
 void HookupEvents(struct AVRenderer *r)
 {
-    DMRCP_SubscribeForUPnPEvents(r->AVT,NULL);
-    DMRCP_SubscribeForUPnPEvents(r->RCS,NULL);
-    DMRCP_SubscribeForUPnPEvents(r->CMS,NULL);
+    if (r->AVT) DMRCP_SubscribeForUPnPEvents(r->AVT,NULL);
+    if (r->RCS) DMRCP_SubscribeForUPnPEvents(r->RCS,NULL);
+    if (r->CMS) DMRCP_SubscribeForUPnPEvents(r->CMS,NULL);
 }
 
 /* Action Respones */
@@ -640,13 +638,13 @@ void UPnPUser_GetMediaInfo(struct UPnPService *sender,int ErrorCode,void *User,u
 
     int mediaDuration = 0;
 
-    if( ErrorCode != 0 ) 
-    {
-        free(s);
-        return;
-    }
+    //if( ErrorCode != 0 ) 
+    //{
+    //    free(s);
+    //    return;
+    //}
 
-    if(s->CB!=NULL)
+    if(s->CB!=NULL && ErrorCode == 0)
     {
         if(strcmp("NOT_IMPLEMENTED",MediaDuration)!=0)
         {
@@ -670,8 +668,8 @@ void UPnPUser_GetMediaInfo(struct UPnPService *sender,int ErrorCode,void *User,u
             ILibDestructParserResults(pr);
         }
 
-        ((void (*)(struct AVRendererConnection*,int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI,void *Tag ) )s->CB)(s->connection,ErrorCode, NrTracks, mediaDuration,CurrentURI, NextURI, s->Tag);
     }
+    ((void (*)(struct AVRendererConnection*,int ErrorCode, int nrTracks, int mediaDuration, char * curUrI, char * nextURI,void *Tag ) )s->CB)(s->connection,ErrorCode, NrTracks, mediaDuration,CurrentURI, NextURI, s->Tag);
     free(s);
 }
 
@@ -684,14 +682,14 @@ void UPnPUser_GetPositionInfo(struct UPnPService* Service,int ErrorCode,void *Us
     int AbsoluteTime = 0;
     int RelativeTime = 0;
 
-    if(ErrorCode!=0) 
+    //if(ErrorCode!=0) 
+    //{
+    //    free(s);
+    //    return;
+    //}
+    if(s->CB!=NULL && ErrorCode==0)
     {
-        free(s);
-        return;
-    }
-    if(s->CB!=NULL)
-    {
-        if(strcmp("NOT_IMPLEMENTED",RelTime)!=0)
+        if(RelTime != NULL && strcmp("NOT_IMPLEMENTED",RelTime)!=0)
         {
             pr = ILibParseString(RelTime,0,(int)strlen(RelTime),":",1);
             prf = pr->FirstResult;
@@ -712,7 +710,7 @@ void UPnPUser_GetPositionInfo(struct UPnPService* Service,int ErrorCode,void *Us
 
             ILibDestructParserResults(pr);
         }
-        if(strcmp("NOT_IMPLEMENTED",AbsTime)!=0)
+        if(AbsTime != NULL && strcmp("NOT_IMPLEMENTED",AbsTime)!=0)
         {
             pr = ILibParseString(AbsTime,0,(int)strlen(AbsTime),":",1);
             prf = pr->FirstResult;
@@ -735,7 +733,7 @@ void UPnPUser_GetPositionInfo(struct UPnPService* Service,int ErrorCode,void *Us
         }
 
         // leochen begin
-        if(strcmp("NOT_IMPLEMENTED",TrackDuration)!=0)
+        if(TrackDuration != NULL && strcmp("NOT_IMPLEMENTED",TrackDuration)!=0)
         {
             pr = ILibParseString(TrackDuration,0,(int)strlen(TrackDuration),":",1);
             prf = pr->FirstResult;
@@ -758,8 +756,9 @@ void UPnPUser_GetPositionInfo(struct UPnPService* Service,int ErrorCode,void *Us
         }
         // leochen end
 
-        ((void (*)(struct AVRendererConnection*,int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter,void *Tag))s->CB)(s->connection,ErrorCode,RelativeTime,AbsoluteTime,RelCount,AbsCount,s->Tag);
     }
+    ((void (*)(struct AVRendererConnection*,int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter,void *Tag))s->CB)(s->connection,ErrorCode,RelativeTime,AbsoluteTime,RelCount,AbsCount,s->Tag);
+
     free(s);
 }
 
@@ -770,6 +769,26 @@ void UPnPUser_GetTransportInfo(struct UPnPService *sender, int ErrorCode, void *
     if(s->CB!=NULL)
     {
         ((void (*)(struct AVRendererConnection*,int ErrorCode, char* CurrentTransportState, char* CurrentTransportStatus, char* CurrentSpeed,void *Tag))s->CB)(s->connection,ErrorCode, CurrentTransportState,CurrentTransportStatus,CurrentSpeed,s->Tag);
+    }
+    free(s);
+}
+
+void UPnPUser_GetMute(struct UPnPService *sender,int ErrorCode,void *user,int CurrentMute)
+{
+    struct AVR_State *s = (struct AVR_State *)user;
+
+    if(s->CB != NULL) {
+        ((void (*)(struct AVRendererConnection *, int, unsigned short, void *))s->CB)(s->connection, ErrorCode, CurrentMute, s->Tag);
+    }
+    free(s);
+}
+
+void UPnPUser_GetVolume(struct UPnPService *sender,int ErrorCode,void *user,unsigned short CurrentVolume)
+{
+    struct AVR_State *s = (struct AVR_State *)user;
+
+    if(s->CB != NULL) {
+        ((void (*)(struct AVRendererConnection *, int, unsigned short, void *))s->CB)(s->connection,ErrorCode, CurrentVolume, s->Tag);
     }
     free(s);
 }
@@ -789,7 +808,9 @@ void UPnPResponseSink_RenderingControl_GetMute(struct UPnPService* Service,int E
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+            if (ErrorCode != 5 && ErrorCode != -1) {// httpclient destroy
+                ((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+            }
             free(AVRS);
             return;
         }
@@ -798,7 +819,7 @@ void UPnPResponseSink_RenderingControl_GetMute(struct UPnPService* Service,int E
     ++AVRS->index;
     if(AVRS->index>=AVRS->connection->ChannelCount)
     {
-        //((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+        ((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
         free(AVRS);
     }
     else
@@ -806,7 +827,6 @@ void UPnPResponseSink_RenderingControl_GetMute(struct UPnPService* Service,int E
         DMRCP_Invoke_RenderingControl_GetMute(AVRS->connection->Parent->RCS, &UPnPResponseSink_RenderingControl_GetMute,AVRS,AVRS->connection->RCID,AVRS->connection->Channel[AVRS->index]);
     }
 }
-
 void RCP_GetInitialMuteState(struct AVRendererConnection *connection)
 {
     struct UPnPStateVariable *SV;
@@ -839,7 +859,6 @@ void RCP_GetInitialMuteState(struct AVRendererConnection *connection)
         SV = SV->Next;
     }
 }
-
 void UPnPResponseSink_RenderingControl_GetVolume(struct UPnPService* Service,int ErrorCode,void *User,unsigned short CurrentVolume)
 {
     struct AVR_VolumeState *AVRS = (struct AVR_VolumeState*)User;
@@ -858,7 +877,9 @@ void UPnPResponseSink_RenderingControl_GetVolume(struct UPnPService* Service,int
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+            if (ErrorCode != 5 && ErrorCode != -1) { // httpclient destroy
+                ((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+            }
             free(AVRS);
             return;
         }
@@ -873,16 +894,15 @@ void UPnPResponseSink_RenderingControl_GetVolume(struct UPnPService* Service,int
         }
         else
         {
-            //((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
+            ((void (*)(struct AVRendererConnection*))AVRS->connection->Reserved)(AVRS->connection);
         }
         free(AVRS);
     }
     else
     {
         DMRCP_Invoke_RenderingControl_GetVolume(AVRS->connection->Parent->RCS, &UPnPResponseSink_RenderingControl_GetVolume,AVRS,AVRS->connection->RCID,AVRS->connection->Channel[AVRS->index]);
-    }
+    }    
 }
-
 void UPnPResponseSink_AVTransport_GetTransportSettings(struct UPnPService* Service,int ErrorCode,void *User,char* PlayMode,char* RecQualityMode)
 {
     struct AVRendererConnection *connection = (struct AVRendererConnection*)User;
@@ -901,7 +921,7 @@ void UPnPResponseSink_AVTransport_GetTransportSettings(struct UPnPService* Servi
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
@@ -941,7 +961,7 @@ void UPnPResponseSink_AVTransport_GetTransportSettings(struct UPnPService* Servi
         connection->Channel = NULL;
         connection->Volume = NULL;
         connection->Mute = NULL;
-        //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+        ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
     }
 }
 
@@ -1006,14 +1026,13 @@ void UPnPResponseSink_AVTransport_GetPositionInfo(struct UPnPService* Service,in
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
 
     DMRCP_Invoke_AVTransport_GetTransportSettings(Service, &UPnPResponseSink_AVTransport_GetTransportSettings,connection,connection->AVTID);
 }
-
 void UPnPResponseSink_AVTransport_GetTransportInfo(struct UPnPService* Service,int ErrorCode,void *User,char* CurrentTransportState,char* CurrentTransportStatus,char* CurrentSpeed)
 {
     struct AVRendererConnection *connection = (struct AVRendererConnection*)User;
@@ -1038,14 +1057,13 @@ void UPnPResponseSink_AVTransport_GetTransportInfo(struct UPnPService* Service,i
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
 
     DMRCP_Invoke_AVTransport_GetPositionInfo(connection->Parent->AVT, &UPnPResponseSink_AVTransport_GetPositionInfo,connection,connection->AVTID);
 }
-
 void UPnPResponseSink_AVTransport_GetMediaInfo(struct UPnPService* Service,int ErrorCode,void *User,unsigned int NrTracks,char* MediaDuration,char* CurrentURI,char* CurrentURIMetaData,char* NextURI,char* NextURIMetaData,char* PlayMedium,char* RecordMedium,char* WriteStatus)
 {
     struct AVRendererConnection *connection = (struct AVRendererConnection*)User;
@@ -1071,13 +1089,14 @@ void UPnPResponseSink_AVTransport_GetMediaInfo(struct UPnPService* Service,int E
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
 
     DMRCP_Invoke_AVTransport_GetTransportInfo(connection->Parent->AVT, &UPnPResponseSink_AVTransport_GetTransportInfo,connection,connection->AVTID);
 }
+
 
 void ReAcquireStateSink(struct AVRendererConnection *connection)
 {
@@ -1114,7 +1133,7 @@ void UPnPResponseSink_AVTransport_GetDeviceCapabilities(struct UPnPService* Serv
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
@@ -1172,6 +1191,7 @@ void UPnPResponseSink_AVTransport_GetDeviceCapabilities(struct UPnPService* Serv
     DMRCP_Invoke_AVTransport_GetMediaInfo(connection->Parent->AVT, &UPnPResponseSink_AVTransport_GetMediaInfo,connection,connection->AVTID);
 }
 
+
 void RCP_ReAcquireConnectionState(struct AVRendererConnection *connection, void *Tag, void (*ReAcquireConnectionStateSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -1203,7 +1223,6 @@ void StableState_1(struct AVRendererConnection *connection)
         UpdateConnectionInfo(connection->Next);
     }
 }
-
 void UPnPResponseSink_ConnectionManager_GetCurrentConnectionInfo(struct UPnPService* Service,int ErrorCode,void *User,int RcsID,int AVTransportID,char* ProtocolInfo,char* PeerConnectionManager,int PeerConnectionID,char* Direction,char* Status)
 {
     struct AVR_ConnectionState *ACS = (struct AVR_ConnectionState*)User;
@@ -1277,7 +1296,6 @@ void UPnPResponseSink_ConnectionManager_GetCurrentConnectionInfo(struct UPnPServ
         free(ACS);
     }
 }
-
 void UPnPResponseSink_ConnectionManager_GetCurrentConnectionIDs(struct UPnPService* Service,int ErrorCode,void *User,char* ConnectionIDs)
 {
     struct AVRenderer *AVR = (struct AVRenderer*)User;
@@ -1318,7 +1336,6 @@ void UPnPResponseSink_ConnectionManager_GetCurrentConnectionIDs(struct UPnPServi
     free(id);
     ILibDestructParserResults(r);
 }
-
 void UPnPResponseSink_ConnectionManager_GetProtocolInfo(struct UPnPService* Service,int ErrorCode,void *User,char* Source,char* Sink)
 {
     struct parser_result *r;
@@ -1355,8 +1372,7 @@ void UPnPResponseSink_ConnectionManager_GetProtocolInfo(struct UPnPService* Serv
         memset(AVR->Connection,0,sizeof(struct AVRendererConnection));
 
         AVR->Connection->Parent = AVR;
-        //AVR->Connection->Reserved = (void*)&StableState_0;
-        StableState_0(AVR->Connection);
+        AVR->Connection->Reserved = (void*)&StableState_0;
         UpdateConnectionInfo(AVR->Connection);
     }
     else
@@ -1365,6 +1381,8 @@ void UPnPResponseSink_ConnectionManager_GetProtocolInfo(struct UPnPService* Serv
         DMRCP_Invoke_ConnectionManager_GetCurrentConnectionIDs(AVR->CMS, &UPnPResponseSink_ConnectionManager_GetCurrentConnectionIDs,AVR);
     }
 }
+
+
 
 void FinishedPrepareForConnection(struct AVRendererConnection *connection)
 {
@@ -1400,7 +1418,6 @@ void FinishedPrepareForConnection(struct AVRendererConnection *connection)
         r->ConnectionAdded(r, connection, ErrorCode ,Tag);
     }
 }
-
 void ProcessUpdateConnectionInfo_GetCurrentConnectionInfo(struct UPnPService* Service,int ErrorCode,void *User,int RcsID,int AVTransportID,char* ProtocolInfo,char* PeerConnectionManager,int PeerConnectionID,char* Direction,char* Status)
 {
     struct AVRendererConnection* connection = (struct AVRendererConnection*)User;
@@ -1420,7 +1437,7 @@ void ProcessUpdateConnectionInfo_GetCurrentConnectionInfo(struct UPnPService* Se
         if(ErrorCode<300)
         {
             // Do NOT Continue
-            //((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
+            ((void (*)(struct AVRendererConnection*))connection->Reserved)(connection);
             return;
         }
     }
@@ -1505,7 +1522,6 @@ void ProcessRemovedConnection(struct AVRenderer *AVR, int id)
         c = c->Next;
     }
 }
-
 void ProcessAddedConnection(struct AVRenderer *AVR, int id)
 {
     struct AVR_ConnectionState *s = (struct AVR_ConnectionState*)malloc(sizeof(struct AVR_ConnectionState));
@@ -1513,7 +1529,6 @@ void ProcessAddedConnection(struct AVRenderer *AVR, int id)
     s->CMID = id;
     DMRCP_Invoke_ConnectionManager_GetCurrentConnectionInfo(AVR->CMS, ProcessAddedConnection_GetCurrentConnectionInfo,s, id);
 }
-
 void ProcessConnectionIDEvents(struct AVRenderer *AVR, char* CurrentConnectionIDs, int IgnoreID)
 {
     int AddedIDsLength=0;
@@ -1600,6 +1615,12 @@ void ProcessConnectionIDEvents(struct AVRenderer *AVR, char* CurrentConnectionID
     ILibDestructParserResults(pr);
 }
 
+
+
+
+
+
+
 void UPnPResponseSink_ConnectionManager_PrepareForConnection(struct UPnPService* Service,int ErrorCode,void *User,int ConnectionID,int AVTransportID,int RcsID)
 {
     struct AVR_State *s = (struct AVR_State*)User;
@@ -1642,6 +1663,19 @@ void UPnPResponseSink_ConnectionManager_PrepareForConnection(struct UPnPService*
 
     UpdateConnectionInfo(connection);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void UPnPResponseSink_ConnectionManager_ConnectionComplete(struct UPnPService* Service,int ErrorCode,void *User)
 {
@@ -1843,6 +1877,7 @@ void UPnPEventSink_ConnectionManager_SinkProtocolInfo(struct UPnPService* Servic
     //printf("UPnP Event from %s/ConnectionManager/SinkProtocolInfo: %s\r\n",Service->Parent->FriendlyName,SinkProtocolInfo);
 }
 
+
 void UPnPEventSink_ConnectionManager_CurrentConnectionIDs(struct UPnPService* Service,char* CurrentConnectionIDs)
 {
     struct AVRenderer *AVR = (struct AVRenderer*)Service->Parent->Tag;
@@ -1864,6 +1899,7 @@ void UPnPEventSink_ConnectionManager_CurrentConnectionIDs(struct UPnPService* Se
     printf("UPnP Event from %s/ConnectionManager/CurrentConnectionIDs: %s\r\n",Service->Parent->FriendlyName,CurrentConnectionIDs);
 }
 
+
 /* Called whenever a new device on the correct type is discovered */
 void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
 {
@@ -1871,21 +1907,32 @@ void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
     int i;
     struct UPnPStateVariable *SV;
 
-    printf("**<< UPnP A/V Renderer Added: %s >>**\r\n", device->FriendlyName);
-    /*     UPnPPrintUPnPDevice(0,device); */
-
-
     memset(AVR,0,sizeof(struct AVRenderer));
+    AVR->RCS = DMRCP_GetService_RenderingControl(device);
+    if (AVR->RCS == NULL) {
+        free(AVR);
+        return;
+    }
+    AVR->AVT = DMRCP_GetService_AVTransport(device);
+    if (AVR->AVT == NULL) {
+        free(AVR);
+        return;
+    }
+    AVR->CMS = DMRCP_GetService_ConnectionManager(device);
+    if (AVR->CMS == NULL) {
+        free(AVR);
+        return;
+    }
+    AVR->device = device;
+
     AVR->EventTimer = ILibCreateLifeTime(((struct AVR_Object*)UPnP_CP)->Chain);
     AVR->CP = UPnP_CP;
     device->Tag = AVR;
     AVR->FriendlyName = device->FriendlyName;
     AVR->FetchingTable = ILibInitHashTree();
 
-    AVR->RCS = DMRCP_GetService_RenderingControl(device);
-    AVR->AVT = DMRCP_GetService_AVTransport(device);
-    AVR->CMS = DMRCP_GetService_ConnectionManager(device);
-    AVR->device = device;
+    printf("**<< UPnP A/V Renderer Added: %s >>**\r\n", device->FriendlyName);
+    /*     UPnPPrintUPnPDevice(0,device); */
 
     if(AVR->AVT!=NULL)
     {
@@ -1937,7 +1984,58 @@ void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
         }
     }
 
-    DMRCP_Invoke_ConnectionManager_GetProtocolInfo(AVR->CMS, &UPnPResponseSink_ConnectionManager_GetProtocolInfo,AVR);
+    //DMRCP_Invoke_ConnectionManager_GetProtocolInfo(AVR->CMS, &UPnPResponseSink_ConnectionManager_GetProtocolInfo,AVR);
+
+    //AVR->ImplementsPrepareForConnection = 0;
+
+    //AVR->Connection = (struct AVRendererConnection*)malloc(sizeof(struct AVRendererConnection));
+    //memset(AVR->Connection,0,sizeof(struct AVRendererConnection));
+
+    //AVR->Connection->Parent = AVR;
+    //StableState_0(AVR->Connection);
+
+    AVR->ImplementsPrepareForConnection = 0;
+
+    AVR->Connection = (struct AVRendererConnection*)malloc(sizeof(struct AVRendererConnection));
+    memset(AVR->Connection,0,sizeof(struct AVRendererConnection));
+
+    AVR->Connection->Parent = AVR;
+    AVR->Connection->Reserved = (void*)&StableState_0;
+
+    if(RCP_SupportVolume(AVR) != 0)
+    {
+        struct AVR_VolumeState * AVRS;
+        SV = AVR->RCS->Variables;
+        while(SV!=NULL)
+        {
+            if(strcmp(SV->Name,"A_ARG_TYPE_Channel")==0)
+            {
+                AVR->Connection->ChannelCount = SV->NumAllowedValues;
+                AVR->Connection->Channel = (char**)malloc(SV->NumAllowedValues*sizeof(char*));
+                AVR->Connection->Volume = (char*)malloc(SV->NumAllowedValues);
+                for(i=0;i<SV->NumAllowedValues;++i)
+                {
+                    AVR->Connection->Channel[i] = SV->AllowedValues[i];
+                    AVR->Connection->Volume[i] = 0;
+                }
+                AVRS = (struct AVR_VolumeState*)malloc(sizeof(struct AVR_VolumeState));
+                AVRS->connection = AVR->Connection;
+                AVRS->index = 0;
+                DMRCP_Invoke_RenderingControl_GetVolume(AVR->RCS, &UPnPResponseSink_RenderingControl_GetVolume,AVRS,AVR->Connection->RCID,AVR->Connection->Channel[0]);
+                break;
+            }
+            SV = SV->Next;
+        }
+    } else if (RCP_SupportMute(AVR)!=0) {
+        AVR->Connection->Volume = NULL;
+        RCP_GetInitialMuteState(AVR->Connection);
+    } else {
+        AVR->Connection->ChannelCount = 0;
+        AVR->Connection->Channel = NULL;
+        AVR->Connection->Volume = NULL;
+        AVR->Connection->Mute = NULL;
+        StableState_0(AVR->Connection);
+    }
 
     /*
     MRCP_Invoke_RenderingControl_GetHorizontalKeystone(tempService, &UPnPResponseSink_RenderingControl_GetHorizontalKeystone,NULL,250);
@@ -2000,7 +2098,7 @@ void UPnPDeviceDiscoverSink(struct UPnPDevice *device)
 }
 
 /* Called whenever a discovered device was removed from the network */
-void UPnPDeviceRemoveSink(struct UPnPDevice *device)
+void UPnPDeviceRemoveSink(struct UPnPDevice *device, int error_code)
 {
     struct AVRenderer *r = (struct AVRenderer*)device->Tag;
     struct AVRendererConnection *c,*c2;
@@ -2008,11 +2106,12 @@ void UPnPDeviceRemoveSink(struct UPnPDevice *device)
 
     printf("**<< UPnP A/V Renderer Removed: %s >>**\r\n", device->FriendlyName);
 
+    if (r == NULL) return;
     ILibDestroyHashTree(r->FetchingTable);
 
     if(r->Reserved!=0 && RendererRemoved!=NULL)
     {
-        RendererRemoved(UPnP_CP,r);
+        RendererRemoved(UPnP_CP,r, error_code);
     }
 
     for(i=0;i<r->PlayMediaLength;++i)
@@ -2066,37 +2165,34 @@ void UPnPDeviceRemoveSink(struct UPnPDevice *device)
 
 void LockRendererCP(void *token)
 {
-    sem_wait(&(((struct AVR_Object*)token)->GlobalLock));
+    lock_wait(&(((struct AVR_Object*)token)->GlobalLock));
 }
-
 void UnLockRendererCP(void *token)
 {
-    sem_post(&(((struct AVR_Object*)token)->GlobalLock));
+    lock_post(&(((struct AVR_Object*)token)->GlobalLock));
 }
 
 void DestroyRendererCP(void *object)
 {
     struct AVR_Object *avrobject = (struct AVR_Object*)object;
-    sem_destroy(&(avrobject->GlobalLock));
+    lock_destroy(&(avrobject->GlobalLock));
 }
-
 void RCP_IPAddressChanged(void *RCP)
 {
     DMRCP__CP_IPAddressListChanged(((struct AVR_Object *)RCP)->CP);
 }
-
 void *CreateRendererCP(void *Chain)
 {
     /* Event callback function registration code */
-    DMRCP_EventCallback_RenderingControl_LastChange             = &UPnPEventSink_RenderingControl_LastChange;
-    DMRCP_EventCallback_ConnectionManager_SourceProtocolInfo    = &UPnPEventSink_ConnectionManager_SourceProtocolInfo;
-    DMRCP_EventCallback_ConnectionManager_SinkProtocolInfo      = &UPnPEventSink_ConnectionManager_SinkProtocolInfo;
-    DMRCP_EventCallback_ConnectionManager_CurrentConnectionIDs  = &UPnPEventSink_ConnectionManager_CurrentConnectionIDs;
-    DMRCP_EventCallback_AVTransport_LastChange                  = &UPnPEventSink_AVTransport_LastChange;
+    DMRCP_EventCallback_RenderingControl_LastChange=&UPnPEventSink_RenderingControl_LastChange;
+    DMRCP_EventCallback_ConnectionManager_SourceProtocolInfo=&UPnPEventSink_ConnectionManager_SourceProtocolInfo;
+    DMRCP_EventCallback_ConnectionManager_SinkProtocolInfo=&UPnPEventSink_ConnectionManager_SinkProtocolInfo;
+    DMRCP_EventCallback_ConnectionManager_CurrentConnectionIDs=&UPnPEventSink_ConnectionManager_CurrentConnectionIDs;
+    DMRCP_EventCallback_AVTransport_LastChange=&UPnPEventSink_AVTransport_LastChange;
 
     UPnP_CP = (struct AVR_Object*)malloc(sizeof(struct AVR_Object));
     UPnP_CP->CP = DMRCP_CreateControlPoint(Chain,&UPnPDeviceDiscoverSink,&UPnPDeviceRemoveSink);
-    sem_init(&(UPnP_CP->GlobalLock),0,1);
+    lock_init(&(UPnP_CP->GlobalLock),0,1);
     UPnP_CP->PreSelect = NULL;
     UPnP_CP->PostSelect = NULL;
     UPnP_CP->Destroy = &DestroyRendererCP;
@@ -2108,12 +2204,29 @@ void *CreateRendererCP(void *Chain)
     return(UPnP_CP);
 }
 
+void RCP_SearchDevice()
+{
+    if (UPnP_CP == NULL || UPnP_CP->CP == NULL) return;
+    DMRCP_SearchDevice(UPnP_CP->CP);
+}
+
+void RCP_SearchDeviceWithUDN(char * UDN)
+{
+    if (UPnP_CP == NULL || UPnP_CP->CP == NULL) return;
+    DMRCP_SearchDeviceWithUDN(UPnP_CP->CP, UDN);
+}
+
 void RCP_GetDeviceCap(struct AVRendererConnection * connection, void * Tag, void (*GetDevCapSink)(struct AVRendererConnection*,int ErrorCode, void *Tag, char* PlayMedia,char* RecMedia,char* RecQualityModes))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
     s->connection = connection;
     s->CB = GetDevCapSink;
     s->Tag = Tag;
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        GetDevCapSink(connection, -1000, Tag, NULL, NULL, NULL);
+        return;
+    }
 
     DMRCP_Invoke_AVTransport_GetDeviceCapabilities(connection->Parent->AVT, &UPnPResponseSink_GetDeviceCap,s, connection->AVTID);
 }
@@ -2150,16 +2263,15 @@ int RCP_CompatibleWithProtocolInfo(struct AVRendererConnection *avc, char *Proto
     DLNAProtocolInfo_Destruct(target);
     return(RetVal);
 }
-
 int RCP_SupportPlayMode(struct AVRenderer *r, enum PlayModeEnum PlayMode)
 {
     return(PlayMode & r->SupportedPlayModeMask);
 }
-
 int RCP_SupportVolume(struct AVRenderer *r)
 {
     struct UPnPStateVariable *SV;
 
+    if (r == NULL || r->RCS == NULL) return 0;
     SV = r->RCS->Variables;
     while(SV!=NULL)
     {
@@ -2171,11 +2283,11 @@ int RCP_SupportVolume(struct AVRenderer *r)
     }
     return(0);
 }
-
 int RCP_SupportMute(struct AVRenderer *r)
 {
     struct UPnPStateVariable *SV;
 
+    if (r == NULL || r->RCS == NULL) return 0;
     SV = r->RCS->Variables;
     while(SV!=NULL)
     {
@@ -2196,16 +2308,21 @@ void RCP_SetUri(struct AVRendererConnection *connection,char *URI,void *Tag,void
     char * ipaddress;
     unsigned short port;
     char * path;
-    char tmp[1024] = {0}, tmp1[1024] = {0};
+    char tmpuri[1024] = {0}, tmpip[1024];
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
     s->connection = connection;
     s->CB = SetUriSink;
     s->Tag = Tag;
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        SetUriSink(connection, -1000, Tag);
+        return;
+    }
     ILibParseUri(URI, &ipaddress, &port, &path);
     metaData = (char *)malloc(strlen(URI) + strlen(METADATA_TEMPLATE) + 512);
-    ILibXmlEscape(tmp, URI);
-    ILibXmlEscape(tmp1, ipaddress);
-    sprintf(metaData, METADATA_TEMPLATE, tmp1, tmp1, tmp);
+    ILibXmlEscape(tmpuri, URI);
+    ILibXmlEscape(tmpip, ipaddress);
+    sprintf(metaData, METADATA_TEMPLATE, tmpip, tmpip, tmpuri);
     DMRCP_Invoke_AVTransport_SetAVTransportURI(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID,URI, metaData);
     free(ipaddress);
     free(path);
@@ -2220,6 +2337,12 @@ void RCP_SetPlayMode(struct AVRendererConnection *connection, enum PlayModeEnum 
     s->connection = connection;
     s->CB = SetPlayModeSink;
     s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        SetPlayModeSink(connection, -1000, Tag);
+        return;
+    }
 
     while(PlayMode!=0)
     {
@@ -2236,6 +2359,11 @@ void RCP_Play(struct AVRendererConnection *connection,void *Tag,void (*PlaySink)
     s->connection = connection;
     s->CB = PlaySink;
     s->Tag = Tag;
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        PlaySink(connection, -1000, Tag);
+        return;
+    }
     DMRCP_Invoke_AVTransport_Play(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID,"1");
 }
 
@@ -2245,10 +2373,17 @@ void RCP_Seek(struct AVRendererConnection *connection, int abs_time, void *Tag, 
     char unescaped_Target[16];
     struct UPnPStateVariable * var;
     int i = 0;
+    int support_seek = 0x00000000;
 
     s->connection = connection;
     s->CB = SeekSink;
     s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        SeekSink(connection, -1000, Tag);
+        return;
+    }
 
     var = connection->Parent->AVT->Variables;
     while ( var != NULL )
@@ -2259,19 +2394,22 @@ void RCP_Seek(struct AVRendererConnection *connection, int abs_time, void *Tag, 
             {
                 if ( stricmp( var->AllowedValues[i], "REL_TIME" ) == 0 )
                 {
-                    sprintf( unescaped_Target, "%.2d:%.2d:%.2d", abs_time / 3600, (abs_time % 3600)/60, (abs_time % 3600)%60 );
-                    DMRCP_Invoke_AVTransport_Seek(connection->Parent->AVT, UPnPResponseSink_Generic, s, connection->AVTID, "REL_TIME", unescaped_Target);
-                    return;
+                    support_seek |= 0x00000001;
                 }
                 else if ( stricmp( var->AllowedValues[i], "ABS_COUNT" ) == 0 )
                 {
-                    sprintf( unescaped_Target, "%d", abs_time );
-                    DMRCP_Invoke_AVTransport_Seek(connection->Parent->AVT, UPnPResponseSink_Generic, s, connection->AVTID, "ABS_COUNT", unescaped_Target);
-                    return;
+                    support_seek |= 0x00000002;
                 }
             }
         }
         var = var->Next;
+    }
+    if (support_seek & 0x00000001) {
+        sprintf( unescaped_Target, "%.2d:%.2d:%.2d", abs_time / 3600, (abs_time % 3600)/60, (abs_time % 3600)%60 );
+        DMRCP_Invoke_AVTransport_Seek(connection->Parent->AVT, UPnPResponseSink_Generic, s, connection->AVTID, "REL_TIME", unescaped_Target);
+    } else if (support_seek & 0x00000002) {
+        sprintf( unescaped_Target, "%d", abs_time );
+        DMRCP_Invoke_AVTransport_Seek(connection->Parent->AVT, UPnPResponseSink_Generic, s, connection->AVTID, "ABS_COUNT", unescaped_Target);
     }
 }
 
@@ -2282,7 +2420,45 @@ void RCP_GetMediaInfo(struct AVRendererConnection *connection,void *Tag,void (*G
     s->CB = GetMediaInfoSink;
     s->Tag = Tag;
 
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        GetMediaInfoSink(connection, -1000, 0, 0, NULL, NULL, Tag);
+        return;
+    }
+
     DMRCP_Invoke_AVTransport_GetMediaInfo(connection->Parent->AVT, &UPnPUser_GetMediaInfo,s,connection->AVTID);
+}
+
+void RCP_GetMute(struct AVRendererConnection *connection, void *Tag, void (*GetMuteSink)(struct AVRendererConnection *sender,int ErrorCode,int CurrentMute, void *user))
+{
+    struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
+    s->connection = connection;
+    s->CB = GetMuteSink;
+    s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->RCS == NULL) {
+        free(s);
+        GetMuteSink(connection, -1000, 0, Tag);
+        return;
+    }
+
+    DMRCP_Invoke_RenderingControl_GetMute(connection->Parent->RCS, &UPnPUser_GetMute, s, connection->RCID, "Master");
+}
+
+void RCP_GetVolume(struct AVRendererConnection *connection, void *Tag, void (* GetVolumeSink)(struct AVRendererConnection *, int, unsigned short, void *))
+{
+    struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
+    s->connection = connection;
+    s->CB = GetVolumeSink;
+    s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->RCS == NULL) {
+        free(s);
+        GetVolumeSink(connection, -1000, 0, Tag);
+        return;
+    }
+
+    DMRCP_Invoke_RenderingControl_GetVolume(connection->Parent->RCS, &UPnPUser_GetVolume, s, connection->RCID, "Master");
 }
 
 void RCP_GetPosition(struct AVRendererConnection *connection,void *Tag,void (*GetPositionSink)(struct AVRendererConnection*,int ErrorCode, int RelativeSeconds, int AbsoluteSeconds, int RelativeCounter, int AbsoluteCounter,void *Tag))
@@ -2291,6 +2467,12 @@ void RCP_GetPosition(struct AVRendererConnection *connection,void *Tag,void (*Ge
     s->connection = connection;
     s->CB = GetPositionSink;
     s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        GetPositionSink(connection, -1000, 0, 0, 0, 0, Tag);
+        return;
+    }
 
     DMRCP_Invoke_AVTransport_GetPositionInfo(connection->Parent->AVT, &UPnPUser_GetPositionInfo,s,connection->AVTID);
 }
@@ -2301,6 +2483,12 @@ void RCP_GetTransportInfo(struct AVRendererConnection *connection,void *Tag,void
     s->connection = connection;
     s->CB = GetTransportInfoSink;
     s->Tag = Tag;
+
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        GetTransportInfoSink(connection, -1000, NULL, NULL, NULL, Tag);
+        return;
+    }
 
     DMRCP_Invoke_AVTransport_GetTransportInfo(connection->Parent->AVT, &UPnPUser_GetTransportInfo, s, connection->AVTID);
 }
@@ -2319,9 +2507,14 @@ void RCP_SetVolume(struct AVRendererConnection *connection, char *Channel, char 
     pcnt = (double)NewVolumeValue / (double)100;
     DesiredVolume = (unsigned short)(pcnt*(double)(MaxVol-MinVol));
 
+    if (connection == NULL || connection->Parent->RCS == NULL) {
+        free(s);
+        SetVolumeSink(connection, -1000, Tag);
+        return;
+    }
+
     DMRCP_Invoke_RenderingControl_SetVolume(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,DesiredVolume);
 }
-
 void RCP_SetMute(struct AVRendererConnection *connection, char *Channel, int MuteState, void *Tag, void(*SetMuteSink)(struct AVRendererConnection *sender,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2329,9 +2522,14 @@ void RCP_SetMute(struct AVRendererConnection *connection, char *Channel, int Mut
     s->connection = connection;
     s->Tag = Tag;
 
-    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);
-}
+    if (connection == NULL || connection->Parent->RCS == NULL) {
+        free(s);
+        SetMuteSink(connection, -1000, Tag);
+        return;
+    }
 
+    DMRCP_Invoke_RenderingControl_SetMute(connection->Parent->RCS, &UPnPResponseSink_Generic,s,connection->RCID,Channel,MuteState);    
+}
 void RCP_Stop(struct AVRendererConnection *connection,void *Tag, void (*StopSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2339,9 +2537,13 @@ void RCP_Stop(struct AVRendererConnection *connection,void *Tag, void (*StopSink
     s->connection = connection;
     s->Tag = Tag;
 
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        StopSink(connection, -1000, Tag);
+        return;
+    }
     DMRCP_Invoke_AVTransport_Stop(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID);
 }
-
 void RCP_Pause(struct AVRendererConnection *connection,void *Tag, void (*PauseSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2349,9 +2551,13 @@ void RCP_Pause(struct AVRendererConnection *connection,void *Tag, void (*PauseSi
     s->connection = connection;
     s->Tag = Tag;
 
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        PauseSink(connection, -1000, Tag);
+        return;
+    }
     DMRCP_Invoke_AVTransport_Pause(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID);
 }
-
 void RCP_Next(struct AVRendererConnection *connection,void *Tag, void (*NextSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2359,9 +2565,14 @@ void RCP_Next(struct AVRendererConnection *connection,void *Tag, void (*NextSink
     s->connection = connection;
     s->Tag = Tag;
 
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        NextSink(connection, -1000, Tag);
+        return;
+    }
+
     DMRCP_Invoke_AVTransport_Next(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID);
 }
-
 void RCP_Prev(struct AVRendererConnection *connection,void *Tag, void (*PrevSink)(struct AVRendererConnection*,int ErrorCode, void *Tag))
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2369,14 +2580,18 @@ void RCP_Prev(struct AVRendererConnection *connection,void *Tag, void (*PrevSink
     s->connection = connection;
     s->Tag = Tag;
 
+    if (connection == NULL || connection->Parent->AVT == NULL) {
+        free(s);
+        PrevSink(connection, -1000, Tag);
+        return;
+    }
+
     DMRCP_Invoke_AVTransport_Previous(connection->Parent->AVT, &UPnPResponseSink_Generic,s,connection->AVTID);
 }
-
 void RCP_CloseConnection(struct AVRendererConnection *connection)
 {
     DMRCP_Invoke_ConnectionManager_ConnectionComplete(connection->Parent->CMS,NULL,NULL,connection->CMID);
 }
-
 void RCP_CreateConnection(struct AVRenderer *renderer, char* RemoteProtocolInfo, void *Tag)
 {
     struct AVR_State *s = (struct AVR_State*)malloc(sizeof(struct AVR_State));
@@ -2391,17 +2606,14 @@ void RCP_CreateConnection(struct AVRenderer *renderer, char* RemoteProtocolInfo,
 
     DMRCP_Invoke_ConnectionManager_PrepareForConnection(renderer->CMS, &UPnPResponseSink_ConnectionManager_PrepareForConnection,s,RemoteProtocolInfo,"/",-1,"Input");
 }
-
 void RCP_AddRef(struct AVRenderer *r)
 {
     DMRCP_AddRef(r->device);
 }
-
 void RCP_Release(struct AVRenderer *r)
 {
     DMRCP_Release(r->device);
 }
-
 void UpdateConnectionInfo(struct AVRendererConnection *connection)
 {
     DMRCP_Invoke_ConnectionManager_GetCurrentConnectionInfo(connection->Parent->CMS, &ProcessUpdateConnectionInfo_GetCurrentConnectionInfo,connection,connection->CMID);

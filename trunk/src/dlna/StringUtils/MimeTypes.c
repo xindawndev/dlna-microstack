@@ -20,10 +20,8 @@
 #include "MimeTypes.h"
 #include "UTF8Utils.h"
 
-#if !defined(__SYMBIAN32__)
 #ifndef UNDER_CE
 #include <wchar.h>
-#endif
 #endif
 
 #ifdef _POSIX

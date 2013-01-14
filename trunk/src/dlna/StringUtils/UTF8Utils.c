@@ -11,6 +11,7 @@
  /*
  * Implements additional string functionality.
  */
+
 char* EncodeToUTF8(const char* mbcsStr) 
 { 
 #if defined(WIN32)
@@ -57,4 +58,4 @@ char* DecodeFromUTF8(const char* utf8Str)
 #else
     return(ILibString_Copy(utf8Str, (int)strlen(utf8Str)));
 #endif
-}
+} 

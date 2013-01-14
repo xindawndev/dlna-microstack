@@ -3224,9 +3224,9 @@ void CDS_ObjRef_Add(struct CdsObject *refThis)
 
     ASSERT(refThis != NULL);
 
-    sem_wait(&(refThis->CpInfo.Reserved.ReservedLock));
+    lock_wait(&(refThis->CpInfo.Reserved.ReservedLock));
     refThis->CpInfo.Reserved.ReservedRefCount++;
-    sem_post(&(refThis->CpInfo.Reserved.ReservedLock));
+    lock_post(&(refThis->CpInfo.Reserved.ReservedLock));
 }
 
 void CDS_ObjRef_Release(struct CdsObject *releaseThis)
@@ -3242,7 +3242,7 @@ void CDS_ObjRef_Release(struct CdsObject *releaseThis)
 
     if (releaseThis != NULL)
     {
-        sem_wait(&(releaseThis->CpInfo.Reserved.ReservedLock));
+        lock_wait(&(releaseThis->CpInfo.Reserved.ReservedLock));
         releaseThis->CpInfo.Reserved.ReservedRefCount--;
 
         if (releaseThis->CpInfo.Reserved.ReservedRefCount < 0)
@@ -3257,14 +3257,14 @@ void CDS_ObjRef_Release(struct CdsObject *releaseThis)
                 #endif
             }
 
-            sem_post(&(releaseThis->CpInfo.Reserved.ReservedLock));
+            lock_post(&(releaseThis->CpInfo.Reserved.ReservedLock));
 
             /* destroy the object */
             CDS_DestroyObject(releaseThis);
         }
         else
         {
-            sem_post(&(releaseThis->CpInfo.Reserved.ReservedLock));
+            lock_post(&(releaseThis->CpInfo.Reserved.ReservedLock));
         }
     }
 }

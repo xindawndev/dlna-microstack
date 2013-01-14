@@ -9,3 +9,5 @@ DIRECTORY_SUBS    	:= $(DIRECTORY_SUBS) \
 				boost \
 				framework \
 				util \
+				security \
+				dlna \

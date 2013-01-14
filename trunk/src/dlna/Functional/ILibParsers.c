@@ -1,31 +1,18 @@
-﻿#if defined(__SYMBIAN32__)
-#include <libc\stddef.h>
-#include <libc\sys\types.h>
-#include <libc\sys\socket.h>
-#include <libc\sys\errno.h>
-#include <libc\sys\time.h>
-#include <libc\netinet\in.h>
-#include <libc\arpa\inet.h>
-
-#include "ILibSymbianSemaphore.h"
-#include "ILibSocketWrapper.h"
-#include "ILibChainAdaptor.h"
-#endif
-
 #if defined(WINSOCK2)
-#include <winsock2.h>
-#include <ws2tcpip.h>
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
 #elif defined(WINSOCK1)
-#include <winsock.h>
-#include <wininet.h>
+    #include <winsock.h>
+    #include <wininet.h>
 #endif
 
 #include <time.h>
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
+    #define _CRTDBG_MAP_ALLOC
+    #include <crtdbg.h>
 #endif
+#include "Defines.h"
 #include "ILibParsers.h"
 #define DEBUGSTATEMENT(x)
 #define MINPORTNUMBER 50000
@@ -33,37 +20,42 @@
 #define UPNP_MAX_WAIT 86400    // 24 Hours
 
 #if defined(WIN32) || defined(_WIN32_WCE)
-static sem_t ILibChainLock = { 0 };
+    static lock_t ILibChainLock = { 0 };
 #else
 #    if !defined(ANDROID)
-extern int errno;
+    extern int errno;
 #       else
-int daylight = 0;
-long int timezone = 0;
-char *tzname[2];
+        int daylight = 0;
+        long int timezone = 0;
+        char *tzname[2];
 #    endif
-static sem_t ILibChainLock;
+    static lock_t ILibChainLock;
 #endif
 
-static int ILibChainLock_RefCounter = 0;
-static int malloc_counter = 0;
+#if (defined __MACH__)
+#  include <mach/mach_time.h>
+#endif
 
+
+static int ILibChainLock_RefCounter = 0;
+
+static int malloc_counter = 0;
 void* dbg_malloc(int sz)
 {
     ++malloc_counter;
     return((void*)malloc(sz));
 }
-
 void dbg_free(void* ptr)
 {
     --malloc_counter;
     free(ptr);    
 }
-
 int dbg_GetCount()
 {
     return(malloc_counter);
 }
+
+
 
 //
 // All of the following structures are meant to be private internal structures
@@ -77,13 +69,13 @@ struct ILibQueueNode
 {
     struct ILibStackNode *Head;
     struct ILibStackNode *Tail;
-    sem_t LOCK;
+    lock_t LOCK;
 };
 struct HashNode_Root
 {
     struct HashNode *Root;
     int CaseInSensitive;
-    sem_t LOCK;
+    lock_t LOCK;
 };
 struct HashNode
 {
@@ -108,7 +100,7 @@ struct ILibLinkedListNode
 };
 struct ILibLinkedListNode_Root
 {
-    sem_t LOCK;
+    lock_t LOCK;
     long count;
     struct ILibLinkedListNode *Head;
     struct ILibLinkedListNode *Tail;
@@ -120,15 +112,18 @@ struct ILibReaderWriterLock_Data
     ILibChain_PostSelect Post;
     ILibChain_Destroy Destroy;
 
-    sem_t WriteLock;
-    sem_t ReadLock;
-    sem_t CounterLock;
-    sem_t ExitLock;
+    lock_t WriteLock;
+    lock_t ReadLock;
+    lock_t CounterLock;
+    lock_t ExitLock;
     int ActiveReaders;
     int WaitingReaders;
     int PendingWriters;
     int Exit;
 };
+
+
+
 
 #ifdef WINSOCK2
 int ILibGetLocalIPAddressNetMask(int address)
@@ -140,15 +135,16 @@ int ILibGetLocalIPAddressNetMask(int address)
     int numLocalAddr; 
     int i;
 
+
     if((s = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, 0)) == INVALID_SOCKET)
     {
         fprintf (stderr, "Socket creation failed\n");
-        return(0);
-    }
+         return(0);
+       }
 
     // Enumerate all IP interfaces
     if(WSAIoctl(s, SIO_GET_INTERFACE_LIST, NULL, 0, &localAddr,
-        sizeof(localAddr), &bytesReturned, NULL, NULL) == SOCKET_ERROR)
+                      sizeof(localAddr), &bytesReturned, NULL, NULL) == SOCKET_ERROR)
     {
         fprintf(stderr, "WSAIoctl fails with error %d\n", GetLastError());
         closesocket(s);
@@ -161,7 +157,7 @@ int ILibGetLocalIPAddressNetMask(int address)
     numLocalAddr = (bytesReturned/sizeof(INTERFACE_INFO));
     for (i=0; i<numLocalAddr; i++) 
     {
-
+        
         pAddrInet = (SOCKADDR_IN*)&localAddr[i].iiAddress;
         if(pAddrInet->sin_addr.S_un.S_addr == address)
         {
@@ -182,11 +178,11 @@ char *ILibIPAddress_ToDottedQuad(int ip)
 }
 
 /*! \fn ILibGetLocalIPAddressList(int** pp_int)
-\brief Gets a list of IP Addresses
-\par
-\b NOTE: \a pp_int must be freed
-\param[out] pp_int Array of IP Addresses
-\returns Number of IP Addresses returned
+    \brief Gets a list of IP Addresses
+    \par
+    \b NOTE: \a pp_int must be freed
+    \param[out] pp_int Array of IP Addresses
+    \returns Number of IP Addresses returned
 */
 int ILibGetLocalIPAddressList(int** pp_int)
 {
@@ -248,7 +244,7 @@ int ILibGetLocalIPAddressList(int** pp_int)
     if ((LocalSock = socket (AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
         DEBUGSTATEMENT(printf("Can't do that\r\n"));
-        //    exit(1);// leochen
+    //    exit(1);// leochen
     }
     /* Get the interface configuration information... */
     ifConf.ifc_len = sizeof szBuffer;
@@ -256,7 +252,7 @@ int ILibGetLocalIPAddressList(int** pp_int)
     nResult = ioctl(LocalSock, SIOCGIFCONF, &ifConf);
     if (nResult < 0)
     {
-        perror("ioctl 1");// leochen
+                perror("ioctl 1");// leochen
         DEBUGSTATEMENT(printf("ioctl error\r\n"));
         exit(1);
     }
@@ -265,7 +261,7 @@ int ILibGetLocalIPAddressList(int** pp_int)
     {
         struct ifreq *pifReq = (struct ifreq *)((caddr_t)ifConf.ifc_req + i);
 #if defined(__APPLE__)
-        i += sizeof(pifReq->ifr_name) + ( sizeof( struct sockaddr) > (size_t)pifReq->ifr_addr.sa_len ?sizeof( struct sockaddr) :(size_t)pifReq->ifr_addr.sa_len );
+                i += sizeof(pifReq->ifr_name) + ( sizeof( struct sockaddr) > (size_t)pifReq->ifr_addr.sa_len ?sizeof( struct sockaddr) :(size_t)pifReq->ifr_addr.sa_len );
 #else
         i += sizeof *pifReq;//leochen
 #endif
@@ -298,18 +294,9 @@ int ILibGetLocalIPAddressList(int** pp_int)
     *pp_int = (int*)malloc(sizeof(int)*(ctr));
     memcpy(*pp_int,tempresults,sizeof(int)*ctr);
     return(ctr);
-#elif defined(__SYMBIAN32__)
-    //
-    // The Symbian Way :)
-    //
-    int iplist[16];
-    int ctr;
-    ctr = ILibSocketWrapper_GetLocalIPAddressList(iplist);
-    *pp_int = (int*)malloc(sizeof(int)*(ctr));
-    memcpy(*pp_int,iplist,sizeof(int)*ctr);
-    return(ctr);
 #endif
 }
+
 
 struct ILibChain
 {
@@ -363,11 +350,6 @@ struct ILibBaseChain
     FILE *TerminateReadPipe;
     FILE *TerminateWritePipe;
 #endif
-#if defined(__SYMBIAN32__)
-    void *SymbianAdaptor;
-    ILibOnChainStopped OnChainStoppedHandler;
-    void *OnChainStoppedUserObj;
-#endif
     void *Timer;
     void *Object;
     void *Next;
@@ -385,16 +367,16 @@ char* ILibDecompressString(unsigned char* CurrentCompressed, const int bufferLen
     unsigned char *CurrentUnCompressed = RetVal;
     unsigned char *EndPtr = RetVal + DecompressedLength;
     int offset,length;
-
+    
     do
     {
         /* UnCompressed Data Block */
         memcpy(CurrentUnCompressed,CurrentCompressed+1,(int)*CurrentCompressed);
         MEMCHECK(assert((int)*CurrentCompressed <= (DecompressedLength+1) );)
 
-            CurrentUnCompressed += (int)*CurrentCompressed;
+        CurrentUnCompressed += (int)*CurrentCompressed;
         CurrentCompressed += 1+((int)*CurrentCompressed);
-
+        
         /* CompressedBlock */
 #ifdef REQUIRES_MEMORY_ALIGNMENT
         length = (unsigned short)((*(CurrentCompressed)) & 63);
@@ -406,7 +388,7 @@ char* ILibDecompressString(unsigned char* CurrentCompressed, const int bufferLen
         memcpy(CurrentUnCompressed,CurrentUnCompressed-offset,length);
         MEMCHECK(assert(length <= (DecompressedLength+1)-(CurrentUnCompressed - RetVal));)
 
-            CurrentCompressed += 2;
+        CurrentCompressed += 2;
         CurrentUnCompressed += length;
     } while(CurrentUnCompressed < EndPtr);
     RetVal[DecompressedLength] = 0;
@@ -451,11 +433,11 @@ void ILibChain_SafeRemoveSink(void *object)
     free(data);
 }
 /*! \fn void ILibChain_SafeAdd(void *chain, void *object)
-\brief Dynamically add a link to a chain that is already running.
-\par
-\b Note: All objects added to the chain must extend/implement ILibChain
-\param chain The chain to add the link to
-\param object The link to add to the chain
+    \brief Dynamically add a link to a chain that is already running.
+    \par
+    \b Note: All objects added to the chain must extend/implement ILibChain
+    \param chain The chain to add the link to
+    \param object The link to add to the chain
 */
 void ILibChain_SafeAdd(void *chain, void *object)
 {
@@ -468,15 +450,15 @@ void ILibChain_SafeAdd(void *chain, void *object)
     ILibLifeTime_Add(baseChain->Timer,data,0,&ILibChain_SafeAddSink,&ILibChain_Safe_Destroy);
 }
 /*! \fn void ILibChain_SafeRemove(void *chain, void *object)
-\brief Dynamically remove a link from a chain that is already running.
-\param chain The chain to remove a link from
-\param object The link to remove
+    \brief Dynamically remove a link from a chain that is already running.
+    \param chain The chain to remove a link from
+    \param object The link to remove
 */
 void ILibChain_SafeRemove(void *chain, void *object)
 {
     struct ILibBaseChain *baseChain = (struct ILibBaseChain*)chain;
     struct ILibBaseChain_SafeData *data;
-
+    
     if(ILibIsChainBeingDestroyed(chain)==0)
     {
         data = (struct ILibBaseChain_SafeData*)malloc(sizeof(struct ILibBaseChain_SafeData));
@@ -488,8 +470,8 @@ void ILibChain_SafeRemove(void *chain, void *object)
 }
 
 /*! \fn ILibCreateChain()
-\brief Creates an empty Chain
-\returns Chain
+    \brief Creates an empty Chain
+    \returns Chain
 */
 void *ILibCreateChain()
 {
@@ -498,44 +480,41 @@ void *ILibCreateChain()
 #if defined(WIN32) || defined(_WIN32_WCE)
     WORD wVersionRequested;
     WSADATA wsaData;
-#ifdef WINSOCK1
-    wVersionRequested = MAKEWORD( 1, 1 );    
-#elif WINSOCK2
-    wVersionRequested = MAKEWORD( 2, 0 );
-#endif
+    #ifdef WINSOCK1
+        wVersionRequested = MAKEWORD( 1, 1 );    
+    #elif WINSOCK2
+        wVersionRequested = MAKEWORD( 2, 0 );
+    #endif
     if (WSAStartup( wVersionRequested, &wsaData ) != 0) {exit(1);}
 #endif
-    memset(RetVal, 0, sizeof(struct ILibBaseChain));
+    memset(RetVal,0,sizeof(struct ILibBaseChain));
     srand((unsigned int)time(NULL));
-
+    
     RetVal->Object = NULL;
     RetVal->Next = NULL;
     RetVal->TerminateFlag = 0;
 #if defined(WIN32) || defined(_WIN32_WCE)
     RetVal->Terminate = socket(AF_INET, SOCK_DGRAM, 0);
 #endif
-
-    if(ILibChainLock_RefCounter == 0)
+    
+    if(ILibChainLock_RefCounter==0)
     {
-        sem_init(&ILibChainLock, 0, 1);
+        lock_init(&ILibChainLock,0,1);
     }
     ILibChainLock_RefCounter++;
 
     RetVal->Timer = ILibCreateLifeTime(RetVal);
-
-#if defined(__SYMBIAN32__)
-    ILibSocketWrapper_Create();
-#endif
+    
     return(RetVal);
 }
 
 /*! \fn ILibAddToChain(void *Chain, void *object)
-\brief Add links to the chain
-\par
-\b Notes:
-<P>      Do <B>NOT</B> use this method to add a link to a chain that is already running.<br> All objects added to the chain must extend/implement ILibChain.
-\param Chain The chain to add the link to
-\param object The link to add to the chain
+    \brief Add links to the chain
+    \par
+    \b Notes:
+    <P>      Do <B>NOT</B> use this method to add a link to a chain that is already running.<br> All objects added to the chain must extend/implement ILibChain.
+    \param Chain The chain to add the link to
+    \param object The link to add to the chain
 */
 void ILibAddToChain(void *Chain, void *object)
 {
@@ -558,8 +537,8 @@ void ILibAddToChain(void *Chain, void *object)
 }
 
 /*! \fn ILibForceUnBlockChain(void *Chain)
-\brief Forces a Chain to unblock, and check for pending operations
-\param Chain The chain to unblock
+    \brief Forces a Chain to unblock, and check for pending operations
+    \param Chain The chain to unblock
 */
 void ILibForceUnBlockChain(void *Chain)
 {
@@ -568,8 +547,8 @@ void ILibForceUnBlockChain(void *Chain)
 #if defined(WIN32) || defined(_WIN32_WCE)
     SOCKET temp;
 #endif
-    sem_wait(&ILibChainLock);
-
+    lock_wait(&ILibChainLock);
+    
 #if defined(WIN32) || defined(_WIN32_WCE)
     //
     // Closing the socket will trigger the select on Windows
@@ -577,8 +556,6 @@ void ILibForceUnBlockChain(void *Chain)
     temp = c->Terminate;
     c->Terminate = ~0;
     closesocket(temp);
-#elif defined(__SYMBIAN32__)
-    ILibChainAdaptor_ForceUnBlock(c->SymbianAdaptor);    
 #else
     //
     // Writing data on the pipe will trigger the select on Posix
@@ -589,18 +566,18 @@ void ILibForceUnBlockChain(void *Chain)
         fflush(c->TerminateWritePipe);
     }
 #endif
-    sem_post(&ILibChainLock);
+    lock_post(&ILibChainLock);
 }
 void ILibChain_SubChain_Destroy(void *object)
 {
     struct ILibChain_SubChain *c = (struct ILibChain_SubChain*)object;
     struct ILibBaseChain *baseChain,*temp;
-
+        
     //
     // Now we actually free the chain
     //
     baseChain = (struct ILibBaseChain*)c->subChain;
-#if !defined(WIN32) && !defined(_WIN32_WCE) && !defined(__SYMBIAN32__)
+#if !defined(WIN32) && !defined(_WIN32_WCE)
     //
     // Free the pipe resources
     //
@@ -627,17 +604,17 @@ void ILibChain_SubChain_Destroy(void *object)
 #endif
     if(ILibChainLock_RefCounter==1)
     {
-        sem_destroy(&ILibChainLock);
+        lock_destroy(&ILibChainLock);
     }
     --ILibChainLock_RefCounter;    
 }
 /*! \fn void ILibChain_SafeAdd_SubChain(void *chain, void *subChain)
-\brief Dynamically add an entire chain, as a subchain to an existing chain that is already running
-\par
-\b Note: After adding a subchain, you cannot add more links/chains to the subchain. You can however, continue to
-add more links/subchains to the parent chain.
-\param chain The chain to add the subchain to
-\param subChain The subchain to add to the chain
+    \brief Dynamically add an entire chain, as a subchain to an existing chain that is already running
+    \par
+    \b Note: After adding a subchain, you cannot add more links/chains to the subchain. You can however, continue to
+    add more links/subchains to the parent chain.
+    \param chain The chain to add the subchain to
+    \param subChain The subchain to add to the chain
 */
 void ILibChain_SafeAdd_SubChain(void *chain, void *subChain)
 {
@@ -647,9 +624,6 @@ void ILibChain_SafeAdd_SubChain(void *chain, void *subChain)
     memset(c,0,sizeof(struct ILibChain_SubChain));
     c->Destroy = &ILibChain_SubChain_Destroy;
 
-#if defined(__SYMBIAN32__)
-    newChain->SymbianAdaptor = ((struct ILibBaseChain*)chain)->SymbianAdaptor;
-#endif
     newChain->RunningFlag = ((struct ILibBaseChain*)chain)->RunningFlag;
 
     newChain->Reserved = c;
@@ -662,9 +636,9 @@ void ILibChain_SafeAdd_SubChain(void *chain, void *subChain)
     ILibChain_SafeAdd(chain,c);
 }
 /*! \fn void ILibChain_SafeRemove_SubChain(void *chain, void *subChain)
-\brief Dynamically removes a subchain from an existing chain that is already running
-\param chain The chain to remove the subchain from
-\param subChain The subchain to remove
+    \brief Dynamically removes a subchain from an existing chain that is already running
+    \param chain The chain to remove the subchain from
+    \param subChain The subchain to remove
 */
 void ILibChain_SafeRemove_SubChain(void *chain, void *subChain)
 {
@@ -673,24 +647,24 @@ void ILibChain_SafeRemove_SubChain(void *chain, void *subChain)
     void *temp;
 
 #if defined(WIN32)
-    if(newChain->Terminate!=~0)
-    {
-        closesocket(newChain->Terminate);
-        newChain->Terminate = ~0;
-    }
+        if(newChain->Terminate!=~0)
+        {
+            closesocket(newChain->Terminate);
+            newChain->Terminate = ~0;
+        }
 #endif
 #if !defined(WIN32) && !defined(_WIN32_WCE)
     //
     // Free the pipe resources
     //
-    if(newChain->TerminateReadPipe!=NULL)
-    {
-        fclose(newChain->TerminateReadPipe);
-    }
-    if(newChain->TerminateWritePipe!=NULL)
-    {
-        fclose(newChain->TerminateWritePipe);
-    }
+        if(newChain->TerminateReadPipe!=NULL)
+        {
+            fclose(newChain->TerminateReadPipe);
+        }
+        if(newChain->TerminateWritePipe!=NULL)
+        {
+            fclose(newChain->TerminateWritePipe);
+        }
 #endif
 
     while(newChain!=NULL && newChain->Object!=NULL)
@@ -706,11 +680,11 @@ void ILibChain_SafeRemove_SubChain(void *chain, void *subChain)
     }
 }
 /*! \fn void ILibChain_DestroyEx(void *subChain)
-\brief Destroys a chain or subchain that was never started.
-\par
-<B>Do NOT</B> call this on a chain that is running, or has been stopped.
-<br><B>Do NOT</B> call this on a subchain that was already added to another chain.
-\param subChain The chain or subchain to destroy
+    \brief Destroys a chain or subchain that was never started.
+    \par
+    <B>Do NOT</B> call this on a chain that is running, or has been stopped.
+    <br><B>Do NOT</B> call this on a subchain that was already added to another chain.
+    \param subChain The chain or subchain to destroy
 */
 void ILibChain_DestroyEx(void *subChain)
 {
@@ -731,192 +705,56 @@ void ILibChain_DestroyEx(void *subChain)
         newChain = temp;
     }
 }
-#if defined(__SYMBIAN32__)
-void ILibChain_OnPreSelect(void *sender)
-{
-    void *Chain = ILibChainAdaptor_GetChain(sender);
-    struct ILibBaseChain *c = (struct ILibBaseChain*)Chain;
-    struct timeval tv;
-    int slct;
-    int v;
-    void *temp;
-    void *SymbianAdaptor = NULL;
-    ILibOnChainStopped OnStopped = c->OnChainStoppedHandler;
-    void *user = c->OnChainStoppedUserObj;
-
-    ILibSocketWrapper_struct_FDSET readset;
-    ILibSocketWrapper_struct_FDSET errorset;
-    ILibSocketWrapper_struct_FDSET writeset;
-
-    ILibSocketWrapper_FDZERO(&readset);
-    ILibSocketWrapper_FDZERO(&errorset);
-    ILibSocketWrapper_FDZERO(&writeset);
-
-    slct = 0;
-
-    tv.tv_sec = UPNP_MAX_WAIT;
-    tv.tv_usec = 0;
-
-    //
-    // Iterate through all the PreSelect function pointers in the chain
-    //
-    c = (struct ILibBaseChain*)Chain;
-    while(c!=NULL && c->Object!=NULL)
-    {
-        if(((struct ILibChain*)c->Object)->PreSelect!=NULL)
-        {
-            v = (tv.tv_sec*1000) + (tv.tv_usec/1000);
-            ((struct ILibChain*)c->Object)->PreSelect(c->Object,&readset,&writeset,&errorset,&v);
-            tv.tv_sec = v/1000;
-            tv.tv_usec = 1000*(v%1000);
-        }
-        c = c->Next;
-    }
-
-    if(((struct ILibBaseChain*)Chain)->TerminateFlag==0)
-    {
-        ILibChainAdaptor_Select(sender, &readset, &writeset, &errorset, v);
-    }
-    else
-    {
-        //
-        // Quitting Time
-        //
-        SymbianAdaptor = ((struct ILibBaseChain*)Chain)->SymbianAdaptor;
-
-        //
-        // This loop will start, when the Chain was signaled to quit. Clean up the chain
-        // by iterating through all the Destroy.
-        //
-        c = (struct ILibBaseChain*)Chain;
-        while(c!=NULL && c->Object!=NULL)
-        {
-            if(((struct ILibChain*)c->Object)->Destroy!=NULL)
-            {
-                ((struct ILibChain*)c->Object)->Destroy(c->Object);
-            }
-            //
-            // After calling the Destroy, we free the link
-            //
-            free(c->Object);
-            c = c->Next;
-        }
-        ILibSocketWrapper_Destroy();
-
-        //
-        // Now we actually free the chain
-        //
-        c = (struct ILibBaseChain*)Chain;
-        while(c!=NULL)
-        {
-            temp = c->Next;
-            free(c);
-            c = temp;
-        }
-        if(ILibChainLock_RefCounter==1)
-        {
-            sem_destroy(&ILibChainLock);
-        }
-        --ILibChainLock_RefCounter;
-
-        ILibChainAdaptor_StopChain(SymbianAdaptor);
-    }
-    if(OnStopped!=NULL)
-    {
-        OnStopped(user);
-    }
-}
-void ILibChain_OnPostSelect(void* sender, void *fds_read, void *fds_write, void *fds_error)
-{
-    void *Chain = ILibChainAdaptor_GetChain(sender);
-    struct ILibBaseChain *c = (struct ILibBaseChain*)Chain;
-
-    //
-    // Iterate through all of the PostSelect in the chain
-    //
-    c = (struct ILibBaseChain*)Chain;
-    while(c!=NULL && c->Object!=NULL)
-    {
-        if(((struct ILibChain*)c->Object)->PostSelect!=NULL)
-        {
-            ((struct ILibChain*)c->Object)->PostSelect(c->Object,1,fds_read,fds_write,fds_error);
-        }
-        c = c->Next;
-    }    
-}
-void ILibChain_OnDestroy(void *sender)
-{
-}
-#endif
 /*! \fn ILibStartChain(void *Chain)
-\brief Starts a Chain
-\par
-This method will use the current thread. This thread will be refered to as the
-microstack thread. All events and processing will be done on this thread. This method
-will not return until ILibStopChain is called.
-\param Chain The chain to start
+    \brief Starts a Chain
+    \par
+    This method will use the current thread. This thread will be refered to as the
+    microstack thread. All events and processing will be done on this thread. This method
+    will not return until ILibStopChain is called.
+    \param Chain The chain to start
 */
 void ILibStartChain(void *Chain)
 {
     struct ILibBaseChain *c = (struct ILibBaseChain*)Chain;
     struct ILibBaseChain *temp;
-
-#if defined(__SYMBIAN32__)
-    ILibSocketWrapper_struct_FDSET readset;
-    ILibSocketWrapper_struct_FDSET errorset;
-    ILibSocketWrapper_struct_FDSET writeset;
-    void *ChainAdaptor = ILibChainAdaptor_CreateChainAdaptor(Chain);
-#else
-    fd_set readset;
-    fd_set errorset;
-    fd_set writeset;
-#endif
-
+        fd_set readset;
+        fd_set errorset;
+        fd_set writeset;
+    
     struct timeval tv;
     int slct;
     int v;
-
-#if !defined(__SYMBIAN32__)
-#if !defined(WIN32) && !defined(_WIN32_WCE)
-    int TerminatePipe[2];
-    int flags;
-#endif
-#endif
+    
+    #if !defined(WIN32) && !defined(_WIN32_WCE)
+        int TerminatePipe[2];
+        int flags;
+    #endif
     srand((unsigned int)time(NULL));
-
-#if defined(__SYMBIAN32__)
-    c->SymbianAdaptor = ChainAdaptor;
-    ILibChainAdaptor_StartChain(ChainAdaptor, &ILibChain_OnPreSelect, &ILibChain_OnPostSelect, &ILibChain_OnDestroy);
-    //ToDo: The fact that we are returning, and not blocking may cause problems, so we
-    //        need to investigate this further. 
-    return;
-#endif
-
+    
+    printf("________________[StartChain ]________________\n|       Svn sub version: %s          |\n|____________________________________________|\n", SVN_SUB_VER);
+    
     //
     // Use this thread as if it's our own. Keep looping until we are signaled to stop
     //
     FD_ZERO(&readset);
     FD_ZERO(&errorset);
     FD_ZERO(&writeset);
-
-#if !defined(__SYMBIAN32__)
-#if !defined(WIN32) && !defined(_WIN32_WCE)
-    // 
-    // For posix, we need to use a pipe to force unblock the select loop
-    //
-    pipe(TerminatePipe);
-    flags = fcntl(TerminatePipe[0],F_GETFL,0);
-    //
-    // We need to set the pipe to nonblock, so we can blindly empty the pipe
-    //
-    fcntl(TerminatePipe[0],F_SETFL,O_NONBLOCK|flags);
-    ((struct ILibBaseChain*)Chain)->TerminateReadPipe = fdopen(TerminatePipe[0],"r");
-    ((struct ILibBaseChain*)Chain)->TerminateWritePipe = fdopen(TerminatePipe[1],"w");
-#endif
-#endif
-
-    ((struct ILibBaseChain*)Chain)->RunningFlag = 1;
-    while(((struct ILibBaseChain*)Chain)->TerminateFlag == 0)
+    
+    #if !defined(WIN32) && !defined(_WIN32_WCE)
+        // 
+        // For posix, we need to use a pipe to force unblock the select loop
+        //
+        pipe(TerminatePipe);
+        flags = fcntl(TerminatePipe[0],F_GETFL,0);
+        //
+        // We need to set the pipe to nonblock, so we can blindly empty the pipe
+        //
+        fcntl(TerminatePipe[0],F_SETFL,O_NONBLOCK|flags);
+        ((struct ILibBaseChain*)Chain)->TerminateReadPipe = fdopen(TerminatePipe[0],"r");
+        ((struct ILibBaseChain*)Chain)->TerminateWritePipe = fdopen(TerminatePipe[1],"w");
+    #endif
+    ((struct ILibBaseChain*)Chain)->RunningFlag=1;
+    while(((struct ILibBaseChain*)Chain)->TerminateFlag==0)
     {
         slct = 0;
         FD_ZERO(&readset);
@@ -924,8 +762,10 @@ void ILibStartChain(void *Chain)
         FD_ZERO(&writeset);
         tv.tv_sec = UPNP_MAX_WAIT;
         tv.tv_usec = 0;
-
+        
+        //
         // Iterate through all the PreSelect function pointers in the chain
+        //
         c = (struct ILibBaseChain*)Chain;
         while(c!=NULL && c->Object!=NULL)
         {
@@ -948,12 +788,15 @@ void ILibStartChain(void *Chain)
 #endif
             }
             c = c->Next;
+            
         }
 
-        sem_wait(&ILibChainLock);
+        lock_wait(&ILibChainLock);
 #if defined(WIN32) || defined(_WIN32_WCE)
+        //
         // Check the fake socket, for ILibForceUnBlockChain
-        if(((struct ILibBaseChain*)Chain)->Terminate == ~0)
+        //
+        if(((struct ILibBaseChain*)Chain)->Terminate==~0)
         {
             slct = -1;
         }
@@ -961,42 +804,46 @@ void ILibStartChain(void *Chain)
         {
             FD_SET(((struct ILibBaseChain*)Chain)->Terminate,&errorset);
         }
-#elif !defined(__SYMBIAN32__)
+#else
         //
         // Put the Read end of the Pipe in the FDSET, for ILibForceUnBlockChain
         //
         FD_SET(TerminatePipe[0],&readset);
 #endif
-        sem_post(&ILibChainLock);
+        lock_post(&ILibChainLock);
 
         //
         // If this flag is set, force the max block time to be zero
         //
-        if(slct != 0)
+        if(slct!=0)
         {
             tv.tv_sec = 0;
             tv.tv_usec = 0;
         }
 
+        //
         // The actual Select Statement
-#if !defined(__SYMBIAN32__)
-        slct = select(FD_SETSIZE, &readset, &writeset, &errorset, &tv);
-#endif
-        if(slct == -1)
+        //
+        slct = select(FD_SETSIZE,&readset,&writeset,&errorset,&tv);
+        if(slct==-1)
         {
+            //
             // If the select simply timed out, we need to clear these sets
+            //
             FD_ZERO(&readset);
             FD_ZERO(&writeset);
             FD_ZERO(&errorset);
         }
-
+        
 #if defined(WIN32) || defined(_WIN32_WCE)
+        //
         // Reinitialise our fake socket if necessary
+        //
         if(((struct ILibBaseChain*)Chain)->Terminate==~0)
         {
             ((struct ILibBaseChain*)Chain)->Terminate = socket(AF_INET,SOCK_DGRAM,0);
         }
-#elif !defined(__SYMBIAN32__)
+#else
         if(FD_ISSET(TerminatePipe[0],&readset))
         {
             //
@@ -1028,11 +875,15 @@ void ILibStartChain(void *Chain)
 #endif
             }
             c = c->Next;
+            
         }
+        
     }
 
+    //
     // This loop will start, when the Chain was signaled to quit. Clean up the chain
     // by iterating through all the Destroy.
+    //
     c = (struct ILibBaseChain*)Chain;
     while(c!=NULL && c->Object!=NULL)
     {
@@ -1043,11 +894,13 @@ void ILibStartChain(void *Chain)
         //
         // After calling the Destroy, we free the link
         //
-        freesafe(c->Object);
+        Safefree(c->Object);
         c = c->Next;
     }
-
+    
+    //
     // Now we actually free the chain
+    //
     c = (struct ILibBaseChain*)Chain;
 #if !defined(WIN32) && !defined(_WIN32_WCE)
     //
@@ -1059,13 +912,13 @@ void ILibStartChain(void *Chain)
     c->TerminateWritePipe=0;
 #endif
 #if defined(WIN32)
-    if(c->Terminate != ~0)
+    if(c->Terminate!=~0)
     {
         closesocket(c->Terminate);
         c->Terminate = ~0;
     }
 #endif
-    while(c != NULL)
+    while(c!=NULL)
     {
         temp = c->Next;
         free(c);
@@ -1076,34 +929,27 @@ void ILibStartChain(void *Chain)
 #endif
     if(ILibChainLock_RefCounter==1)
     {
-        sem_destroy(&ILibChainLock);
+        lock_destroy(&ILibChainLock);
     }
     --ILibChainLock_RefCounter;
 }
 
 /*! \fn ILibStopChain(void *Chain)
-\brief Stops a chain
-\par
-This will signal the microstack thread to shutdown. When the chain cleans itself up, 
-the thread that is blocked on ILibStartChain will return.
-\param Chain The Chain to stop
+    \brief Stops a chain
+    \par
+    This will signal the microstack thread to shutdown. When the chain cleans itself up, 
+    the thread that is blocked on ILibStartChain will return.
+    \param Chain The Chain to stop
 */
 void ILibStopChain(void *Chain)
 {
     ((struct ILibBaseChain*)Chain)->TerminateFlag = 1;
     ILibForceUnBlockChain(Chain);
 }
-#if defined(__SYMBIAN32__)
-void ILibChain_SetOnStoppedHandler(void *chain, void *user, ILibOnChainStopped Handler)
-{
-    ((struct ILibBaseChain*)chain)->OnChainStoppedHandler = Handler;
-    ((struct ILibBaseChain*)chain)->OnChainStoppedUserObj = user;
-}
-#endif
 
 /*! \fn ILibDestructXMLNodeList(struct ILibXMLNode *node)
-\brief Frees resources from an XMLNodeList tree that was returned from ILibParseXML
-\param node The XML Tree to clean up
+    \brief Frees resources from an XMLNodeList tree that was returned from ILibParseXML
+    \param node The XML Tree to clean up
 */
 void ILibDestructXMLNodeList(struct ILibXMLNode *node)
 {
@@ -1122,8 +968,8 @@ void ILibDestructXMLNodeList(struct ILibXMLNode *node)
 }
 
 /*! \fn ILibDestructXMLAttributeList(struct ILibXMLAttribute *attribute)
-\brief Frees resources from an AttributeList that was returned from ILibGetXMLAttributes
-\param attribute The Attribute Tree to clean up
+    \brief Frees resources from an AttributeList that was returned from ILibGetXMLAttributes
+    \param attribute The Attribute Tree to clean up
 */
 void ILibDestructXMLAttributeList(struct ILibXMLAttribute *attribute)
 {
@@ -1137,12 +983,12 @@ void ILibDestructXMLAttributeList(struct ILibXMLAttribute *attribute)
 }
 
 /*! \fn ILibProcessXMLNodeList(struct ILibXMLNode *nodeList)
-\brief Pro-process an XML node list
-\par
-Checks XML for validity, while at the same time populate helper properties on each node,
-such as Parent, Peer, etc, to aid in XML parsing.
-\param nodeList The XML Tree to process
-\returns 0 if the XML is valid, nonzero otherwise
+    \brief Pro-process an XML node list
+    \par
+    Checks XML for validity, while at the same time populate helper properties on each node,
+    such as Parent, Peer, etc, to aid in XML parsing.
+    \param nodeList The XML Tree to process
+    \returns 0 if the XML is valid, nonzero otherwise
 */
 int ILibProcessXMLNodeList(struct ILibXMLNode *nodeList)
 {
@@ -1150,9 +996,9 @@ int ILibProcessXMLNodeList(struct ILibXMLNode *nodeList)
     struct ILibXMLNode *current = nodeList;
     struct ILibXMLNode *temp;
     void *TagStack;
-
+    
     ILibCreateStack(&TagStack);
-
+    
     //
     // Iterate through the node list, and setup all the pointers
     // such that all StartElements have pointers to EndElements,
@@ -1226,7 +1072,7 @@ int ILibProcessXMLNodeList(struct ILibXMLNode *nodeList)
         }
         current = current->Next;
     }
-
+    
     //
     // If there are still elements in the stack, that means not all the StartElements
     // have associated EndElements, which means this XML is not valid XML.
@@ -1237,16 +1083,16 @@ int ILibProcessXMLNodeList(struct ILibXMLNode *nodeList)
         RetVal = -3;
         ILibClearStack(&TagStack);
     }
-
+    
     return(RetVal);
 }
 
 /*! \fn ILibXML_LookupNamespace(struct ILibXMLNode *currentLocation, char *prefix, int prefixLength)
-\brief Resolves a namespace prefix from the scope of the given node
-\param currentLocation The node used to start the resolve
-\param prefix The namespace prefix to resolve
-\param prefixLength The lenght of the prefix
-\returns The resolved namespace. NULL if unable to resolve
+    \brief Resolves a namespace prefix from the scope of the given node
+    \param currentLocation The node used to start the resolve
+    \param prefix The namespace prefix to resolve
+    \param prefixLength The lenght of the prefix
+    \returns The resolved namespace. NULL if unable to resolve
 */
 char* ILibXML_LookupNamespace(struct ILibXMLNode *currentLocation, char *prefix, int prefixLength)
 {
@@ -1292,8 +1138,8 @@ char* ILibXML_LookupNamespace(struct ILibXMLNode *currentLocation, char *prefix,
 }
 
 /*! \fn ILibXML_BuildNamespaceLookupTable(struct ILibXMLNode *node)
-\brief Builds the lookup table used by ILibXML_LookupNamespace
-\param node This node will be the highest scoped
+    \brief Builds the lookup table used by ILibXML_LookupNamespace
+    \param node This node will be the highest scoped
 */
 void ILibXML_BuildNamespaceLookupTable(struct ILibXMLNode *node)
 {
@@ -1343,12 +1189,12 @@ void ILibXML_BuildNamespaceLookupTable(struct ILibXMLNode *node)
 
 
 /*! \fn ILibReadInnerXML(struct ILibXMLNode *node, char **RetVal)
-\brief Reads the data segment from an ILibXMLNode
-\par
-The data is a pointer into the original string that the XML was read from.
-\param node The node to read the data from
-\param[out] RetVal The data
-\returns The length of the data read
+    \brief Reads the data segment from an ILibXMLNode
+    \par
+    The data is a pointer into the original string that the XML was read from.
+    \param node The node to read the data from
+    \param[out] RetVal The data
+    \returns The length of the data read
 */
 int ILibReadInnerXML(struct ILibXMLNode *node, char **RetVal)
 {
@@ -1356,7 +1202,7 @@ int ILibReadInnerXML(struct ILibXMLNode *node, char **RetVal)
     int length = 0;
     void *TagStack;
     *RetVal = NULL;
-
+    
     //
     // Starting with the current StartElement, we use this stack to find the matching
     // EndElement, so we can figure out what we need to return
@@ -1372,14 +1218,14 @@ int ILibReadInnerXML(struct ILibXMLNode *node, char **RetVal)
         if(x->StartTag!=0) {ILibPushStack(&TagStack,x);}
 
         x = x->Next;
-
+        
         if(x==NULL)
         {
             ILibClearStack(&TagStack);
             return(0);
         }
     }while(!(x->StartTag==0 && ILibPopStack(&TagStack)==node && x->NameLength==node->NameLength && memcmp(x->Name,node->Name,node->NameLength)==0));
-
+    
     //
     // The Reserved fields of the StartElement and EndElement are used as pointers representing
     // the data segment of the XML
@@ -1391,9 +1237,9 @@ int ILibReadInnerXML(struct ILibXMLNode *node, char **RetVal)
 }
 
 /*! \fn ILibGetXMLAttributes(struct ILibXMLNode *node)
-\brief Reads the attributes from an XML node
-\param node The node to read the attributes from
-\returns A linked list of attributes
+    \brief Reads the attributes from an XML node
+    \param node The node to read the attributes from
+    \returns A linked list of attributes
 */
 struct ILibXMLAttribute *ILibGetXMLAttributes(struct ILibXMLNode *node)
 {
@@ -1403,12 +1249,12 @@ struct ILibXMLAttribute *ILibGetXMLAttributes(struct ILibXMLNode *node)
     int EndReserved = (node->EmptyTag==0)?1:2;
     int i;
     int CheckName = node->Name[node->NameLength]==0?1:0;
-
+    
     struct parser_result *xml;
     struct parser_result_field *field,*field2;
     struct parser_result *temp2;
     struct parser_result *temp3;
-
+    
 
     //
     // The reserved field is used to show where the data segments start and stop. We
@@ -1425,7 +1271,7 @@ struct ILibXMLAttribute *ILibGetXMLAttributes(struct ILibXMLNode *node)
         c = c -1;
     }
     c = c +1;
-
+    
     //
     // Now that we isolated the string in between the '<' and the '>' we can parse the
     // string as delimited by ' ', because thats what delineates attributes. We need
@@ -1559,7 +1405,7 @@ struct ILibXMLAttribute *ILibGetXMLAttributes(struct ILibXMLNode *node)
         }
         field = field->NextResult;
     }
-
+    
     ILibDestructParserResults(xml);
     if(CheckName)
     {
@@ -1569,13 +1415,13 @@ struct ILibXMLAttribute *ILibGetXMLAttributes(struct ILibXMLNode *node)
 }
 
 /*! \fn ILibParseXML(char *buffer, int offset, int length)
-\brief Parses an XML string.
-\par
-The strings are never copied. Everything is referenced via pointers into the original buffer
-\param buffer The string to parse
-\param offset starting index of \a buffer
-\param length Length of \a buffer
-\returns A tree of ILibXMLNodes, representing the XML document
+    \brief Parses an XML string.
+    \par
+    The strings are never copied. Everything is referenced via pointers into the original buffer
+    \param buffer The string to parse
+    \param offset starting index of \a buffer
+    \param length Length of \a buffer
+    \returns A tree of ILibXMLNodes, representing the XML document
 */
 struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
 {
@@ -1589,11 +1435,11 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
     int EmptyTag;
     int i;
     int wsi;
-
+    
     struct ILibXMLNode *RetVal = NULL;
     struct ILibXMLNode *current = NULL;
     struct ILibXMLNode *x = NULL;
-
+    
     char *NSTag;
     int NSTagLength;
 
@@ -1714,7 +1560,7 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
                 TagNameLength = temp3->FirstResult->NextResult->datalength;
             }
             ILibDestructParserResults(temp3);
-
+            
             //
             // Iterate through the tag name, to figure out what the exact length is, as
             // well as check to see if its an empty element
@@ -1734,7 +1580,7 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
                     }
                 }
             }
-
+            
             if(TagNameLength!=0)
             {
                 //
@@ -1747,7 +1593,7 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
                 x->StartTag = StartTag;
                 x->NSTag = NSTag;
                 x->NSLength = NSTagLength;                
-
+                
                 if(StartTag==0)
                 {
                     //
@@ -1767,7 +1613,7 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
                     //
                     x->Reserved = temp2->LastResult->data;
                 }
-
+                
                 if(RetVal==NULL)
                 {
                     RetVal = x;
@@ -1789,26 +1635,26 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
                     x->NameLength = TagNameLength;
                     x->NSTag = NSTag;
                     x->NSLength = NSTagLength;
-
+                                        
                     x->Reserved = current->Reserved;
                     current->EmptyTag = -1;
                     current->Next = x;
                     current = x;
                 }
             }
-
+            
             ILibDestructParserResults(temp2);
         }
         field = field->NextResult;
     }
-
+    
     ILibDestructParserResults(xml);
     return(RetVal);
 }
 
 /*! \fn ILibQueue_Create()
-\brief Create an empty Queue
-\returns An empty queue
+    \brief Create an empty Queue
+    \returns An empty queue
 */
 void *ILibQueue_Create()
 {
@@ -1816,8 +1662,8 @@ void *ILibQueue_Create()
 }
 
 /*! \fn ILibQueue_Lock(void *q)
-\brief Locks a queue
-\param q The queue to lock
+    \brief Locks a queue
+    \param q The queue to lock
 */
 void ILibQueue_Lock(void *q)
 {
@@ -1825,8 +1671,8 @@ void ILibQueue_Lock(void *q)
 }
 
 /*! \fn ILibQueue_UnLock(void *q)
-\brief Unlocks a queue
-\param q The queue to unlock
+    \brief Unlocks a queue
+    \param q The queue to unlock
 */
 void ILibQueue_UnLock(void *q)
 {
@@ -1834,8 +1680,8 @@ void ILibQueue_UnLock(void *q)
 }
 
 /*! \fn ILibQueue_Destroy(void *q)
-\brief Frees the resources associated with a queue
-\param q The queue to free
+    \brief Frees the resources associated with a queue
+    \param q The queue to free
 */
 void ILibQueue_Destroy(void *q)
 {
@@ -1843,9 +1689,9 @@ void ILibQueue_Destroy(void *q)
 }
 
 /*! \fn ILibQueue_IsEmpty(void *q)
-\brief Checks to see if a queue is empty
-\param q The queue to check
-\returns zero value if not empty, non-zero if empty
+    \brief Checks to see if a queue is empty
+    \param q The queue to check
+    \returns zero value if not empty, non-zero if empty
 */
 int ILibQueue_IsEmpty(void *q)
 {
@@ -1853,18 +1699,18 @@ int ILibQueue_IsEmpty(void *q)
 }
 
 /*! \fn ILibQueue_EnQueue(void *q, void *data)
-\brief Add an item to the queue
-\param q The queue to add to
-\param data The data to add to the queue
+    \brief Add an item to the queue
+    \param q The queue to add to
+    \param data The data to add to the queue
 */
 void ILibQueue_EnQueue(void *q, void *data)
 {
     ILibLinkedList_AddTail(q,data);
 }
 /*! \fn ILibQueue_DeQueue(void *q)
-\brief Removes an item from the queue
-\param q The queue to pop the item from
-\returns The item popped off the queue. NULL if empty
+    \brief Removes an item from the queue
+    \param q The queue to pop the item from
+    \returns The item popped off the queue. NULL if empty
 */
 void *ILibQueue_DeQueue(void *q)
 {
@@ -1881,9 +1727,9 @@ void *ILibQueue_DeQueue(void *q)
 }
 
 /*! \fn ILibQueue_PeekQueue(void *q)
-\brief Peeks at an item from the queue
-\param q The queue to peek an item from
-\returns The item from the queue. NULL if empty
+    \brief Peeks at an item from the queue
+    \param q The queue to peek an item from
+    \returns The item from the queue. NULL if empty
 */
 void *ILibQueue_PeekQueue(void *q)
 {
@@ -1899,9 +1745,9 @@ void *ILibQueue_PeekQueue(void *q)
 }
 
 /*! \fn ILibQueue_GetCount(void *q)
-\brief Returns the number of items in the queue.
-\param q The queue to query
-\returns The item count in the queue.
+    \brief Returns the number of items in the queue.
+    \param q The queue to query
+    \returns The item count in the queue.
 */
 long ILibQueue_GetCount(void *q)
 {
@@ -1909,14 +1755,14 @@ long ILibQueue_GetCount(void *q)
 }
 
 /*! \fn ILibCreateStack(void **TheStack)
-\brief Creates an empty Stack
-\par
-This module uses a void* that is preinitialized to NULL, eg:<br>
-<i>
-void *stack = NULL;<br>
-ILibCreateStack(&stack);<br>
-</i>
-\param TheStack A void* to use for the stack. Simply pass in a void* by reference
+    \brief Creates an empty Stack
+    \par
+    This module uses a void* that is preinitialized to NULL, eg:<br>
+    <i>
+    void *stack = NULL;<br>
+    ILibCreateStack(&stack);<br>
+    </i>
+    \param TheStack A void* to use for the stack. Simply pass in a void* by reference
 */
 void ILibCreateStack(void **TheStack)
 {
@@ -1924,9 +1770,9 @@ void ILibCreateStack(void **TheStack)
 }
 
 /*! \fn ILibPushStack(void **TheStack, void *data)
-\brief Push an item onto the stack
-\param TheStack The stack to push to
-\param data The data to push onto the stack
+    \brief Push an item onto the stack
+    \param TheStack The stack to push to
+    \param data The data to push onto the stack
 */
 void ILibPushStack(void **TheStack, void *data)
 {
@@ -1937,9 +1783,9 @@ void ILibPushStack(void **TheStack, void *data)
 }
 
 /*! \fn ILibPopStack(void **TheStack)
-\brief Pop an item from the stack
-\param TheStack The stack to pop from
-\returns The item that was popped from the stack
+    \brief Pop an item from the stack
+    \param TheStack The stack to pop from
+    \returns The item that was popped from the stack
 */
 void *ILibPopStack(void **TheStack)
 {
@@ -1956,9 +1802,9 @@ void *ILibPopStack(void **TheStack)
 }
 
 /*! \fn ILibPeekStack(void **TheStack)
-\brief Peek at an item from the stack
-\param TheStack The stack to peek from
-\returns The item that is currently on the top of the stack
+    \brief Peek at an item from the stack
+    \param TheStack The stack to peek from
+    \returns The item that is currently on the top of the stack
 */
 void *ILibPeekStack(void **TheStack)
 {
@@ -1971,8 +1817,8 @@ void *ILibPeekStack(void **TheStack)
 }
 
 /*! \fn ILibClearStack(void **TheStack)
-\brief Clears all the items from the stack
-\param TheStack The stack to clear
+    \brief Clears all the items from the stack
+    \param TheStack The stack to clear
 */
 void ILibClearStack(void **TheStack)
 {
@@ -1985,36 +1831,36 @@ void ILibClearStack(void **TheStack)
 }
 
 /*! \fn ILibHashTree_Lock(void *hashtree)
-\brief Locks a HashTree
-\param hashtree The HashTree to lock
+    \brief Locks a HashTree
+    \param hashtree The HashTree to lock
 */
 void ILibHashTree_Lock(void *hashtree)
 {
     struct HashNode_Root *r = (struct HashNode_Root*)hashtree;
-    sem_wait(&(r->LOCK));
+    lock_wait(&(r->LOCK));
 }
 
 /*! \fn ILibHashTree_UnLock(void *hashtree)
-\brief Unlocks a HashTree
-\param hashtree The HashTree to unlock
+    \brief Unlocks a HashTree
+    \param hashtree The HashTree to unlock
 */
 void ILibHashTree_UnLock(void *hashtree)
 {
     struct HashNode_Root *r = (struct HashNode_Root*)hashtree;
-    sem_post(&(r->LOCK));
+    lock_post(&(r->LOCK));
 }
 
 /*! \fn ILibDestroyHashTree(void *tree)
-\brief Frees resources associated with a HashTree
-\param tree The HashTree to free
+    \brief Frees resources associated with a HashTree
+    \param tree The HashTree to free
 */
 void ILibDestroyHashTree(void *tree)
 {
     struct HashNode_Root *r = (struct HashNode_Root*)tree;
     struct HashNode *c = r->Root;
     struct HashNode *n;
-
-    sem_destroy(&(r->LOCK));
+    
+    lock_destroy(&(r->LOCK));
     while(c!=NULL)
     {
         //
@@ -2022,18 +1868,18 @@ void ILibDestroyHashTree(void *tree)
         //
         n = c->Next;
         if(c->KeyValue!=NULL) {free(c->KeyValue);}
-        freesafe(c);
+        free(c);
         c = n;
     }
-    freesafe(r);
+    free(r);
 }
 
 /*! \fn ILibHashTree_GetEnumerator(void *tree)
-\brief Returns an Enumerator for a HashTree
-\par
-Functionally identicle to an IDictionaryEnumerator in .NET
-\param tree The HashTree to get an enumerator for
-\returns An enumerator
+    \brief Returns an Enumerator for a HashTree
+    \par
+    Functionally identicle to an IDictionaryEnumerator in .NET
+    \param tree The HashTree to get an enumerator for
+    \returns An enumerator
 */
 void *ILibHashTree_GetEnumerator(void *tree)
 {
@@ -2047,8 +1893,8 @@ void *ILibHashTree_GetEnumerator(void *tree)
 }
 
 /*! \fn ILibHashTree_DestroyEnumerator(void *tree_enumerator)
-\brief Frees resources associated with an Enumerator created by ILibHashTree_GetEnumerator
-\param tree_enumerator The enumerator to free
+    \brief Frees resources associated with an Enumerator created by ILibHashTree_GetEnumerator
+    \param tree_enumerator The enumerator to free
 */
 void ILibHashTree_DestroyEnumerator(void *tree_enumerator)
 {
@@ -2059,9 +1905,9 @@ void ILibHashTree_DestroyEnumerator(void *tree_enumerator)
 }
 
 /*! \fn ILibHashTree_MoveNext(void *tree_enumerator)
-\brief Advances an enumerator to the next item
-\param tree_enumerator The enumerator to advance
-\returns A zero value if successful, nonzero if no more items
+    \brief Advances an enumerator to the next item
+    \param tree_enumerator The enumerator to advance
+    \returns A zero value if successful, nonzero if no more items
 */
 int ILibHashTree_MoveNext(void *tree_enumerator)
 {
@@ -2085,16 +1931,16 @@ int ILibHashTree_MoveNext(void *tree_enumerator)
 }
 
 /*! \fn ILibHashTree_GetValue(void *tree_enumerator, char **key, int *keyLength, void **data)
-\brief Reads from the current item of an enumerator
-\param tree_enumerator The enumerator to read from
-\param[out] key The key of the current item
-\param[out] keyLength The length of the key of the current item
-\param[out] data The data of the current item
+    \brief Reads from the current item of an enumerator
+    \param tree_enumerator The enumerator to read from
+    \param[out] key The key of the current item
+    \param[out] keyLength The length of the key of the current item
+    \param[out] data The data of the current item
 */
 void ILibHashTree_GetValue(void *tree_enumerator, char **key, int *keyLength, void **data)
 {
     struct HashNodeEnumerator *en = (struct HashNodeEnumerator*)tree_enumerator;
-
+    
     //
     // All we do, is just assign the pointers.
     //
@@ -2103,17 +1949,17 @@ void ILibHashTree_GetValue(void *tree_enumerator, char **key, int *keyLength, vo
     if(data!=NULL){*data = en->node->Data;}
 }
 /*! \fn void ILibHashTree_GetValueEx(void *tree_enumerator, char **key, int *keyLength, void **data, int *dataEx)
-\brief Reads from the current item of an enumerator
-\param tree_enumerator The enumerator to read from
-\param[out] key The key of the current item
-\param[out] keyLength The length of the key of the current item
-\param[out] data The data of the current item
-\param[out] dataEx The extended data of the current item
+    \brief Reads from the current item of an enumerator
+    \param tree_enumerator The enumerator to read from
+    \param[out] key The key of the current item
+    \param[out] keyLength The length of the key of the current item
+    \param[out] data The data of the current item
+    \param[out] dataEx The extended data of the current item
 */
 void ILibHashTree_GetValueEx(void *tree_enumerator, char **key, int *keyLength, void **data, int *dataEx)
 {
     struct HashNodeEnumerator *en = (struct HashNodeEnumerator*)tree_enumerator;
-
+    
     //
     // All we do, is just assign the pointers.
     //
@@ -2124,8 +1970,8 @@ void ILibHashTree_GetValueEx(void *tree_enumerator, char **key, int *keyLength, 
 }
 
 /*! \fn ILibInitHashTree()
-\brief Creates an empty ILibHashTree, whose keys are <B>case sensitive</B>.
-\returns An empty ILibHashTree
+    \brief Creates an empty ILibHashTree, whose keys are <B>case sensitive</B>.
+    \returns An empty ILibHashTree
 */
 void* ILibInitHashTree()
 {
@@ -2134,12 +1980,12 @@ void* ILibInitHashTree()
     memset(RetVal,0,sizeof(struct HashNode));
     memset(Root,0,sizeof(struct HashNode_Root));
     Root->Root = RetVal;
-    sem_init(&(Root->LOCK),0,1);
+    lock_init(&(Root->LOCK),0,1);
     return(Root);
 }
 /*! \fn void* ILibInitHashTree_CaseInSensitive()
-\brief Creates an empty ILibHashTree, whose keys are <B>case insensitive</B>.
-\returns An empty ILibHashTree
+    \brief Creates an empty ILibHashTree, whose keys are <B>case insensitive</B>.
+    \returns An empty ILibHashTree
 */
 void* ILibInitHashTree_CaseInSensitive()
 {
@@ -2190,7 +2036,7 @@ int ILibGetHashValueEx(char *key, int keylength, int caseInSensitiveText)
 {
     int HashValue=0;
     char TempValue[4];
-
+    
     if(keylength<=4)
     {
         //
@@ -2207,7 +2053,7 @@ int ILibGetHashValueEx(char *key, int keylength, int caseInSensitiveText)
         }
         MEMCHECK(assert(keylength<=4);)
 
-            HashValue = *((int*)TempValue);
+        HashValue = *((int*)TempValue);
     }
     else
     {
@@ -2233,8 +2079,8 @@ int ILibGetHashValueEx(char *key, int keylength, int caseInSensitiveText)
             ILibToLower((char*)key+(keylength-4),4,TempValue);
         }
         HashValue = HashValue^(*((int*)TempValue));
-
-
+        
+        
         //
         // If the key length is >= 10, the hash is also XOR with the middle 4 bytes
         //
@@ -2255,12 +2101,12 @@ int ILibGetHashValueEx(char *key, int keylength, int caseInSensitiveText)
 }
 
 /*! \fn ILibGetHashValue(char *key, int keylength)
-\brief Calculates a numeric Hash from a given string
-\par
-Used by ILibHashTree methods
-\param key The string to hash
-\param keylength The length of the string to hash
-\returns A hash value
+    \brief Calculates a numeric Hash from a given string
+    \par
+    Used by ILibHashTree methods
+    \param key The string to hash
+    \param keylength The length of the string to hash
+    \returns A hash value
 */
 int ILibGetHashValue(char *key, int keylength)
 {
@@ -2280,9 +2126,9 @@ struct HashNode* ILibFindEntry(void *hashtree, void *key, int keylength, int cre
     struct HashNode *current = root->Root;
     int HashValue = ILibGetHashValueEx(key,keylength,root->CaseInSensitive);
     int done = 0;
-
+    
     if(keylength==0){return(NULL);}
-
+    
     //
     // Iterate through our tree to see if we can find this key entry
     //
@@ -2311,7 +2157,7 @@ struct HashNode* ILibFindEntry(void *hashtree, void *key, int keylength, int cre
                 }
             }
         }
-
+        
         if(current->Next!=NULL)
         {
             current = current->Next;
@@ -2340,15 +2186,17 @@ struct HashNode* ILibFindEntry(void *hashtree, void *key, int keylength, int cre
 }
 
 /*! \fn ILibHasEntry(void *hashtree, char* key, int keylength)
-\brief Determines if a key entry exists in a HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keylength The length of the key
-\returns 0 if does not exist, nonzero otherwise
+    \brief Determines if a key entry exists in a HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keylength The length of the key
+    \returns 0 if does not exist, nonzero otherwise
 */
 int ILibHasEntry(void *hashtree, char* key, int keylength)
 {
+    //
     // This can be duplicated by calling Find entry, but setting the create flag to false
+    //
     return(ILibFindEntry(hashtree,key,keylength,0)!=NULL?1:0);
 }
 
@@ -2359,11 +2207,11 @@ int ILibHashTreeIsEmpty( void * tree )
 }
 
 /*! \fn ILibAddEntry(void* hashtree, char* key, int keylength, void *value)
-\brief Adds an item to the HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keylength The length of the key
-\param value The data to add into the HashTree
+    \brief Adds an item to the HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keylength The length of the key
+    \param value The data to add into the HashTree
 */
 void ILibAddEntry(void* hashtree, char* key, int keylength, void *value)
 {
@@ -2375,12 +2223,12 @@ void ILibAddEntry(void* hashtree, char* key, int keylength, void *value)
         n->Data = value;
 }
 /*! \fn ILibAddEntryEx(void* hashtree, char* key, int keylength, void *value, int valueLength)
-\brief Adds an extended item to the HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keylength The length of the key
-\param value The data to add into the HashTree
-\param valueEx An optional int value
+    \brief Adds an extended item to the HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keylength The length of the key
+    \param value The data to add into the HashTree
+    \param valueEx An optional int value
 */
 void ILibAddEntryEx(void* hashtree, char* key, int keylength, void *value, int valueEx)
 {
@@ -2397,11 +2245,11 @@ void ILibAddEntryEx(void* hashtree, char* key, int keylength, void *value, int v
 
 
 /*! \fn ILibGetEntry(void *hashtree, char* key, int keylength)
-\brief Gets an item from a HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keylength The length of the key
-\returns The data in the HashTree. NULL if key does not exist
+    \brief Gets an item from a HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keylength The length of the key
+    \returns The data in the HashTree. NULL if key does not exist
 */
 void* ILibGetEntry(void *hashtree, char* key, int keylength)
 {
@@ -2420,12 +2268,12 @@ void* ILibGetEntry(void *hashtree, char* key, int keylength)
     }
 }
 /*! \fn void ILibGetEntryEx(void *hashtree, char *key, int keyLength, void **value, int* valueEx)
-\brief Gets an extended item from a HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keyLength The length of the key
-\param[out] value The data in the HashTree. NULL if key does not exist
-\param[out] valueEx The extended data in the HashTree.
+    \brief Gets an extended item from a HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keyLength The length of the key
+    \param[out] value The data in the HashTree. NULL if key does not exist
+    \param[out] valueEx The extended data in the HashTree.
 */
 void ILibGetEntryEx(void *hashtree, char *key, int keyLength, void **value, int* valueEx)
 {
@@ -2447,10 +2295,10 @@ void ILibGetEntryEx(void *hashtree, char *key, int keyLength, void **value, int*
 }
 
 /*! \fn ILibDeleteEntry(void *hashtree, char* key, int keylength)
-\brief Deletes a keyed item from the HashTree
-\param hashtree The HashTree to operate on
-\param key The key
-\param keylength The length of the key
+    \brief Deletes a keyed item from the HashTree
+    \param hashtree The HashTree to operate on
+    \param key The key
+    \param keylength The length of the key
 */
 void ILibDeleteEntry(void *hashtree, char* key, int keylength)
 {
@@ -2474,11 +2322,11 @@ void ILibDeleteEntry(void *hashtree, char* key, int keylength)
 }
 
 /*! \fn ILibGetLong(char *TestValue, int TestValueLength, long* NumericValue)
-\brief Reads a long value from a string, in a validating fashion
-\param TestValue The string to read from
-\param TestValueLength The length of the string
-\param NumericValue The long value extracted from the string
-\returns 0 if succesful, nonzero if there was an error
+    \brief Reads a long value from a string, in a validating fashion
+    \param TestValue The string to read from
+    \param TestValueLength The length of the string
+    \param NumericValue The long value extracted from the string
+    \returns 0 if succesful, nonzero if there was an error
 */
 int ILibGetLong(char *TestValue, int TestValueLength, long* NumericValue)
 {
@@ -2516,11 +2364,11 @@ int ILibGetLong(char *TestValue, int TestValueLength, long* NumericValue)
 }
 
 /*! \fn int ILibGetULong(const char *TestValue, const int TestValueLength, unsigned long* NumericValue)
-\brief Reads an unsigned long value from a string, in a validating fashion
-\param TestValue The string to read from
-\param TestValueLength The length of the string
-\param NumericValue The long value extracted from the string
-\returns 0 if succesful, nonzero if there was an error
+    \brief Reads an unsigned long value from a string, in a validating fashion
+    \param TestValue The string to read from
+    \param TestValueLength The length of the string
+    \param NumericValue The long value extracted from the string
+    \returns 0 if succesful, nonzero if there was an error
 */
 int ILibGetULong(const char *TestValue, const int TestValueLength, unsigned long* NumericValue)
 {
@@ -2579,7 +2427,7 @@ int ILibIsDelimiter(char* buffer, int offset, int buffersize, char* Delimiter, i
         //
         return(0);
     }
-
+    
     for(i=0;i<DelimiterLength;++i)
     {
         if(buffer[offset+i]!=Delimiter[i])
@@ -2595,16 +2443,16 @@ int ILibIsDelimiter(char* buffer, int offset, int buffersize, char* Delimiter, i
 }
 
 /*! \fn ILibParseStringAdv(char* buffer, int offset, int length, char* Delimiter, int DelimiterLength)
-\brief Parses a string into a linked list of tokens.
-\par
-Differs from \a ILibParseString, in that this method ignores characters contained within
-quotation marks, whereas \a ILibParseString does not.
-\param buffer The buffer to parse
-\param offset The offset of the buffer to start parsing
-\param length The length of the buffer to parse
-\param Delimiter The delimiter
-\param DelimiterLength The length of the delimiter
-\returns A list of tokens
+    \brief Parses a string into a linked list of tokens.
+    \par
+    Differs from \a ILibParseString, in that this method ignores characters contained within
+    quotation marks, whereas \a ILibParseString does not.
+    \param buffer The buffer to parse
+    \param offset The offset of the buffer to start parsing
+    \param length The length of the buffer to parse
+    \param Delimiter The delimiter
+    \param DelimiterLength The length of the delimiter
+    \returns A list of tokens
 */
 struct parser_result* ILibParseStringAdv(char* buffer, int offset, int length, char* Delimiter, int DelimiterLength)
 {
@@ -2615,10 +2463,10 @@ struct parser_result* ILibParseStringAdv(char* buffer, int offset, int length, c
     struct parser_result_field *p_resultfield;
     int Ignore = 0;
     char StringDelimiter=0;
-
+    
     RetVal->FirstResult = NULL;
     RetVal->NumResults = 0;
-
+    
     //
     // By default we will always return at least one token, which will be the
     // entire string if the delimiter is not found.
@@ -2680,7 +2528,7 @@ struct parser_result* ILibParseStringAdv(char* buffer, int offset, int length, c
                 RetVal->FirstResult = p_resultfield;
                 RetVal->LastResult = p_resultfield;
             }
-
+            
             //
             // After we populate the values, we advance the token to after the delimiter
             // to prep for the next token
@@ -2719,15 +2567,15 @@ struct parser_result* ILibParseStringAdv(char* buffer, int offset, int length, c
         RetVal->LastResult = p_resultfield;
     }    
     ++RetVal->NumResults;
-
+    
     return(RetVal);
 }
 
 /*! \fn ILibTrimString(char **theString, int length)
-\brief Trims leading and trailing whitespace characters
-\param theString The string to trim
-\param length Length of \a theString
-\returns Length of the trimmed string
+    \brief Trims leading and trailing whitespace characters
+    \param theString The string to trim
+    \param length Length of \a theString
+    \returns Length of the trimmed string
 */
 int ILibTrimString(char **theString, int length)
 {
@@ -2753,16 +2601,16 @@ int ILibTrimString(char **theString, int length)
 }
 
 /*! \fn ILibParseString(char* buffer, int offset, int length, char* Delimiter, int DelimiterLength)
-\brief Parses a string into a linked list of tokens.
-\par
-Differs from \a ILibParseStringAdv, in that this method does not ignore characters contained within
-quotation marks, whereas \a ILibParseStringAdv does.
-\param buffer The buffer to parse
-\param offset The offset of the buffer to start parsing
-\param length The length of the buffer to parse
-\param Delimiter The delimiter
-\param DelimiterLength The length of the delimiter
-\returns A list of tokens
+    \brief Parses a string into a linked list of tokens.
+    \par
+    Differs from \a ILibParseStringAdv, in that this method does not ignore characters contained within
+    quotation marks, whereas \a ILibParseStringAdv does.
+    \param buffer The buffer to parse
+    \param offset The offset of the buffer to start parsing
+    \param length The length of the buffer to parse
+    \param Delimiter The delimiter
+    \param DelimiterLength The length of the delimiter
+    \returns A list of tokens
 */
 struct parser_result* ILibParseString(char* buffer, int offset, int length, char* Delimiter, int DelimiterLength)
 {
@@ -2771,10 +2619,10 @@ struct parser_result* ILibParseString(char* buffer, int offset, int length, char
     char* Token = NULL;
     int TokenLength = 0;
     struct parser_result_field *p_resultfield;
-
+    
     RetVal->FirstResult = NULL;
     RetVal->NumResults = 0;
-
+    
     //
     // By default we will always return at least one token, which will be the
     // entire string if the delimiter is not found.
@@ -2803,7 +2651,7 @@ struct parser_result* ILibParseString(char* buffer, int offset, int length, char
                 RetVal->FirstResult = p_resultfield;
                 RetVal->LastResult = p_resultfield;
             }
-
+            
             //
             // After we populate the values, we advance the token to after the delimiter
             // to prep for the next token
@@ -2842,13 +2690,13 @@ struct parser_result* ILibParseString(char* buffer, int offset, int length, char
         RetVal->LastResult = p_resultfield;
     }    
     ++RetVal->NumResults;
-
+    
     return(RetVal);
 }
 
 /*! \fn ILibDestructParserResults(struct parser_result *result)
-\brief Frees resources associated with the list of tokens returned from ILibParseString and ILibParseStringAdv.
-\param result The list of tokens to free
+    \brief Frees resources associated with the list of tokens returned from ILibParseString and ILibParseStringAdv.
+    \param result The list of tokens to free
 */
 void ILibDestructParserResults(struct parser_result *result)
 {
@@ -2858,7 +2706,7 @@ void ILibDestructParserResults(struct parser_result *result)
     //
     struct parser_result_field *node = result->FirstResult;
     struct parser_result_field *temp;
-
+    
     while(node!=NULL)
     {
         temp = node->NextResult;
@@ -2869,14 +2717,14 @@ void ILibDestructParserResults(struct parser_result *result)
 }
 
 /*! \fn ILibDestructPacket(struct packetheader *packet)
-\brief Frees resources associated with a Packet that was created either by \a ILibCreateEmptyPacket or \a ILibParsePacket
-\param packet The packet to free
+    \brief Frees resources associated with a Packet that was created either by \a ILibCreateEmptyPacket or \a ILibParsePacket
+    \param packet The packet to free
 */
 void ILibDestructPacket(struct packetheader *packet)
 {
     struct packetheader_field_node *node = packet->FirstField;
     struct packetheader_field_node *nextnode;
-
+    
     //
     // Iterate through all the headers
     //
@@ -2918,17 +2766,17 @@ void ILibDestructPacket(struct packetheader *packet)
 }
 
 /*! \fn ILibHTTPEscape(char* outdata, const char* data)
-\brief Escapes a string according to HTTP Specifications.
-\par
-The string you would want to escape would typically be the string used in the Path portion
-of an HTTP request. eg:<br>
-GET foo/bar.txt HTTP/1.1<br>
-<br>
-\b Note: It should be noted that the output buffer needs to be allocated prior to calling this method.
-The required space can be determined by calling \a ILibHTTPEscapeLength.
-\param outdata The escaped string
-\param data The string to escape
-\returns The length of the escaped string
+    \brief Escapes a string according to HTTP Specifications.
+    \par
+    The string you would want to escape would typically be the string used in the Path portion
+    of an HTTP request. eg:<br>
+    GET foo/bar.txt HTTP/1.1<br>
+    <br>
+    \b Note: It should be noted that the output buffer needs to be allocated prior to calling this method.
+    The required space can be determined by calling \a ILibHTTPEscapeLength.
+    \param outdata The escaped string
+    \param data The string to escape
+    \returns The length of the escaped string
 */
 int ILibHTTPEscape(char* outdata, const char* data)
 {
@@ -2967,9 +2815,9 @@ int ILibHTTPEscape(char* outdata, const char* data)
 }
 
 /*! \fn ILibHTTPEscapeLength(const char* data)
-\brief Determines the buffer space required to HTTP escape a particular string.
-\param data Calculates the length requirements as if \a data was escaped
-\returns The minimum required length
+    \brief Determines the buffer space required to HTTP escape a particular string.
+    \param data Calculates the length requirements as if \a data was escaped
+    \returns The minimum required length
 */
 int ILibHTTPEscapeLength(const char* data)
 {
@@ -2995,12 +2843,12 @@ int ILibHTTPEscapeLength(const char* data)
 }
 
 /*! \fn ILibInPlaceHTTPUnEscape(char* data)
-\brief Unescapes a given string according to HTTP encoding rules
-\par
-The escaped representation of a string is always longer than the unescaped version
-so this method will overwrite the escaped string, with the unescaped result.
-\param data The buffer to unescape
-\returns The length of the unescaped string
+    \brief Unescapes a given string according to HTTP encoding rules
+    \par
+    The escaped representation of a string is always longer than the unescaped version
+    so this method will overwrite the escaped string, with the unescaped result.
+    \param data The buffer to unescape
+    \returns The length of the unescaped string
 */
 int ILibInPlaceHTTPUnEscape(char* data)
 {
@@ -3048,11 +2896,11 @@ int ILibInPlaceHTTPUnEscape(char* data)
 }
 
 /*! \fn ILibParsePacketHeader(char* buffer, int offset, int length)
-\brief Parses the HTTP headers from a buffer, into a packetheader structure
-\param buffer The buffer to parse
-\param offset The offset of the buffer to start parsing
-\param length The length of the buffer to parse
-\returns>packetheader structure
+    \brief Parses the HTTP headers from a buffer, into a packetheader structure
+    \param buffer The buffer to parse
+    \param offset The offset of the buffer to start parsing
+    \param length The length of the buffer to parse
+    \returns>packetheader structure
 */
 struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
 {
@@ -3065,10 +2913,10 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
     char* tempbuffer;
     struct packetheader_field_node *node = NULL;
     int i=0;
-
+    
     memset(RetVal,0,sizeof(struct packetheader));
     RetVal->HeaderTable = ILibInitHashTree_CaseInSensitive();
-
+    
     //
     // All the headers are delineated with a CRLF, so we parse on that
     //
@@ -3081,8 +2929,8 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
     StartLine = (struct parser_result*)ILibParseString(f->data,0,f->datalength," ",1);
     HeaderLine = f->NextResult;
     if(memcmp(StartLine->FirstResult->data,
-        "HTTP/",
-        5)==0)
+    "HTTP/",
+    5)==0)
     {
         //
         // If the StartLine starts with HTTP/, then we know this is a response packet.
@@ -3090,22 +2938,22 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
         // eg: HTTP/1.1 200 OK
         //
         p = (struct parser_result*)ILibParseString(StartLine->FirstResult->data,
-            0,
-            StartLine->FirstResult->datalength,
-            "/",1);
+        0,
+        StartLine->FirstResult->datalength,
+        "/",1);
         RetVal->Version = p->LastResult->data;
         RetVal->VersionLength = p->LastResult->datalength;
         RetVal->Version[RetVal->VersionLength]=0;
         ILibDestructParserResults(p);
         tempbuffer = (char*)malloc(1+sizeof(char)*(StartLine->FirstResult->NextResult->datalength));
         memcpy(tempbuffer,StartLine->FirstResult->NextResult->data,
-            StartLine->FirstResult->NextResult->datalength);
+        StartLine->FirstResult->NextResult->datalength);
         MEMCHECK(assert(StartLine->FirstResult->NextResult->datalength <= 1+(int)sizeof(char)*(StartLine->FirstResult->NextResult->datalength));) 
 
-            //
-            // The other tokens contain the Status code and data
-            //
-            tempbuffer[StartLine->FirstResult->NextResult->datalength] = '\0';
+        //
+        // The other tokens contain the Status code and data
+        //
+        tempbuffer[StartLine->FirstResult->NextResult->datalength] = '\0';
         RetVal->StatusCode = (int)atoi(tempbuffer);
         free(tempbuffer);
         RetVal->StatusData = StartLine->FirstResult->NextResult->NextResult->data;
@@ -3113,7 +2961,7 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
     }
     else
     {
-
+        
         //
         // If the packet didn't start with HTTP/ then we know it's a request packet
         // eg: GET /index.html HTTP/1.1
@@ -3135,20 +2983,20 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
             ILibDestructPacket(RetVal);
             return(NULL);
         }
-
+        
         RetVal->StatusCode = -1;
         //
         // We parse the last token on '/' to find the version
         //
         p = (struct parser_result*)ILibParseString(StartLine->LastResult->data,
-            0,
-            StartLine->LastResult->datalength,
-            "/",1);
+        0,
+        StartLine->LastResult->datalength,
+        "/",1);
         RetVal->Version = p->LastResult->data;
         RetVal->VersionLength = p->LastResult->datalength;
         RetVal->Version[RetVal->VersionLength]=0;
         ILibDestructParserResults(p);
-
+        
         RetVal->Directive[RetVal->DirectiveLength] = '\0';
         RetVal->DirectiveObj[RetVal->DirectiveObjLength] = '\0';
     }
@@ -3223,14 +3071,14 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
             node->FieldDataLength = ILibTrimString(&(node->FieldData),node->FieldDataLength);            
             node->Field[node->FieldLength] = '\0';
             node->FieldData[node->FieldDataLength] = '\0';
-
+            
             //
             // Since we are parsing an existing string, we set this flag to zero, so that it doesn't
             // get freed
             //
             node->UserAllocStrings = 0;
             node->NextField = NULL;
-
+            
             if(RetVal->FirstField==NULL)
             {
                 //
@@ -3257,13 +3105,13 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
 }
 
 /*! \fn ILibFragmentTextLength(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength)
-\brief Determines the buffer size required to fragment a string
-\param text The string to fragment
-\param textLength Length of \a text
-\param delimiter Line delimiter
-\param delimiterLength Length of \a delimiter
-\param tokenLength The maximum size of each fragment or token
-\returns The length of the buffer required to call \a ILibFragmentText
+    \brief Determines the buffer size required to fragment a string
+    \param text The string to fragment
+    \param textLength Length of \a text
+    \param delimiter Line delimiter
+    \param delimiterLength Length of \a delimiter
+    \param tokenLength The maximum size of each fragment or token
+    \returns The length of the buffer required to call \a ILibFragmentText
 */
 int ILibFragmentTextLength(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength)
 {
@@ -3272,14 +3120,14 @@ int ILibFragmentTextLength(char *text, int textLength, char *delimiter, int deli
 }
 
 /*! \fn ILibFragmentText(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength, char **RetVal)
-\brief Fragments a string into multiple tokens
-\param text The string to fragment
-\param textLength Length of \a text
-\param delimiter Line delimiter
-\param delimiterLength Length of \a delimiter
-\param tokenLength The maximum size of each fragment or token
-\param RetVal The buffer to store the resultant string
-\returns The length of the written string
+    \brief Fragments a string into multiple tokens
+    \param text The string to fragment
+    \param textLength Length of \a text
+    \param delimiter Line delimiter
+    \param delimiterLength Length of \a delimiter
+    \param tokenLength The maximum size of each fragment or token
+    \param RetVal The buffer to store the resultant string
+    \returns The length of the written string
 */
 int ILibFragmentText(char *text, int textLength, char *delimiter, int delimiterLength, int tokenLength, char **RetVal)
 {
@@ -3308,12 +3156,12 @@ int ILibFragmentText(char *text, int textLength, char *delimiter, int delimiterL
 }
 
 /*! \fn ILibGetRawPacket(struct packetheader* packet,char **RetVal)
-\brief Converts a packetheader structure into a raw char* buffer
-\par
-\b Note: The returned buffer must be freed
-\param packet The packetheader struture to convert
-\param RetVal The output char* buffer
-\returns The length of the output buffer
+    \brief Converts a packetheader structure into a raw char* buffer
+    \par
+    \b Note: The returned buffer must be freed
+    \param packet The packetheader struture to convert
+    \param RetVal The output char* buffer
+    \returns The length of the output buffer
 */
 int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
 {
@@ -3327,7 +3175,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
     int FieldLength;
     void *FieldData;
     int FieldDataLength;
-
+    
     if(packet->StatusCode!=-1)
     {
         BufferSize = 12 + packet->VersionLength + packet->StatusDataLength;
@@ -3347,7 +3195,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
         // But it will work as long as the version is not > 9.9
         // It should also add the length of the Version, but it's not critical.
     }
-
+    
     en = ILibHashTree_GetEnumerator(packet->HeaderTable);
     while(ILibHashTree_MoveNext(en)==0)
     {
@@ -3376,7 +3224,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
     // for the empty line
     //
     BufferSize += (3+packet->BodyLength);
-
+    
     //
     // Allocate the buffer
     //
@@ -3390,11 +3238,11 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
         memcpy(Buffer,"HTTP/",5);
         memcpy(Buffer+5,packet->Version,packet->VersionLength);
         i = 5+packet->VersionLength;
-
+        
         i+=sprintf(Buffer+i," %d ",packet->StatusCode);
         memcpy(Buffer+i,packet->StatusData,packet->StatusDataLength);
         i+=packet->StatusDataLength;
-
+        
         memcpy(Buffer+i,"\r\n",2);
         i+=2;
         /* HTTP/1.1 200 OK\r\n */
@@ -3418,7 +3266,7 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
         i+=2;
         /* GET / HTTP/1.1\r\n */
     }
-
+    
     en = ILibHashTree_GetEnumerator(packet->HeaderTable);
     while(ILibHashTree_MoveNext(en)==0)
     {
@@ -3461,32 +3309,32 @@ int ILibGetRawPacket(struct packetheader* packet,char **RetVal)
     //
     memcpy(Buffer+i,"\r\n",2);
     i+=2;
-
+    
     //
     // Write the body
     //
     memcpy(Buffer+i,packet->Body,packet->BodyLength);
     i+=packet->BodyLength;
     Buffer[i] = '\0';
-
+    
     return(i);
 }
 
 /*! \fn unsigned short ILibGetDGramSocket(int local, int *TheSocket)
-\brief Allocates a UDP socket for a given interface, choosing a random port number from 50000 to 65535
-\par
-\b Note: Storage type of \a TheSocket is platform dependent. <br>
-Windows Winsock2 = HANDLE*<br>
-Windows Winsock1 = SOCKET*<br>
-Linux/Posix = int*<br>
-\param local The interface to bind to
-\param TheSocket The created UDP socket
-\returns The port number that was bound
+    \brief Allocates a UDP socket for a given interface, choosing a random port number from 50000 to 65535
+    \par
+    \b Note: Storage type of \a TheSocket is platform dependent. <br>
+    Windows Winsock2 = HANDLE*<br>
+    Windows Winsock1 = SOCKET*<br>
+    Linux/Posix = int*<br>
+    \param local The interface to bind to
+    \param TheSocket The created UDP socket
+    \returns The port number that was bound
 */
 #if defined(WIN32) || defined(_WIN32_WCE)
-unsigned short ILibGetDGramSocket(int local, HANDLE *TheSocket)
+    unsigned short ILibGetDGramSocket(int local, HANDLE *TheSocket)
 #else
-unsigned short ILibGetDGramSocket(int local, int *TheSocket)
+    unsigned short ILibGetDGramSocket(int local, int *TheSocket)
 #endif
 {
     int count = 0;
@@ -3497,8 +3345,6 @@ unsigned short ILibGetDGramSocket(int local, int *TheSocket)
     addr.sin_addr.s_addr = local;
 #if defined(WIN32) || defined(_WIN32_WCE)
     *TheSocket = (HANDLE)socket(AF_INET, SOCK_DGRAM, 0);
-#elif defined(__SYMBIAN32__)
-    *TheSocket = ILibSocketWrapper_socket(SOCK_DGRAM);
 #else
     *TheSocket = (int)socket(AF_INET, SOCK_DGRAM, 0);
 #endif
@@ -3523,8 +3369,6 @@ unsigned short ILibGetDGramSocket(int local, int *TheSocket)
     }
 #ifdef WIN32
     while(bind((SOCKET)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr)) < 0);
-#elif defined(__SYMBIAN32__)
-    while(ILibSocketWrapper_bind((int)*TheSocket, (struct sockaddr *) &(addr)) < 0);
 #else
     while(bind((int)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr)) < 0);
 #endif
@@ -3533,43 +3377,43 @@ unsigned short ILibGetDGramSocket(int local, int *TheSocket)
 
 
 /*! \fn unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *TheSocket)
-\brief Allocates a TCP socket for a given interface, choosing a random port number from 50000 to 65535
-\par
-\b Note: Storage type of \a TheSocket is platform dependent. <br>
-Windows Winsock2 = HANDLE*<br>
-Windows Winsock1 = SOCKET*<br>
-Linux/Posix = int*<br>
-\param local The interface to bind to
-\param PortNumber 0 for random IANA specified port number, otherwise the port number to bind to
-\param TheSocket The created TCP socket
-\returns The port number that was bound
+    \brief Allocates a TCP socket for a given interface, choosing a random port number from 50000 to 65535
+    \par
+    \b Note: Storage type of \a TheSocket is platform dependent. <br>
+    Windows Winsock2 = HANDLE*<br>
+    Windows Winsock1 = SOCKET*<br>
+    Linux/Posix = int*<br>
+    \param local The interface to bind to
+    \param PortNumber 0 for random IANA specified port number, otherwise the port number to bind to
+    \param TheSocket The created TCP socket
+    \returns The port number that was bound
 */
 #if defined(WIN32) || defined(_WIN32_WCE)
-unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, HANDLE *TheSocket)
+    unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, HANDLE *TheSocket)
 #else
-unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *TheSocket)
+    unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *TheSocket)
 #endif
 {
-    int count               = 0;
-    int ra                  = 1;
-    unsigned short PortNum  = -1;
+    int count = 0;
+    int ra=1;
+    unsigned short PortNum = -1;
     struct sockaddr_in addr;
     memset((char *)&(addr), 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = local;
-
+    
 #if defined(WIN32) || defined(_WIN32_WCE)
     *TheSocket = (HANDLE)socket(AF_INET, SOCK_STREAM, 0);
-#elif defined(__SYMBIAN32__)
-    *TheSocket = ILibSocketWrapper_socket(SOCK_STREAM);
 #else
     *TheSocket = (int)socket(AF_INET, SOCK_STREAM, 0);
 #endif
-    if(PortNumber == 0)
+    if(PortNumber==0)
     {
+        //
         // If PortNumber is 0, we need to choose a random port from MINPORTNUMBER to 
         // MINPORTNUMBER + PORTNUMBERRANGE.
         // By default this is 50000 + 15000, which gives us the IANA defined range to use
+        //
         do
         {
             if (++count >= 20)
@@ -3582,8 +3426,6 @@ unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *Th
         }
 #ifdef WIN32
         while(bind((SOCKET)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr)) < 0);
-#elif defined(__SYMBIAN32__)
-        while(ILibSocketWrapper_bind((int)*TheSocket, (struct sockaddr *) &(addr)) < 0);
 #else
         while(bind((int)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr)) < 0);
 #endif
@@ -3596,21 +3438,18 @@ unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *Th
         addr.sin_port = htons(PortNumber);
 #ifdef WIN32
         if (setsockopt((SOCKET)*TheSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&ra, sizeof(ra)) < 0)
-#elif !defined(__SYMBIAN32__)
+#else
 #if defined(__APPLE__)
+        // add by leochen
         if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEPORT, (char*)&ra, sizeof(ra)) < 0)
 #else
         if (setsockopt((int)*TheSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&ra, sizeof(ra)) < 0)
 #endif
-#else
-        if(ILibSocketWrapper_SetReuseAddr((int)*TheSocket,1)<0)
 #endif
         {
         }
 #ifdef WIN32
-        PortNum = bind((SOCKET)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr)) < 0 ? 0: PortNumber;
-#elif defined(__SYMBIAN32__)
-        PortNum = ILibSocketWrapper_bind((int)*TheSocket, (struct sockaddr *) &(addr))<0?0:PortNumber;
+        PortNum = bind((SOCKET)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr))<0?0:PortNumber;
 #else
         PortNum = bind((int)*TheSocket, (struct sockaddr *) &(addr), sizeof(addr))<0?0:PortNumber;
 #endif
@@ -3620,27 +3459,27 @@ unsigned short ILibGetStreamSocket(int local, unsigned short PortNumber, int *Th
 
 
 /*! \fn ILibParseUri(char* URI, char** IP, unsigned short* Port, char** Path)
-\brief Parses a URI string, into its IP Address, Port Number, and Path components
-\par
-\b Note: The IP and Path components must be freed
-\param URI The URI to parse
-\param IP The IP Address component in dotted quad format
-\param Port The Port component. Default is 80
-\param Path The Path component
+    \brief Parses a URI string, into its IP Address, Port Number, and Path components
+    \par
+    \b Note: The IP and Path components must be freed
+    \param URI The URI to parse
+    \param IP The IP Address component in dotted quad format
+    \param Port The Port component. Default is 80
+    \param Path The Path component
 */
 void ILibParseUri(char* URI, char** IP, unsigned short* Port, char** Path)
 {
     struct parser_result *result,*result2,*result3;
     char *TempString,*TempString2;
     int TempStringLength,TempStringLength2;
-
+    
     //
     // A scheme has the format xxx://yyy , so if we parse on ://, we can extract the path info
     //
     result = ILibParseString(URI, 0, (int)strlen(URI), "://", 3);
     TempString = result->LastResult->data;
     TempStringLength = result->LastResult->datalength;
-
+    
     //
     // Parse Path
     // The first '/' will occur after the IPAddress:Port combination
@@ -3650,7 +3489,7 @@ void ILibParseUri(char* URI, char** IP, unsigned short* Port, char** Path)
     *Path = (char*)malloc(TempStringLength2+1);
     memcpy(*Path,TempString+(result2->FirstResult->datalength),TempStringLength2);
     (*Path)[TempStringLength2] = '\0';
-
+    
     /* Parse Port Number */
     result3 = ILibParseString(result2->FirstResult->data,0,result2->FirstResult->datalength,":",1);
     if(result3->NumResults==1)
@@ -3684,36 +3523,36 @@ void ILibParseUri(char* URI, char** IP, unsigned short* Port, char** Path)
 }
 
 /*! \fn ILibCreateEmptyPacket()
-\brief Creates an empty packetheader structure
-\returns An empty packet
+    \brief Creates an empty packetheader structure
+    \returns An empty packet
 */
 struct packetheader *ILibCreateEmptyPacket()
 {
     struct packetheader *RetVal = (struct packetheader*)malloc(sizeof(struct packetheader));
     memset(RetVal,0,sizeof(struct packetheader));
-
+    
     RetVal->UserAllocStrings = -1;
     RetVal->StatusCode = -1;
     RetVal->Version = "1.0";
     RetVal->VersionLength = 3;
     RetVal->HeaderTable = ILibInitHashTree_CaseInSensitive();
-
+    
     return(RetVal);
 }
 
 /*! \fn ILibClonePacket(struct packetheader *packet)
-\brief Creates a Deep Copy of a packet structure
-\par
-Because ILibParsePacketHeader does not copy any data, the data will become invalid
-once the data is flushed. This method is used to preserve the data.
-\param packet The packet to clone
-\returns A cloned packet structure
+    \brief Creates a Deep Copy of a packet structure
+    \par
+    Because ILibParsePacketHeader does not copy any data, the data will become invalid
+    once the data is flushed. This method is used to preserve the data.
+    \param packet The packet to clone
+    \returns A cloned packet structure
 */
 struct packetheader* ILibClonePacket(struct packetheader *packet)
 {
     struct packetheader *RetVal = ILibCreateEmptyPacket();
     struct packetheader_field_node *n;
-
+    
     RetVal->ClonedPacket=1;
     RetVal->ReceivingAddress = packet->ReceivingAddress;
     RetVal->Source = packet->Source;
@@ -3722,20 +3561,20 @@ struct packetheader* ILibClonePacket(struct packetheader *packet)
     // These three calls will result in the fields being copied
     //
     ILibSetDirective(
-        RetVal,
-        packet->Directive,
-        packet->DirectiveLength,
-        packet->DirectiveObj,
-        packet->DirectiveObjLength);
+    RetVal,
+    packet->Directive,
+    packet->DirectiveLength,
+    packet->DirectiveObj,
+    packet->DirectiveObjLength);
 
     ILibSetStatusCode(
-        RetVal,
-        packet->StatusCode,
-        packet->StatusData,
-        packet->StatusDataLength);
+    RetVal,
+    packet->StatusCode,
+    packet->StatusData,
+    packet->StatusDataLength);
 
     ILibSetVersion(RetVal,packet->Version,packet->VersionLength);
-
+    
     //
     // Iterate through each header, and copy them
     //
@@ -3743,21 +3582,21 @@ struct packetheader* ILibClonePacket(struct packetheader *packet)
     while(n!=NULL)
     {
         ILibAddHeaderLine(
-            RetVal,
-            n->Field,
-            n->FieldLength,
-            n->FieldData,
-            n->FieldDataLength);
+        RetVal,
+        n->Field,
+        n->FieldLength,
+        n->FieldData,
+        n->FieldDataLength);
         n = n->NextField;
     }
     return(RetVal);
 }
 
 /*! \fn ILibSetVersion(struct packetheader *packet, char* Version, int VersionLength)
-\brief Sets the version of a packetheader structure. The Default version is 1.0
-\param packet The packet to modify
-\param Version The version string to write. eg: 1.1
-\param VersionLength The length of the \a Version
+    \brief Sets the version of a packetheader structure. The Default version is 1.0
+    \param packet The packet to modify
+    \param Version The version string to write. eg: 1.1
+    \param VersionLength The length of the \a Version
 */
 void ILibSetVersion(struct packetheader *packet, char* Version, int VersionLength)
 {
@@ -3769,11 +3608,11 @@ void ILibSetVersion(struct packetheader *packet, char* Version, int VersionLengt
 }
 
 /*! \fn ILibSetStatusCode(struct packetheader *packet, int StatusCode, char *StatusData, int StatusDataLength)
-\brief Sets the status code of a packetheader structure
-\param packet The packet to modify
-\param StatusCode The status code, eg: 200
-\param StatusData The status string, eg: OK
-\param StatusDataLength The length of \a StatusData
+    \brief Sets the status code of a packetheader structure
+    \param packet The packet to modify
+    \param StatusCode The status code, eg: 200
+    \param StatusData The status string, eg: OK
+    \param StatusDataLength The length of \a StatusData
 */
 void ILibSetStatusCode(struct packetheader *packet, int StatusCode, char *StatusData, int StatusDataLength)
 {
@@ -3785,12 +3624,12 @@ void ILibSetStatusCode(struct packetheader *packet, int StatusCode, char *Status
 }
 
 /*! \fn ILibSetDirective(struct packetheader *packet, char* Directive, int DirectiveLength, char* DirectiveObj, int DirectiveObjLength)
-\brief Sets the /a Method and /a Path of a packetheader structure
-\param packet The packet to modify
-\param Directive The Method to write, eg: \b GET
-\param DirectiveLength The length of \a Directive
-\param DirectiveObj The path component of the method, eg: \b /index.html
-\param DirectiveObjLength The length of \a DirectiveObj
+    \brief Sets the /a Method and /a Path of a packetheader structure
+    \param packet The packet to modify
+    \param Directive The Method to write, eg: \b GET
+    \param DirectiveLength The length of \a Directive
+    \param DirectiveObj The path component of the method, eg: \b /index.html
+    \param DirectiveObjLength The length of \a DirectiveObj
 */
 void ILibSetDirective(struct packetheader *packet, char* Directive, int DirectiveLength, char* DirectiveObj, int DirectiveObjLength)
 {
@@ -3798,7 +3637,7 @@ void ILibSetDirective(struct packetheader *packet, char* Directive, int Directiv
     memcpy(packet->Directive,Directive,DirectiveLength);
     packet->Directive[DirectiveLength] = '\0';
     packet->DirectiveLength = DirectiveLength;
-
+    
     packet->DirectiveObj = (char*)malloc(DirectiveObjLength+1);
     memcpy(packet->DirectiveObj,DirectiveObj,DirectiveObjLength);
     packet->DirectiveObj[DirectiveObjLength] = '\0';
@@ -3806,27 +3645,27 @@ void ILibSetDirective(struct packetheader *packet, char* Directive, int Directiv
     packet->UserAllocStrings = -1;
 }
 /*! \fn void ILibDeleteHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength)
-\brief Removes an HTTP header entry from a packetheader structure
-\param packet The packet to modify
-\param FieldName The header name, eg: \b CONTENT-TYPE
-\param FieldNameLength The length of the \a FieldName
+    \brief Removes an HTTP header entry from a packetheader structure
+    \param packet The packet to modify
+    \param FieldName The header name, eg: \b CONTENT-TYPE
+    \param FieldNameLength The length of the \a FieldName
 */
 void ILibDeleteHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength)
 {
     ILibDeleteEntry(packet->HeaderTable,FieldName,FieldNameLength);
 }
 /*! \fn ILibAddHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength, char* FieldData, int FieldDataLength)
-\brief Adds an HTTP header entry into a packetheader structure
-\param packet The packet to modify
-\param FieldName The header name, eg: \b CONTENT-TYPE
-\param FieldNameLength The length of the \a FieldName
-\param FieldData The header value, eg: \b text/xml
-\param FieldDataLength The length of the \a FieldData
+    \brief Adds an HTTP header entry into a packetheader structure
+    \param packet The packet to modify
+    \param FieldName The header name, eg: \b CONTENT-TYPE
+    \param FieldNameLength The length of the \a FieldName
+    \param FieldData The header value, eg: \b text/xml
+    \param FieldDataLength The length of the \a FieldData
 */
 void ILibAddHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength, char* FieldData, int FieldDataLength)
 {
     struct packetheader_field_node *node;
-
+    
     //
     // Create the Header Node
     //
@@ -3836,16 +3675,16 @@ void ILibAddHeaderLine(struct packetheader *packet, char* FieldName, int FieldNa
     memcpy(node->Field,FieldName,FieldNameLength);
     node->Field[FieldNameLength] = '\0';
     node->FieldLength = FieldNameLength;
-
+    
     node->FieldData = (char*)malloc(FieldDataLength+1);
     memcpy(node->FieldData,FieldData,FieldDataLength);
     node->FieldData[FieldDataLength] = '\0';
     node->FieldDataLength = FieldDataLength;
-
+    
     node->NextField = NULL;
 
     ILibAddEntryEx(packet->HeaderTable,node->Field,node->FieldLength,node->FieldData,node->FieldDataLength);
-
+    
     //
     // And attach it to the linked list
     //
@@ -3862,12 +3701,12 @@ void ILibAddHeaderLine(struct packetheader *packet, char* FieldName, int FieldNa
 }
 
 /*! \fn ILibGetHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength)
-\brief Retrieves an HTTP header value from a packet structure
-\par
-\param packet The packet to introspect
-\param FieldName The header name to lookup
-\param FieldNameLength The length of \a FieldName
-\returns The header value. NULL if not found
+    \brief Retrieves an HTTP header value from a packet structure
+    \par
+    \param packet The packet to introspect
+    \param FieldName The header name to lookup
+    \param FieldNameLength The length of \a FieldName
+    \returns The header value. NULL if not found
 */
 char* ILibGetHeaderLine(struct packetheader *packet, char* FieldName, int FieldNameLength)
 {
@@ -3895,29 +3734,29 @@ void ILibencodeblock( unsigned char in[3], unsigned char out[4], int len )
 }
 
 /*! \fn ILibBase64Encode(unsigned char* input, const int inputlen, unsigned char** output)
-\brief Base64 encode a stream adding padding and line breaks as per spec.
-\par
-\b Note: The encoded stream must be freed
-\param input The stream to encode
-\param inputlen The length of \a input
-\param output The encoded stream
-\returns The length of the encoded stream
+    \brief Base64 encode a stream adding padding and line breaks as per spec.
+    \par
+    \b Note: The encoded stream must be freed
+    \param input The stream to encode
+    \param inputlen The length of \a input
+    \param output The encoded stream
+    \returns The length of the encoded stream
 */
 int ILibBase64Encode(unsigned char* input, const int inputlen, unsigned char** output)
 {
     unsigned char* out;
     unsigned char* in;
-
+    
     *output = (unsigned char*)malloc(((inputlen * 4) / 3) + 5);
     out = *output;
     in  = input;
-
+    
     if (input == NULL || inputlen == 0)
     {
         *output = NULL;
         return 0;
     }
-
+    
     while ((in+3) <= (input+inputlen))
     {
         ILibencodeblock(in, out, 3);
@@ -3930,14 +3769,14 @@ int ILibBase64Encode(unsigned char* input, const int inputlen, unsigned char** o
         out += 4;
     }
     else
-        if ((input+inputlen)-in == 2)
-        {
-            ILibencodeblock(in, out, 2);
-            out += 4;
-        }
-        *out = 0;
-
-        return (int)(out-*output);
+    if ((input+inputlen)-in == 2)
+    {
+        ILibencodeblock(in, out, 2);
+        out += 4;
+    }
+    *out = 0;
+    
+    return (int)(out-*output);
 }
 
 /* Decode 4 '6-bit' characters into 3 8-bit binary bytes */
@@ -3949,13 +3788,13 @@ void ILibdecodeblock( unsigned char in[4], unsigned char out[3] )
 }
 
 /*! \fn ILibBase64Decode(unsigned char* input, const int inputlen, unsigned char** output)
-\brief Decode a base64 encoded stream discarding padding, line breaks and noise
-\par
-\b Note: The decoded stream must be freed
-\param input The stream to decode
-\param inputlen The length of \a input
-\param output The decoded stream
-\returns The length of the decoded stream
+    \brief Decode a base64 encoded stream discarding padding, line breaks and noise
+    \par
+    \b Note: The decoded stream must be freed
+    \param input The stream to decode
+    \param inputlen The length of \a input
+    \param output The decoded stream
+    \returns The length of the decoded stream
 */
 int ILibBase64Decode(unsigned char* input, const int inputlen, unsigned char** output)
 {
@@ -3964,17 +3803,17 @@ int ILibBase64Decode(unsigned char* input, const int inputlen, unsigned char** o
     unsigned char v;
     unsigned char in[4];
     int i, len;
-
+    
     if (input == NULL || inputlen == 0)
     {
         *output = NULL;
         return 0;
     }
-
+    
     *output = (unsigned char*)malloc(((inputlen * 3) / 4) + 4);
     out = *output;
     inptr = input;
-
+    
     while( inptr <= (input+inputlen) )
     {
         for( len = 0, i = 0; i < 4 && inptr <= (input+inputlen); i++ )
@@ -4009,12 +3848,12 @@ int ILibBase64Decode(unsigned char* input, const int inputlen, unsigned char** o
 }
 
 /*! \fn ILibInPlaceXmlUnEscape(char* data)
-\brief Unescapes a string according to XML parsing rules
-\par
-Since an escaped XML string is always larger than its unescaped form, this method
-will overwrite the escaped string with the unescaped string, while decoding.
-\param data The XML string to unescape
-\returns The length of the unescaped XML string
+    \brief Unescapes a string according to XML parsing rules
+    \par
+    Since an escaped XML string is always larger than its unescaped form, this method
+    will overwrite the escaped string with the unescaped string, while decoding.
+    \param data The XML string to unescape
+    \returns The length of the unescaped XML string
 */
 int ILibInPlaceXmlUnEscape(char* data)
 {
@@ -4088,11 +3927,11 @@ int ILibInPlaceXmlUnEscape(char* data)
 }
 
 /*! \fn ILibXmlEscapeLength(const char* data)
-\brief Calculates the minimum required buffer space, to escape an xml string
-\par
-\b Note: This calculation does not include space for a null terminator
-\param data The XML string to calculate buffer requirments with
-\returns The minimum required buffer size
+    \brief Calculates the minimum required buffer space, to escape an xml string
+    \par
+    \b Note: This calculation does not include space for a null terminator
+    \param data The XML string to calculate buffer requirments with
+    \returns The minimum required buffer size
 */
 int ILibXmlEscapeLength(const char* data)
 {
@@ -4101,22 +3940,22 @@ int ILibXmlEscapeLength(const char* data)
     {
         switch (data[i])
         {
-        case '"':
+            case '"':
             j += 6;
             break;
-        case '\'':
+            case '\'':
             j += 6;
             break;
-        case '<':
+            case '<':
             j += 4;
             break;
-        case '>':
+            case '>':
             j += 4;
             break;
-        case '&':
+            case '&':
             j += 5;
             break;
-        default:
+            default:
             j++;
         }
         i++;
@@ -4126,22 +3965,22 @@ int ILibXmlEscapeLength(const char* data)
 
 
 /*! \fn ILibXmlEscape(char* outdata, const char* indata)
-\brief Escapes a string according to XML parsing rules
-\par
-\b Note: \a outdata must be pre-allocated and freed
-\param outdata The escaped XML string
-\param indata The string to escape
-\returns The length of the escaped string
+    \brief Escapes a string according to XML parsing rules
+    \par
+    \b Note: \a outdata must be pre-allocated and freed
+    \param outdata The escaped XML string
+    \param indata The string to escape
+    \returns The length of the escaped string
 */
 int ILibXmlEscape(char* outdata, const char* indata)
 {
     int i=0;
     int inlen;
     char* out;
-
+    
     out = outdata;
     inlen = (int)strlen(indata);
-
+    
     for (i=0; i < inlen; i++)
     {
         if (indata[i] == '"')
@@ -4150,48 +3989,48 @@ int ILibXmlEscape(char* outdata, const char* indata)
             out = out + 6;
         }
         else
-            if (indata[i] == '\'')
-            {
-                memcpy(out, "&apos;", 6);
-                out = out + 6;
-            }
-            else
-                if (indata[i] == '<')
-                {
-                    memcpy(out, "&lt;", 4);
-                    out = out + 4;
-                }
-                else
-                    if (indata[i] == '>')
-                    {
-                        memcpy(out, "&gt;", 4);
-                        out = out + 4;
-                    }
-                    else
-                        if (indata[i] == '&')
-                        {
-                            memcpy(out, "&amp;", 5);
-                            out = out + 5;
-                        }
-                        else
-                        {
-                            out[0] = indata[i];
-                            out++;
-                        }
+        if (indata[i] == '\'')
+        {
+            memcpy(out, "&apos;", 6);
+            out = out + 6;
+        }
+        else
+        if (indata[i] == '<')
+        {
+            memcpy(out, "&lt;", 4);
+            out = out + 4;
+        }
+        else
+        if (indata[i] == '>')
+        {
+            memcpy(out, "&gt;", 4);
+            out = out + 4;
+        }
+        else
+        if (indata[i] == '&')
+        {
+            memcpy(out, "&amp;", 5);
+            out = out + 5;
+        }
+        else
+        {
+            out[0] = indata[i];
+            out++;
+        }
     }
-
+    
     out[0] = 0;
-
+    
     return (int)(out - outdata);
 }
 
 /*! \fn ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, void* Callback, void* Destroy)
-\brief Registers a timed callback with millisecond granularity
-\param LifetimeMonitorObject The \a ILibLifeTime object to add the timed callback to
-\param data The data object to associate with the timed callback
-\param ms The number of milliseconds for the timed callback
-\param Callback The callback function pointer to trigger when the specified time elapses
-\param Destroy The abort function pointer, which triggers all non-triggered timed callbacks, upon shutdown
+    \brief Registers a timed callback with millisecond granularity
+    \param LifetimeMonitorObject The \a ILibLifeTime object to add the timed callback to
+    \param data The data object to associate with the timed callback
+    \param ms The number of milliseconds for the timed callback
+    \param Callback The callback function pointer to trigger when the specified time elapses
+    \param Destroy The abort function pointer, which triggers all non-triggered timed callbacks, upon shutdown
 */
 void ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, ILibLifeTime_OnCallback Callback, ILibLifeTime_OnCallback Destroy)
 {
@@ -4203,12 +4042,12 @@ void ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, ILibLife
     void *node;
 
     memset(ltms,0,sizeof(struct LifeTimeMonitorData));
-
+    
     //
     // Get the current time for reference
     //
     gettimeofday(&tv,NULL);
-
+    
     //
     // Set the trigger time
     //
@@ -4230,8 +4069,6 @@ void ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, ILibLife
     }
     else
     {
-        // 如果按照预期时间排序节点，有可能会导致remove节点会在add之前添加，
-        // 这将导致chain节点会不断增加，故这里注释掉
         //while(node!=NULL)
         //{
         //    temp = (struct LifeTimeMonitorData*)ILibLinkedList_GetDataFromNode(node);
@@ -4244,7 +4081,7 @@ void ILibLifeTime_AddEx(void *LifetimeMonitorObject,void *data, int ms, ILibLife
         //}
         //if(node==NULL)
         //{
-        ILibLinkedList_AddTail(UPnPLifeTime->ObjectList,ltms);
+            ILibLinkedList_AddTail(UPnPLifeTime->ObjectList,ltms);
         //}
         //else if(ILibLinkedList_GetNode_Head(UPnPLifeTime->ObjectList)==ltms)
         //{
@@ -4316,17 +4153,17 @@ void ILibLifeTime_Check(void *LifeTimeMonitorObject,void *readset, void *writese
         EVT = (struct LifeTimeMonitorData*)node;
         if(removed==0)
         {
-#ifdef MEMORY_CHECK
-#ifdef WIN32
-            _CrtCheckMemory();
-#endif
-#endif
-            EVT->CallbackPtr(EVT->data);
-#ifdef MEMORY_CHECK
-#ifdef WIN32
-            _CrtCheckMemory();
-#endif
-#endif
+            #ifdef MEMORY_CHECK
+            #ifdef WIN32
+                    _CrtCheckMemory();
+            #endif
+            #endif
+                    EVT->CallbackPtr(EVT->data);
+            #ifdef MEMORY_CHECK
+            #ifdef WIN32
+                    _CrtCheckMemory();
+            #endif
+            #endif
         }
         else
         {
@@ -4336,7 +4173,7 @@ void ILibLifeTime_Check(void *LifeTimeMonitorObject,void *readset, void *writese
             //
             if(EVT->DestroyPtr!=NULL) {EVT->DestroyPtr(EVT->data);}
         }
-
+        
         free(EVT);
         node = ILibQueue_DeQueue(EventQueue);
     }
@@ -4357,9 +4194,9 @@ void ILibLifeTime_Check(void *LifeTimeMonitorObject,void *readset, void *writese
 }
 
 /*! \fn ILibLifeTime_Remove(void *LifeTimeToken, void *data)
-\brief Removes a timed callback from an \a ILibLifeTime module
-\param LifeTimeToken The \a ILibLifeTime object to remove the callback from
-\param data The data object to remove
+    \brief Removes a timed callback from an \a ILibLifeTime module
+    \param LifeTimeToken The \a ILibLifeTime object to remove the callback from
+    \param data The data object to remove
 */
 void ILibLifeTime_Remove(void *LifeTimeToken, void *data)
 {
@@ -4417,8 +4254,8 @@ void ILibLifeTime_Remove(void *LifeTimeToken, void *data)
 }
 
 /*! \fn ILibLifeTime_Flush(void *LifeTimeToken)
-\brief Flushes all timed callbacks from an ILibLifeTime module
-\param LifeTimeToken The \a ILibLifeTime object to flush items from
+    \brief Flushes all timed callbacks from an ILibLifeTime module
+    \param LifeTimeToken The \a ILibLifeTime object to flush items from
 */
 void ILibLifeTime_Flush(void *LifeTimeToken)
 {
@@ -4452,11 +4289,11 @@ void ILibLifeTime_Destroy(void *LifeTimeToken)
 }
 
 /*! \fn ILibCreateLifeTime(void *Chain)
-\brief Creates an empty ILibLifeTime container for Timed Callbacks.
-\par
-\b Note: All events are triggered on the MicroStack thread. Developers must \b NEVER block this thread!
-\param Chain The chain to add the \a ILibLifeTime to
-\returns An \a ILibLifeTime token, which is used to add/remove callbacks
+    \brief Creates an empty ILibLifeTime container for Timed Callbacks.
+    \par
+    \b Note: All events are triggered on the MicroStack thread. Developers must \b NEVER block this thread!
+    \param Chain The chain to add the \a ILibLifeTime to
+    \returns An \a ILibLifeTime token, which is used to add/remove callbacks
 */
 void *ILibCreateLifeTime(void *Chain)
 {
@@ -4474,15 +4311,15 @@ void *ILibCreateLifeTime(void *Chain)
 }
 
 /*! \fn ILibFindEntryInTable(char *Entry, char **Table)
-\brief Find the index in \a Table that contains \a Entry.
-\param Entry The char* to find
-\param Table Array of char*, where the last entry is NULL
-\returns the index into \a Table, that contains \a Entry
+    \brief Find the index in \a Table that contains \a Entry.
+    \param Entry The char* to find
+    \param Table Array of char*, where the last entry is NULL
+    \returns the index into \a Table, that contains \a Entry
 */
 int ILibFindEntryInTable(char *Entry, char **Table)
 {
     int i = 0;
-
+    
     while(Table[i]!=NULL)
     {
         if(strcmp(Entry,Table[i])==0)
@@ -4491,13 +4328,13 @@ int ILibFindEntryInTable(char *Entry, char **Table)
         }
         ++i;
     }
-
+    
     return(-1);
 }
 
 /*! \fn ILibLinkedList_Create()
-\brief Create an empty Linked List Data Structure
-\returns Empty Linked List
+    \brief Create an empty Linked List Data Structure
+    \returns Empty Linked List
 */
 void* ILibLinkedList_Create()
 {
@@ -4505,14 +4342,14 @@ void* ILibLinkedList_Create()
     root->Head = NULL;
     root->Tail = NULL;
     root->count=0;
-    sem_init(&(root->LOCK),0,1);
+    lock_init(&(root->LOCK),0,1);
     return(root);
 }
 
 /*! \fn ILibLinkedList_ShallowCopy(void *LinkedList)
-\brief Create a shallow copy of a linked list
-\param LinkedList The linked list to copy
-\returns The copy of the supplied linked list
+    \brief Create a shallow copy of a linked list
+    \param LinkedList The linked list to copy
+    \returns The copy of the supplied linked list
 */
 void* ILibLinkedList_ShallowCopy(void *LinkedList)
 {
@@ -4527,9 +4364,9 @@ void* ILibLinkedList_ShallowCopy(void *LinkedList)
 }
 
 /*! \fn ILibLinkedList_GetNode_Head(void *LinkedList)
-\brief Returns the Head node of a linked list data structure
-\param LinkedList The linked list
-\returns The first node of the linked list
+    \brief Returns the Head node of a linked list data structure
+    \param LinkedList The linked list
+    \returns The first node of the linked list
 */
 void* ILibLinkedList_GetNode_Head(void *LinkedList)
 {
@@ -4537,9 +4374,9 @@ void* ILibLinkedList_GetNode_Head(void *LinkedList)
 }
 
 /*! \fn ILibLinkedList_GetNode_Tail(void *LinkedList)
-\brief Returns the Tail node of a linked list data structure
-\param LinkedList The linked list
-\returns The last node of the linked list
+    \brief Returns the Tail node of a linked list data structure
+    \param LinkedList The linked list
+    \returns The last node of the linked list
 */
 void* ILibLinkedList_GetNode_Tail(void *LinkedList)
 {
@@ -4547,9 +4384,9 @@ void* ILibLinkedList_GetNode_Tail(void *LinkedList)
 }
 
 /*! \fn ILibLinkedList_GetNextNode(void *LinkedList_Node)
-\brief Returns the next node, from the specified linked list node
-\param LinkedList_Node The current linked list node
-\returns The next adjacent node of the current one
+    \brief Returns the next node, from the specified linked list node
+    \param LinkedList_Node The current linked list node
+    \returns The next adjacent node of the current one
 */
 void* ILibLinkedList_GetNextNode(void *LinkedList_Node)
 {
@@ -4557,18 +4394,18 @@ void* ILibLinkedList_GetNextNode(void *LinkedList_Node)
 }
 
 /*! \fn ILibLinkedList_GetPreviousNode(void *LinkedList_Node)
-\brief Returns the previous node, from the specified linked list node
-\param LinkedList_Node The current linked list node
-\returns The previous adjacent node of the current one
+    \brief Returns the previous node, from the specified linked list node
+    \param LinkedList_Node The current linked list node
+    \returns The previous adjacent node of the current one
 */void* ILibLinkedList_GetPreviousNode(void *LinkedList_Node)
 {
     return(((struct ILibLinkedListNode*)LinkedList_Node)->Previous);
 }
 
 /*! \fn ILibLinkedList_GetDataFromNode(void *LinkedList_Node)
-\brief Returns the data pointed to by a linked list node
-\param LinkedList_Node The current linked list node
-\returns The data pointer
+    \brief Returns the data pointed to by a linked list node
+    \param LinkedList_Node The current linked list node
+    \returns The data pointer
 */
 void *ILibLinkedList_GetDataFromNode(void *LinkedList_Node)
 {
@@ -4576,9 +4413,9 @@ void *ILibLinkedList_GetDataFromNode(void *LinkedList_Node)
 }
 
 /*! \fn ILibLinkedList_InsertBefore(void *LinkedList_Node, void *data)
-\brief Creates a new element, and inserts it before the given node
-\param LinkedList_Node The linked list node
-\param data The data pointer to be referenced
+    \brief Creates a new element, and inserts it before the given node
+    \param LinkedList_Node The linked list node
+    \param data The data pointer to be referenced
 */
 void ILibLinkedList_InsertBefore(void *LinkedList_Node, void *data)
 {
@@ -4589,7 +4426,7 @@ void ILibLinkedList_InsertBefore(void *LinkedList_Node, void *data)
     newNode->Data = data;
     newNode->Root = r;
 
-
+    
     //
     // Attach ourselved before the specified node
     //
@@ -4611,9 +4448,9 @@ void ILibLinkedList_InsertBefore(void *LinkedList_Node, void *data)
 }
 
 /*! \fn ILibLinkedList_InsertAfter(void *LinkedList_Node, void *data)
-\brief Creates a new element, and appends it after the given node
-\param LinkedList_Node The linked list node
-\param data The data pointer to be referenced
+    \brief Creates a new element, and appends it after the given node
+    \param LinkedList_Node The linked list node
+    \param data The data pointer to be referenced
 */void ILibLinkedList_InsertAfter(void *LinkedList_Node, void *data)
 {
     struct ILibLinkedListNode_Root *r = ((struct ILibLinkedListNode*)LinkedList_Node)->Root;
@@ -4647,15 +4484,15 @@ void ILibLinkedList_InsertBefore(void *LinkedList_Node, void *data)
 }
 
 /*! \fn ILibLinkedList_Remove(void *LinkedList_Node)
-\brief Removes the given node from a linked list data structure
-\param LinkedList_Node The linked list node to remove
-\returns The next node
+    \brief Removes the given node from a linked list data structure
+    \param LinkedList_Node The linked list node to remove
+    \returns The next node
 */
 void* ILibLinkedList_Remove(void *LinkedList_Node)
 {
     struct ILibLinkedListNode_Root *r = ((struct ILibLinkedListNode*)LinkedList_Node)->Root;
     struct ILibLinkedListNode *n = (struct ILibLinkedListNode*) LinkedList_Node;
-
+    
     void* RetVal = n->Next;
 
     if(n->Previous!=NULL)
@@ -4687,13 +4524,13 @@ void* ILibLinkedList_Remove(void *LinkedList_Node)
 }
 
 /*! \fn ILibLinkedList_Remove_ByData(void *LinkedList, void *data)
-\brief Removes a node from the Linked list, via comparison
-\par
-Given a data pointer, will traverse the linked list data structure, deleting
-elements that point to this data pointer.
-\param LinkedList The linked list to traverse
-\param data The data pointer to compare
-\returns Non-zero if an item was removed
+    \brief Removes a node from the Linked list, via comparison
+    \par
+    Given a data pointer, will traverse the linked list data structure, deleting
+    elements that point to this data pointer.
+    \param LinkedList The linked list to traverse
+    \param data The data pointer to compare
+    \returns Non-zero if an item was removed
 */
 int ILibLinkedList_Remove_ByData(void *LinkedList, void *data)
 {
@@ -4717,9 +4554,9 @@ int ILibLinkedList_Remove_ByData(void *LinkedList, void *data)
 }
 
 /*! \fn ILibLinkedList_AddHead(void *LinkedList, void *data)
-\brief Creates a new element, and inserts it at the top of the linked list.
-\param LinkedList The linked list
-\param data The data pointer to reference
+    \brief Creates a new element, and inserts it at the top of the linked list.
+    \param LinkedList The linked list
+    \param data The data pointer to reference
 */
 void ILibLinkedList_AddHead(void *LinkedList, void *data)
 {
@@ -4744,9 +4581,9 @@ void ILibLinkedList_AddHead(void *LinkedList, void *data)
 }
 
 /*! \fn ILibLinkedList_AddTail(void *LinkedList, void *data)
-\brief Creates a new element, and appends it to the end of the linked list
-\param LinkedList The linked list
-\param data The data pointer to reference
+    \brief Creates a new element, and appends it to the end of the linked list
+    \param LinkedList The linked list
+    \param data The data pointer to reference
 */
 void ILibLinkedList_AddTail(void *LinkedList, void *data)
 {
@@ -4771,33 +4608,33 @@ void ILibLinkedList_AddTail(void *LinkedList, void *data)
 }
 
 /*! \fn ILibLinkedList_Lock(void *LinkedList)
-\brief Locks the linked list with a non-recursive lock
-\param LinkedList The linked list
+    \brief Locks the linked list with a non-recursive lock
+    \param LinkedList The linked list
 */
 void ILibLinkedList_Lock(void *LinkedList)
 {
     struct ILibLinkedListNode_Root *r = (struct ILibLinkedListNode_Root*)LinkedList;
 
-    sem_wait(&(r->LOCK));
+    lock_wait(&(r->LOCK));
 }
 
 /*! \fn void ILibLinkedList_UnLock(void *LinkedList)
-\brief Unlocks the linked list's non-recursive lock
-\param LinkedList The linked list
+    \brief Unlocks the linked list's non-recursive lock
+    \param LinkedList The linked list
 */
 void ILibLinkedList_UnLock(void *LinkedList)
 {
     struct ILibLinkedListNode_Root *r = (struct ILibLinkedListNode_Root*)LinkedList;
-
-    sem_post(&(r->LOCK));
+    
+    lock_post(&(r->LOCK));
 }
 
 
 /*! \fn ILibLinkedList_Destroy(void *LinkedList)
-\brief Frees the resources used by the linked list.
-\par
-\b Note: The data pointer referenced needs to be freed by the user if required
-\param LinkedList The linked list
+    \brief Frees the resources used by the linked list.
+    \par
+    \b Note: The data pointer referenced needs to be freed by the user if required
+    \param LinkedList The linked list
 */
 void ILibLinkedList_Destroy(void *LinkedList)
 {
@@ -4807,15 +4644,15 @@ void ILibLinkedList_Destroy(void *LinkedList)
     {
         ILibLinkedList_Remove(ILibLinkedList_GetNode_Head(LinkedList));
     }
-    sem_destroy(&(r->LOCK));
+    lock_destroy(&(r->LOCK));
     free(r);
 }
 
 
 /*! \fn ILibLinkedList_GetCount(void *LinkedList)
-\brief Returns the number of nodes in the linked list
-\param LinkedList The linked list
-\returns Number of elements in the linked list
+    \brief Returns the number of nodes in the linked list
+    \param LinkedList The linked list
+    \returns Number of elements in the linked list
 */
 long ILibLinkedList_GetCount(void *LinkedList)
 {
@@ -4838,13 +4675,13 @@ int ILibString_IndexOfFirstWhiteSpace(const char *inString, int inStringLength)
 }
 
 /*! \fn ILibString_EndsWithEx(const char *inString, int inStringLength, const char *endWithString, int endWithStringLength, int caseSensitive)
-\brief Determines if a string ends with a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param endWithString The substring to match
-\param endWithStringLength The length of \a startsWithString
-\param caseSensitive 0 if the matching is case-insensitive
-\returns Non-zero if the string starts with the substring
+    \brief Determines if a string ends with a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param endWithString The substring to match
+    \param endWithStringLength The length of \a startsWithString
+    \param caseSensitive 0 if the matching is case-insensitive
+    \returns Non-zero if the string starts with the substring
 */
 int ILibString_EndsWithEx(const char *inString, int inStringLength, const char *endWithString, int endWithStringLength, int caseSensitive)
 {
@@ -4864,25 +4701,25 @@ int ILibString_EndsWithEx(const char *inString, int inStringLength, const char *
     return(RetVal);
 }
 /*! \fn ILibString_EndsWith(const char *inString, int inStringLength, const char *endWithString, int endWithStringLength)
-\brief Determines if a string ends with a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param endWithString The substring to match
-\param endWithStringLength The length of \a startsWithString
-\returns Non-zero if the string starts with the substring
+    \brief Determines if a string ends with a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param endWithString The substring to match
+    \param endWithStringLength The length of \a startsWithString
+    \returns Non-zero if the string starts with the substring
 */
 int ILibString_EndsWith(const char *inString, int inStringLength, const char *endWithString, int endWithStringLength)
 {
     return(ILibString_EndsWithEx(inString,inStringLength,endWithString,endWithStringLength,1));
 }
 /*! \fn ILibString_StartsWithEx(const char *inString, int inStringLength, const char *startsWithString, int startsWithStringLength, int caseSensitive)
-\brief Determines if a string starts with a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param startsWithString The substring to match
-\param startsWithStringLength The length of \a startsWithString
-\param caseSensitive Non-zero if match is to be case sensitive
-\returns Non-zero if the string starts with the substring
+    \brief Determines if a string starts with a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param startsWithString The substring to match
+    \param startsWithStringLength The length of \a startsWithString
+    \param caseSensitive Non-zero if match is to be case sensitive
+    \returns Non-zero if the string starts with the substring
 */
 int ILibString_StartsWithEx(const char *inString, int inStringLength, const char *startsWithString, int startsWithStringLength, int caseSensitive)
 {
@@ -4902,25 +4739,25 @@ int ILibString_StartsWithEx(const char *inString, int inStringLength, const char
     return(RetVal);
 }
 /*! \fn ILibString_StartsWith(const char *inString, int inStringLength, const char *startsWithString, int startsWithStringLength)
-\brief Determines if a string starts with a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param startsWithString The substring to match
-\param startsWithStringLength The length of \a startsWithString
-\returns Non-zero if the string starts with the substring
+    \brief Determines if a string starts with a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param startsWithString The substring to match
+    \param startsWithStringLength The length of \a startsWithString
+    \returns Non-zero if the string starts with the substring
 */
 int ILibString_StartsWith(const char *inString, int inStringLength, const char *startsWithString, int startsWithStringLength)
 {
     return(ILibString_StartsWithEx(inString,inStringLength,startsWithString,startsWithStringLength,1));
 }
 /*! \fn ILibString_IndexOfEx(const char *inString, int inStringLength, const char *indexOf, int indexOfLength,  int caseSensitive)
-\brief Returns the position index of the first occurance of a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param indexOf The substring to search for
-\param indexOfLength The length of \a lastIndexOf
-\param caseSensitive Non-zero if the match is case sensitive
-\returns Position index of first occurance. -1 if the substring is not found
+    \brief Returns the position index of the first occurance of a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param indexOf The substring to search for
+    \param indexOfLength The length of \a lastIndexOf
+    \param caseSensitive Non-zero if the match is case sensitive
+    \returns Position index of first occurance. -1 if the substring is not found
 */
 int ILibString_IndexOfEx(const char *inString, int inStringLength, const char *indexOf, int indexOfLength,  int caseSensitive)
 {
@@ -4944,25 +4781,25 @@ int ILibString_IndexOfEx(const char *inString, int inStringLength, const char *i
     return(RetVal);
 }
 /*! \fn ILibString_IndexOf(const char *inString, int inStringLength, const char *indexOf, int indexOfLength)
-\brief Returns the position index of the first occurance of a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param indexOf The substring to search for
-\param indexOfLength The length of \a lastIndexOf
-\returns Position index of first occurance. -1 if the substring is not found
+    \brief Returns the position index of the first occurance of a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param indexOf The substring to search for
+    \param indexOfLength The length of \a lastIndexOf
+    \returns Position index of first occurance. -1 if the substring is not found
 */
 int ILibString_IndexOf(const char *inString, int inStringLength, const char *indexOf, int indexOfLength)
 {
     return(ILibString_IndexOfEx(inString,inStringLength,indexOf,indexOfLength,1));
 }
 /*! \fn ILibString_LastIndexOfEx(const char *inString, int inStringLength, const char *lastIndexOf, int lastIndexOfLength, int caseSensitive)
-\brief Returns the position index of the last occurance of a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param lastIndexOf The substring to search for
-\param lastIndexOfLength The length of \a lastIndexOf
-\param caseSensitive 0 for case insensitive matching, non-zero for case-sensitive matching
-\returns Position index of last occurance. -1 if the substring is not found
+    \brief Returns the position index of the last occurance of a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param lastIndexOf The substring to search for
+    \param lastIndexOfLength The length of \a lastIndexOf
+    \param caseSensitive 0 for case insensitive matching, non-zero for case-sensitive matching
+    \returns Position index of last occurance. -1 if the substring is not found
 */
 int ILibString_LastIndexOfEx(const char *inString, int inStringLength, const char *lastIndexOf, int lastIndexOfLength, int caseSensitive)
 {
@@ -4986,28 +4823,28 @@ int ILibString_LastIndexOfEx(const char *inString, int inStringLength, const cha
     return(RetVal);
 }
 /*! \fn ILibString_LastIndexOf(const char *inString, int inStringLength, const char *lastIndexOf, int lastIndexOfLength)
-\brief Returns the position index of the last occurance of a given substring
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param lastIndexOf The substring to search for
-\param lastIndexOfLength The length of \a lastIndexOf
-\returns Position index of last occurance. -1 if the substring is not found
+    \brief Returns the position index of the last occurance of a given substring
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param lastIndexOf The substring to search for
+    \param lastIndexOfLength The length of \a lastIndexOf
+    \returns Position index of last occurance. -1 if the substring is not found
 */
 int ILibString_LastIndexOf(const char *inString, int inStringLength, const char *lastIndexOf, int lastIndexOfLength)
 {
     return(ILibString_LastIndexOfEx(inString,inStringLength,lastIndexOf,lastIndexOfLength,1));
 }
 /*! \fn ILibString_Replace(const char *inString, int inStringLength, const char *replaceThis, int replaceThisLength, const char *replaceWithThis, int replaceWithThisLength)
-\brief Replaces all occurances of a given substring that occur in the input string with another substring
-\par
-\b Note: \a Returned string must be freed
-\param inString Pointer to char* to process
-\param inStringLength The length of \a inString
-\param replaceThis The substring to replace
-\param replaceThisLength The length of \a replaceThis
-\param replaceWithThis The substring to substitute for \a replaceThis
-\param replaceWithThisLength The length of \a replaceWithThis
-\returns New string with replaced values
+    \brief Replaces all occurances of a given substring that occur in the input string with another substring
+    \par
+    \b Note: \a Returned string must be freed
+    \param inString Pointer to char* to process
+    \param inStringLength The length of \a inString
+    \param replaceThis The substring to replace
+    \param replaceThisLength The length of \a replaceThis
+    \param replaceWithThis The substring to substitute for \a replaceThis
+    \param replaceWithThisLength The length of \a replaceWithThis
+    \returns New string with replaced values
 */
 char *ILibString_Replace(const char *inString, int inStringLength, const char *replaceThis, int replaceThisLength, const char *replaceWithThis, int replaceWithThisLength)
 {
@@ -5062,12 +4899,12 @@ char* ILibString_Copy(const char *inString, int length)
     return(RetVal);
 }
 /*! \fn ILibString_ToUpper(const char *inString, int length)
-\brief Coverts the given string to upper case
-\par
-\b Note: \a Returned string must be freed
-\param inString Pointer to char* to convert to upper case
-\param length The length of \a inString
-\returns Converted string
+    \brief Coverts the given string to upper case
+    \par
+    \b Note: \a Returned string must be freed
+    \param inString Pointer to char* to convert to upper case
+    \param length The length of \a inString
+    \returns Converted string
 */
 char *ILibString_ToUpper(const char *inString, int length)
 {
@@ -5077,12 +4914,12 @@ char *ILibString_ToUpper(const char *inString, int length)
     return(RetVal);
 }
 /*! \fn ILibString_ToLower(const char *inString, int length)
-\brief Coverts the given string to lower case
-\par
-\b Note: \a Returned string must be freed
-\param inString Pointer to char* to convert to lower case
-\param length The length of \a inString
-\returns Converted string
+    \brief Coverts the given string to lower case
+    \par
+    \b Note: \a Returned string must be freed
+    \param inString Pointer to char* to convert to lower case
+    \param length The length of \a inString
+    \returns Converted string
 */
 char *ILibString_ToLower(const char *inString, int length)
 {
@@ -5092,12 +4929,12 @@ char *ILibString_ToLower(const char *inString, int length)
     return(RetVal);
 }
 /*! \fn ILibReadFileFromDiskEx(char **Target, char *FileName)
-\brief Reads a file into a char *
-\par
-\b Note: \a Target must be freed
-\param Target Pointer to char* that will contain the data
-\param FileName Filename of the file to read
-\returns length of the data read
+    \brief Reads a file into a char *
+    \par
+    \b Note: \a Target must be freed
+    \param Target Pointer to char* that will contain the data
+    \param FileName Filename of the file to read
+    \returns length of the data read
 */
 int ILibReadFileFromDiskEx(char **Target, char *FileName)
 {
@@ -5111,7 +4948,7 @@ int ILibReadFileFromDiskEx(char **Target, char *FileName)
     }
 
     fseek(SourceFile,0,SEEK_END);
-
+    
     SourceFileLength = (int)ftell(SourceFile);
 
     fseek(SourceFile,0,SEEK_SET);
@@ -5125,11 +4962,11 @@ int ILibReadFileFromDiskEx(char **Target, char *FileName)
 
 
 /*! \fn ILibReadFileFromDisk(char *FileName)
-\brief Reads a file into a char *
-\par
-\b Note: Data must be null terminated
-\param FileName Filename of the file to read
-\returns data read
+    \brief Reads a file into a char *
+    \par
+    \b Note: Data must be null terminated
+    \param FileName Filename of the file to read
+    \returns data read
 */
 char *ILibReadFileFromDisk(char *FileName)
 {
@@ -5139,11 +4976,11 @@ char *ILibReadFileFromDisk(char *FileName)
 }
 
 /*! \fn ILibWriteStringToDisk(char *FileName, char *data)
-\brief Writes a null terminated string to disk
-\par
-\b Note: Files that already exist will be overwritten
-\param FileName Filename of the file to write
-\param data data to write
+    \brief Writes a null terminated string to disk
+    \par
+    \b Note: Files that already exist will be overwritten
+    \param FileName Filename of the file to write
+    \param data data to write
 */
 void ILibWriteStringToDisk(char *FileName, char *data)
 {
@@ -5168,9 +5005,7 @@ void ILibDeleteFileFromDisk(char *FileName)
 }
 int ILibGetCurrentTimezoneOffset_Minutes()
 {
-#if defined(__SYMBIAN32__)
-    return(0);
-#elif !defined(_WIN32_WCE)
+#if !defined(_WIN32_WCE)
     int offset;
 
     tzset();
@@ -5216,7 +5051,7 @@ int ILibGetCurrentTimezoneOffset_Minutes()
 }
 int ILibIsDaylightSavingsTime()
 {
-#if !defined(_WIN32_WCE) && !defined(__SYMBIAN32__)
+#if !defined(_WIN32_WCE)
     tzset();
     return(daylight);
 #else
@@ -5228,54 +5063,54 @@ int ILibIsDaylightSavingsTime()
 #endif
 }
 #if defined(WIN32) || defined(_WIN32_WCE)
-void ILibGetTimeOfDay(struct timeval *tp)
-{
-#if !defined(_WIN32_WCE)
-    struct __timeb64 t;
+    void ILibGetTimeOfDay(struct timeval *tp)
+    {
+        #if !defined(_WIN32_WCE)
+            struct __timeb64 t;
 
-    _ftime64(&t);
-    tp->tv_usec = ((long)t.millitm )*1000;
-    tp->tv_sec = (long)t.time;
-#else
-    //
-    // WinCE Specific
-    //
-    SYSTEMTIME st;
-    FILETIME ft;
-    ULARGE_INTEGER currentTime,epochTime;
-    DWORD EPOCH_HI = 27111902;
-    DWORD EPOCH_LOW = 3577643008;
-    ULONGLONG posixTime;
+            _ftime64(&t);
+            tp->tv_usec = ((long)t.millitm )*1000;
+            tp->tv_sec = (long)t.time;
+        #else
+            //
+            // WinCE Specific
+            //
+            SYSTEMTIME st;
+            FILETIME ft;
+            ULARGE_INTEGER currentTime,epochTime;
+            DWORD EPOCH_HI = 27111902;
+            DWORD EPOCH_LOW = 3577643008;
+            ULONGLONG posixTime;
 
-    //
-    // Get the current time, in UTC
-    //
-    GetSystemTime((&st));
-    SystemTimeToFileTime(&st,&ft);
+            //
+            // Get the current time, in UTC
+            //
+            GetSystemTime((&st));
+            SystemTimeToFileTime(&st,&ft);
+            
+            memset(&currentTime,0,sizeof(ULARGE_INTEGER));
+            memset(&epochTime,0,sizeof(ULARGE_INTEGER));
 
-    memset(&currentTime,0,sizeof(ULARGE_INTEGER));
-    memset(&epochTime,0,sizeof(ULARGE_INTEGER));
+            currentTime.LowPart = ft.dwLowDateTime;
+            currentTime.HighPart = ft.dwHighDateTime;
 
-    currentTime.LowPart = ft.dwLowDateTime;
-    currentTime.HighPart = ft.dwHighDateTime;
-
-    epochTime.LowPart = EPOCH_LOW;
-    epochTime.HighPart = EPOCH_HI;
-
-
-    //
-    // WinCE represents time as number of 100ns intervals since Jan 1, 1601
-    // But Posix represents it as number of sec/usec since Jan 1, 1970
-    //
-    posixTime = currentTime.QuadPart - epochTime.QuadPart;
+            epochTime.LowPart = EPOCH_LOW;
+            epochTime.HighPart = EPOCH_HI;
 
 
-    tp->tv_sec = (long)(posixTime / 10000000); // 100 ns intervals to second intervals
-    tp->tv_usec = (long)((posixTime / 10) - (tp->tv_sec * 1000000)); 
+            //
+            // WinCE represents time as number of 100ns intervals since Jan 1, 1601
+            // But Posix represents it as number of sec/usec since Jan 1, 1970
+            //
+            posixTime = currentTime.QuadPart - epochTime.QuadPart;
 
 
-#endif
-}
+            tp->tv_sec = (long)(posixTime / 10000000); // 100 ns intervals to second intervals
+            tp->tv_usec = (long)((posixTime / 10) - (tp->tv_sec * 1000000)); 
+
+        
+        #endif
+    }
 #endif
 
 int ILibReaderWriterLock_ReadLock(ILibReaderWriterLock rwLock)
@@ -5286,7 +5121,7 @@ int ILibReaderWriterLock_ReadLock(ILibReaderWriterLock rwLock)
 
     int AlreadyExiting = 0;
 
-    sem_wait(&(rw->CounterLock));
+    lock_wait(&(rw->CounterLock));
     AlreadyExiting = rw->Exit;
     if(rw->Exit==0)
     {
@@ -5300,11 +5135,11 @@ int ILibReaderWriterLock_ReadLock(ILibReaderWriterLock rwLock)
             ++rw->WaitingReaders;
         }
     }
-    sem_post(&(rw->CounterLock));
+    lock_post(&(rw->CounterLock));
 
     if(BlockRead!=0)
     {
-        sem_wait(&(rw->ReadLock));
+        lock_wait(&(rw->ReadLock));
     }
 
     //
@@ -5313,7 +5148,7 @@ int ILibReaderWriterLock_ReadLock(ILibReaderWriterLock rwLock)
     RetVal = rw->Exit;
     if(AlreadyExiting==0)
     {
-        sem_post(&(rw->ExitLock));
+        lock_post(&(rw->ExitLock));
     }
     return(RetVal);
 }
@@ -5322,28 +5157,28 @@ int ILibReaderWriterLock_ReadUnLock(ILibReaderWriterLock rwLock)
     struct ILibReaderWriterLock_Data *rw = (struct ILibReaderWriterLock_Data*)rwLock;
     int SignalWriter = 0;
 
-    sem_wait(&(rw->CounterLock));
-
+    lock_wait(&(rw->CounterLock));
+    
     if(rw->Exit!=0)
     {
         //
         // Unlock, and just abort
         //
-        sem_post(&(rw->CounterLock));
+        lock_post(&(rw->CounterLock));
         return(1);
     }
-
+    
 
     --rw->ActiveReaders;
     SignalWriter = (rw->ActiveReaders==0 && rw->PendingWriters>0);
-    sem_post(&(rw->CounterLock));
+    lock_post(&(rw->CounterLock));
 
     if(SignalWriter)
     {
-        sem_post(&(rw->WriteLock));
+        lock_post(&(rw->WriteLock));
     }
 
-    sem_wait(&(rw->ExitLock)); // This won't block. We're just keeping the semaphore value stable.
+    lock_wait(&(rw->ExitLock)); // This won't block. We're just keeping the semaphore value stable.
     return(0);
 }
 int ILibReaderWriterLock_WriteLock(ILibReaderWriterLock rwLock)
@@ -5353,18 +5188,18 @@ int ILibReaderWriterLock_WriteLock(ILibReaderWriterLock rwLock)
     int RetVal = 0;
     int AlreadyExiting = 0;
 
-    sem_wait(&(rw->CounterLock));
+    lock_wait(&(rw->CounterLock));
     AlreadyExiting = rw->Exit;
     if(rw->Exit==0)
     {
         ++rw->PendingWriters;
         BlockWrite = (rw->ActiveReaders>0 || rw->PendingWriters>1);
     }
-    sem_post(&(rw->CounterLock));
+    lock_post(&(rw->CounterLock));
 
     if(BlockWrite)
     {
-        sem_wait(&(rw->WriteLock));
+        lock_wait(&(rw->WriteLock));
     }
 
     //
@@ -5373,7 +5208,7 @@ int ILibReaderWriterLock_WriteLock(ILibReaderWriterLock rwLock)
     RetVal = rw->Exit;
     if(AlreadyExiting==0)
     {
-        sem_post(&(rw->ExitLock));
+        lock_post(&(rw->ExitLock));
     }
     return(RetVal);
 }
@@ -5383,14 +5218,14 @@ int ILibReaderWriterLock_WriteUnLock(ILibReaderWriterLock rwLock)
     int SignalAnotherWriter = 0;
     int SignalReaders = 0;
 
-    sem_wait(&(rw->CounterLock));
-
+    lock_wait(&(rw->CounterLock));
+    
     if(rw->Exit!=0)
     {
         //
         // Unlock, and just abort
         //
-        sem_post(&(rw->CounterLock));
+        lock_post(&(rw->CounterLock));
         return(1);
     }
 
@@ -5414,22 +5249,22 @@ int ILibReaderWriterLock_WriteUnLock(ILibReaderWriterLock rwLock)
             ++SignalReaders;
         }
     }
-    sem_post(&(rw->CounterLock));
+    lock_post(&(rw->CounterLock));
 
     if(SignalAnotherWriter)
     {
-        sem_post(&(rw->WriteLock));
+        lock_post(&(rw->WriteLock));
     }
     else
     {
         while(SignalReaders>0)
         {
             --SignalReaders;
-            sem_post(&(rw->ReadLock));
+            lock_post(&(rw->ReadLock));
         }
     }
 
-    sem_wait(&(rw->ExitLock)); // This won't block. We're just keeping the semaphore value stable.
+    lock_wait(&(rw->ExitLock)); // This won't block. We're just keeping the semaphore value stable.
     return(0);
 }
 void ILibReaderWriterLock_Destroy2(ILibReaderWriterLock rwLock)
@@ -5438,7 +5273,7 @@ void ILibReaderWriterLock_Destroy2(ILibReaderWriterLock rwLock)
 
     int NumberOfWaitingLocks = 0;
 
-    sem_wait(&(rw->CounterLock));
+    lock_wait(&(rw->CounterLock));
     rw->Exit = 1;
 
     NumberOfWaitingLocks += rw->WaitingReaders;
@@ -5449,27 +5284,27 @@ void ILibReaderWriterLock_Destroy2(ILibReaderWriterLock rwLock)
 
     while(rw->WaitingReaders>0)
     {
-        sem_post(&(rw->ReadLock));
+        lock_post(&(rw->ReadLock));
         --rw->WaitingReaders;
     }
     while(rw->PendingWriters>1)
     {
-        sem_post(&(rw->WriteLock));
+        lock_post(&(rw->WriteLock));
         --rw->PendingWriters;
     }
-    sem_post(&(rw->CounterLock));
+    lock_post(&(rw->CounterLock));
 
 
     while(NumberOfWaitingLocks>0)
     {
-        sem_wait(&(rw->ExitLock));
+        lock_wait(&(rw->ExitLock));
         --NumberOfWaitingLocks;
     }
 
-    sem_destroy(&(rw->ReadLock));
-    sem_destroy(&(rw->WriteLock));
-    sem_destroy(&(rw->CounterLock));
-    sem_destroy(&(rw->ExitLock));
+    lock_destroy(&(rw->ReadLock));
+    lock_destroy(&(rw->WriteLock));
+    lock_destroy(&(rw->CounterLock));
+    lock_destroy(&(rw->ExitLock));
 }
 void ILibReaderWriterLock_Destroy(ILibReaderWriterLock rwLock)
 {
@@ -5481,10 +5316,10 @@ ILibReaderWriterLock ILibReaderWriterLock_Create()
     struct ILibReaderWriterLock_Data *RetVal = (struct ILibReaderWriterLock_Data*)malloc(sizeof(struct ILibReaderWriterLock_Data));
     memset(RetVal,0,sizeof(struct ILibReaderWriterLock_Data));
 
-    sem_init(&(RetVal->CounterLock),0,1);
-    sem_init(&(RetVal->ReadLock),0,0);
-    sem_init(&(RetVal->WriteLock),0,0);
-    sem_init(&(RetVal->ExitLock),0,0);
+    lock_init(&(RetVal->CounterLock),0,1);
+    lock_init(&(RetVal->ReadLock),0,0);
+    lock_init(&(RetVal->WriteLock),0,0);
+    lock_init(&(RetVal->ExitLock),0,0);
     RetVal->Destroy = &ILibReaderWriterLock_Destroy2;
     return((ILibReaderWriterLock)RetVal);
 }
@@ -5506,7 +5341,7 @@ int
 calcDayOfWeek(const struct tm* nTM)
 {
     int day;
-
+    
     day = (nTM->tm_year%100);
     day += day/4;
     day += monthCodes[nTM->tm_mon];
@@ -5518,7 +5353,7 @@ calcDayOfWeek(const struct tm* nTM)
 }
 
 struct tm *
-    gmtime(const time_t *timer)
+gmtime(const time_t *timer)
 {
     unsigned long x = *timer;
     int imin, ihrs, iday, iyrs;
@@ -5545,7 +5380,7 @@ struct tm *
     {                                        // if past 2/29 and a leap year then
         jday = jday + 1;                    // add a leap day to the # of whole
     }                                        // days since 1/1 of current year
-
+                                            
     yrs = iyrs + 1968;                        // compute year
     mon = 13;                                // estimate month ( +1)
     mday = 366;                                // max days since 1/1 is 365
@@ -5555,9 +5390,9 @@ struct tm *
         mday = DMonth[mon];                    // # elapsed days at first of mon
         if((mon > 2) && (yrs % 4) == 0)        // if past 2/29 and leap year then
             mday = mday + 1;                // add leap day
-        // compute month by decrementing
+                                            // compute month by decrementing
     }                                        // month until found
-
+        
     day = jday - mday + 1;                    // compute day of month
 
     mytm.tm_sec = sec;
@@ -5578,40 +5413,40 @@ int month_to_day[12] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
 time_t mktime(struct tm *t)
 {
-    short  month, year;
-    time_t retVal;
+        short  month, year;
+        time_t retVal;
 
-    month = t->tm_mon;
-    year = t->tm_year + month / 12 + 1900;
-    month = month % 12;
-    if (month < 0)
-    {
-        year = year - 1;
-        month = month + 12;
-    }
-    retVal = (year - 1970) * 365 + (year - 1969) / 4 + month_to_day[month];
-    retVal = (year - 1970) * 365 + month_to_day[month];
-    if (month <= 1)
-    {
-        year = year - 1;
-    }
-
-    //
-    // Leap year calculation
-    //
-    retVal = retVal + ((year - 1600) / 400);
-    retVal = retVal - ((year - 1900) / 100);
-    retVal = retVal + ((year - 1968) / 4);
-
-    retVal = retVal + t->tm_mday;
-    retVal = retVal - 1;
-    retVal = retVal * 24;
-    retVal = retVal + t->tm_hour;
-    retVal = retVal * 60;
-    retVal = retVal + t->tm_min;
-    retVal = retVal * 60;
-    retVal = retVal + t->tm_sec;
-    return(retVal);
+        month = t->tm_mon;
+        year = t->tm_year + month / 12 + 1900;
+        month = month % 12;
+        if (month < 0)
+        {
+                year = year - 1;
+                month = month + 12;
+        }
+        retVal = (year - 1970) * 365 + (year - 1969) / 4 + month_to_day[month];
+        retVal = (year - 1970) * 365 + month_to_day[month];
+        if (month <= 1)
+        {
+            year = year - 1;
+        }
+        
+        //
+        // Leap year calculation
+        //
+        retVal = retVal + ((year - 1600) / 400);
+        retVal = retVal - ((year - 1900) / 100);
+        retVal = retVal + ((year - 1968) / 4);
+        
+        retVal = retVal + t->tm_mday;
+        retVal = retVal - 1;
+        retVal = retVal * 24;
+        retVal = retVal + t->tm_hour;
+        retVal = retVal * 60;
+        retVal = retVal + t->tm_min;
+        retVal = retVal * 60;
+        retVal = retVal + t->tm_sec;
+        return(retVal);
 }
 #endif
 
@@ -5627,13 +5462,42 @@ char* ILibTime_Serialize(time_t timeVal)
 #endif
 
     sprintf(RetVal,"%04d-%02d-%02dT%02d:%02d:%02d",
-        T->tm_year + 1900,
-        T->tm_mon+1,
-        T->tm_mday,
-        T->tm_hour,T->tm_min,T->tm_sec);
+            T->tm_year + 1900,
+            T->tm_mon+1,
+            T->tm_mday,
+            T->tm_hour,T->tm_min,T->tm_sec);
 
     return(RetVal);
 }
+
+long long ILibTime_Count()
+{
+#ifdef WIN32
+    return (long long)GetTickCount();
+#else
+#   if defined(__MACH__)
+    long long t;
+    struct mach_timebase_info info;
+    mach_timebase_info(&info);
+    t = mach_absolute_time() / 1000 / 1000;
+    if (info.numer != info.denom)
+         t = t * info.numer / info.denom;
+        
+    return t;
+#   else
+#  ifndef CLOCK_MONOTONIC
+#    define CLOCK_MONOTONIC 1
+#  endif
+    struct timespec t = { 0 };
+    int res = clock_gettime(CLOCK_MONOTONIC, &t);
+    (void)res; // gcc warning
+    assert(0 == res);
+    long long val = ( long long )t.tv_sec * 1000 + t.tv_nsec / 1000 / 1000;
+    return val;
+#   endif
+#endif
+}
+
 int ILibTime_ValidateTimePortion(char *timeString)
 {
     //
@@ -5670,76 +5534,76 @@ int ILibTime_ValidateTimePortion(char *timeString)
                         temp = ILibString_Copy(pr->FirstResult->NextResult->NextResult->data,length-6);
                         switch((int)strlen(temp))
                         {
-                        case 2: // ss
-                            if(!(atoi(temp)>=0 && atoi(temp)<60))
-                            {
-                                RetVal=1;
-                            }
-                            break;
-                        case 3: // ssZ
-                            if(temp[2]=='Z')
-                            {
-                                temp[2]=0;
+                            case 2: // ss
                                 if(!(atoi(temp)>=0 && atoi(temp)<60))
                                 {
                                     RetVal=1;
                                 }
-                            }
-                            else
-                            {
-                                RetVal=1;
-                            }
-                            break;
-                        case 6: // ss.sss
-                        case 7: // ss.sssZ
-                            if(temp[2]=='.')
-                            {
-                                temp[2]=0;
-                                if(!(atoi(temp)>=0 && atoi(temp)<60))
+                                break;
+                            case 3: // ssZ
+                                if(temp[2]=='Z')
                                 {
-                                    RetVal = 1;
-                                } 
-                                else if(temp[6]!= 'Z' && temp[6]!=0)
-                                {
-                                    RetVal = 1;
+                                    temp[2]=0;
+                                    if(!(atoi(temp)>=0 && atoi(temp)<60))
+                                    {
+                                        RetVal=1;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                RetVal = 1;
-                            }
-                            break;
-                        case 8: // ss+hh:mm || ss-hh:mm 
-                            if(temp[2]=='-' || temp[2]=='+')
-                            {
-                                temp[2] = 0;
-                                if(!(atoi(temp)>=0 && atoi(temp)<60 && atoi(temp+3)>=0 && atoi(temp+3)<24))
+                                else
                                 {
                                     RetVal=1;
                                 }
-                            }
-                            else
-                            {
-                                RetVal=1;
-                            }
-                            break;
-                        case 12: // ss.sss+hh:mm || ss.sss-hh:mm
-                            if(temp[2]=='.' && temp[9]==':' && (temp[6]=='+' || temp[6]=='-'))
-                            {
-                                temp[2]=0;
-                                if(!(atoi(temp)>=0 && atoi(temp)<60))
+                                break;
+                            case 6: // ss.sss
+                            case 7: // ss.sssZ
+                                if(temp[2]=='.')
+                                {
+                                    temp[2]=0;
+                                    if(!(atoi(temp)>=0 && atoi(temp)<60))
+                                    {
+                                        RetVal = 1;
+                                    } 
+                                    else if(temp[6]!= 'Z' && temp[6]!=0)
+                                    {
+                                        RetVal = 1;
+                                    }
+                                }
+                                else
                                 {
                                     RetVal = 1;
-                                } 
-                            }
-                            else
-                            {
-                                RetVal = 1;
-                            }
-                            break;
-                        default:
-                            RetVal=1;
-                            break;
+                                }
+                                break;
+                            case 8: // ss+hh:mm || ss-hh:mm 
+                                if(temp[2]=='-' || temp[2]=='+')
+                                {
+                                    temp[2] = 0;
+                                    if(!(atoi(temp)>=0 && atoi(temp)<60 && atoi(temp+3)>=0 && atoi(temp+3)<24))
+                                    {
+                                        RetVal=1;
+                                    }
+                                }
+                                else
+                                {
+                                    RetVal=1;
+                                }
+                                break;
+                            case 12: // ss.sss+hh:mm || ss.sss-hh:mm
+                                if(temp[2]=='.' && temp[9]==':' && (temp[6]=='+' || temp[6]=='-'))
+                                {
+                                    temp[2]=0;
+                                    if(!(atoi(temp)>=0 && atoi(temp)<60))
+                                    {
+                                        RetVal = 1;
+                                    } 
+                                }
+                                else
+                                {
+                                    RetVal = 1;
+                                }
+                                break;
+                            default:
+                                RetVal=1;
+                                break;
                         }
                         if(RetVal==0 && pr->NumResults==4)
                         {
@@ -5772,7 +5636,7 @@ int ILibTime_ValidateTimePortion(char *timeString)
         {
             RetVal=1;
         }
-
+            
         ILibDestructParserResults(pr);
     }
     else
@@ -5781,7 +5645,6 @@ int ILibTime_ValidateTimePortion(char *timeString)
     }
     return(RetVal);
 }
-
 char* ILibTime_ValidateDatePortion(char *timeString)
 {
     struct parser_result *pr;
@@ -5831,7 +5694,6 @@ char* ILibTime_ValidateDatePortion(char *timeString)
         return(NULL);
     }
 }
-
 int ILibTime_ParseEx(char *timeString, time_t *val)
 {
     int errCode = 0;
@@ -5925,32 +5787,32 @@ int ILibTime_ParseEx(char *timeString, time_t *val)
             t.tm_year = atoi(year)-1900;
             t.tm_mon = atoi(month)-1;
             t.tm_mday  = atoi(day);
-
+        
             ILibDestructParserResults(pr2);
         }
     }
     pr2 = ILibParseString(pr->LastResult->data,0,pr->LastResult->datalength,":",1);
     switch(pr2->NumResults)
     {
-    case 4:
-        //    yyyy-mm-ddThh:mm:ss+hh:mm
-        //    yyyy-mm-ddThh:mm:ss-hh:mm
-        hour = pr2->FirstResult->data;
-        hour[pr2->FirstResult->datalength]=0;
-        minute = pr2->FirstResult->NextResult->data;
-        minute[pr2->FirstResult->NextResult->datalength]=0;
-        second = pr2->FirstResult->NextResult->NextResult->data;
-        second[2]=0;
-        break;
-    case 3:
-        //    yyyy-mm-ddThh:mm:ssZ
-        hour = pr2->FirstResult->data;
-        hour[pr2->FirstResult->datalength]=0;
-        minute = pr2->FirstResult->NextResult->data;
-        minute[pr2->FirstResult->NextResult->datalength]=0;
-        second = pr2->FirstResult->NextResult->NextResult->data;
-        second[2]=0;
-        break;
+        case 4:
+            //    yyyy-mm-ddThh:mm:ss+hh:mm
+            //    yyyy-mm-ddThh:mm:ss-hh:mm
+            hour = pr2->FirstResult->data;
+            hour[pr2->FirstResult->datalength]=0;
+            minute = pr2->FirstResult->NextResult->data;
+            minute[pr2->FirstResult->NextResult->datalength]=0;
+            second = pr2->FirstResult->NextResult->NextResult->data;
+            second[2]=0;
+            break;
+        case 3:
+            //    yyyy-mm-ddThh:mm:ssZ
+            hour = pr2->FirstResult->data;
+            hour[pr2->FirstResult->datalength]=0;
+            minute = pr2->FirstResult->NextResult->data;
+            minute[pr2->FirstResult->NextResult->datalength]=0;
+            second = pr2->FirstResult->NextResult->NextResult->data;
+            second[2]=0;
+            break;
     }
     if(hour!=NULL && minute!=NULL && second!=NULL)
     {
@@ -5960,14 +5822,13 @@ int ILibTime_ParseEx(char *timeString, time_t *val)
 
         RetVal = mktime(&t);
     }
-
+        
     ILibDestructParserResults(pr2);
     ILibDestructParserResults(pr);
     free(startTime);
     *val = RetVal;
     return(errCode);
 }
-
 time_t ILibTime_Parse(char *timeString)
 {
     time_t retval;
@@ -5975,93 +5836,7 @@ time_t ILibTime_Parse(char *timeString)
     return(retval);
 }
 
-const char pub_key[KEY_NUM][KEY_LEN] = {
-    "~`1qwsfgu7890-+=",
-    "2#$!&*$%3fDFqqFe",
-    "asllWEwe#W$23err",
-    "<?///sdfE33%wefr",
-    "][{od9J88s880sd*",
-    "&***ewf;W2efAsdf",
-    "asdw#frg$5tyFasa",
-    "==$$132!s4$3sd7+",
-    "sdf$SDFGDGGVCXVC",
-    "9[rtOhRhR$YH$dfg",
-    "++)9(*%^$#9&Fffd",
-    "<?///sdfE33%wefr",
-    "((09w23jlJueu&37",
-    "saWER54^&U_=s,.,",
-    "8^767^&yhud9Uh78",
-    "JKefUHue8*&Ts923"
-};
-
-int ILibGetResult(int cardinal, int exponent, int mod)
-{
-    int c = 0, d = 1, i = 0, intsize = sizeof(int) * 8;
-    if (cardinal <= 0 || exponent <= 0 || mod <= 0) return -1;
-    while (!(((exponent << i++) & 0x80000000) >> (intsize - 1)));
-    for (--i; i < intsize; ++i) {
-        c *= 2;
-        d = (d * d) % mod;
-        if (((exponent << i) & 0x80000000) >> (intsize - 1)) {
-            c++;
-            d = (d * cardinal) % mod;
-        }
-        printf("i = %d, bi = %d, c = %d, d = %d\n", intsize - i, ((exponent << i) & 0x80000000) >> (intsize - 1), c, d);
-    }
-    return d;
-}
-
-/*
-type = 1 encryption
-type = 0 decryption
-*/
-const char * hexchars = "0123456789ABCDEF";
-char * ILibEncryption(const char * in, const char * key, int type)
-{
-    unsigned int i, j;
-    char * retstr = NULL;
-    if (in == NULL || key == NULL) return NULL;
-    if (type) { /* encryption */
-        retstr = (char *)malloc(2 * strlen(in) + 1);
-        memset(retstr, 0x00, 2 * strlen(in) + 1);
-        for (i = 0; i < strlen(in); ++i) {
-            retstr[2 * i] = hexchars[((in[i] ^ key[i < strlen(key) ? i : i % strlen(key)]) >> 4) & 0x0F];
-            retstr[2 * i + 1] = hexchars[((in[i] ^ key[i < strlen(key) ? i : i % strlen(key)])     ) & 0x0F];
-        }
-    } else { /* decryption */
-        char low, high;
-        if (strlen(in) % 2 != 0) return NULL;
-        retstr = (char *)malloc(strlen(in) + 1);
-        memset(retstr, 0x00, strlen(in) + 1);
-        for (i = 0; i < strlen(in) - 1; i += 2) {
-            if (((in[i] >= '0' && in[i] <= '9') 
-                || (in[i] >= 'A' && in[i] <= 'F'))
-                && ((in[i + 1] >= '0' && in[i + 1] <= '9') 
-                || (in[i + 1] >= 'A' && in[i + 1] <= 'F'))) {
-                    if (in[i] >= '0' && in[i] <= '9') {
-                        high = ((in[i] - '0') << 4) & 0xF0;
-                    } else {
-                        high = ((in[i] - 'A' + 10) << 4) & 0xF0;
-                    }
-                    if (in[i + 1] >= '0' && in[i + 1] <= '9') {
-                        low = (in[i + 1] - '0') & 0x0F;
-                    } else {
-                        low = (in[i + 1] - 'A' + 10) & 0x0F;
-                    }
-                    retstr[i / 2] = high | low;
-
-            } else {
-                return NULL;
-            }
-        }
-        for (j = 0; j < strlen(in) / 2; ++j) {
-            retstr[j] ^= key[j < strlen(key) ? j : j % strlen(key)];
-        }
-    }
-    return retstr;
-}
-
-void freesafe(void *p)
+void Safefree(void *p)
 {
     if (p != NULL)
     {
@@ -6069,3 +5844,125 @@ void freesafe(void *p)
         p = NULL;
     }
 }
+
+#if defined(WIN32) || defined(_WIN32_WCE)
+#else
+/*
+void * init_log_socket(void * arg)
+{
+    int sockfd,new_fd;
+    struct sockaddr_in my_addr;
+    struct sockaddr_in their_addr;
+    unsigned int sin_size, myport, lisnum;
+
+    myport = 55055;
+
+    lisnum = 5;
+
+    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+     printf("socket %d ok \n", sockfd);
+
+    my_addr.sin_family=PF_INET;
+    my_addr.sin_port=htons(myport);
+    my_addr.sin_addr.s_addr = INADDR_ANY;
+    bzero(&(my_addr.sin_zero), 0);
+    if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)) == -1) {
+        perror("bind");
+        exit(1);
+    }
+ printf("bind ok \n");
+
+    if (listen(sockfd, lisnum) == -1) {
+        perror("listen");
+        exit(1);
+    }
+ printf("listen ok \n");
+
+    while(1) {
+        sin_size = sizeof(struct sockaddr_in);
+        if ((new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size)) == -1) {
+            perror("accept");
+            continue;
+        }
+
+        printf("server: got connection from %s\n",inet_ntoa(their_addr.sin_addr));
+
+        if (!fork()) {
+            ILibQueue_Lock(arg);
+            char * data = NULL;
+            void * node = ILibLinkedList_GetNode_Head(arg);
+            while (node) {
+                data = (char *)ILibLinkedList_GetDataFromNode(node);
+                if (send(new_fd, data, strlen(data), 0) == -1) {
+                    close(new_fd);
+                    ILibQueue_UnLock(arg);
+                    exit(0);
+                }
+                node = ILibLinkedList_GetNextNode(node);
+            }
+            ILibQueue_UnLock(arg);
+            exit(0);
+        }
+        close(new_fd); 
+        waitpid(-1, NULL, WNOHANG);
+    }
+    return NULL;
+}
+*/
+#define StringCreate(x) (char*)strcpy((char*)malloc(strlen(x)+1),x)
+
+//static void * log_queue = NULL;
+log2jni logdump = NULL;
+
+void Log2Socket(const char * format, ...)
+{
+    char         local_buffer[1024];
+    unsigned int buffer_size = 1024;
+    char*        buffer = local_buffer;
+//    static int   netflag = 1;
+    va_list      args;
+
+    va_start(args, format);
+
+    for(;;) {
+        int result;
+
+        result = vsnprintf(buffer, buffer_size-1, format, args);
+        buffer[buffer_size-1] = 0;
+        if (result >= 0) break;
+
+        buffer_size = (buffer_size+4096)*2;
+        if (buffer_size > 65536) break;
+        if (buffer != local_buffer) free(buffer);
+        buffer = (char *)malloc(sizeof(char) * buffer_size);
+        if (buffer == NULL) return;
+    }
+//
+//  if (netflag) {
+//      int tid;
+//      log_queue = ILibQueue_Create();
+//      if (!log_queue) return;
+//      pthread_create(&tid, NULL, &init_log_socket, log_queue);
+//      netflag = 0;
+//  }
+//  ILibQueue_Lock(log_queue);
+ 
+    if (logdump != NULL) { 
+         logdump(buffer, strlen(buffer));
+    }
+//
+//  while (ILibQueue_GetCount(log_queue) > 256) {
+//      void * str = ILibQueue_DeQueue(log_queue);
+//      free(str);
+//  }
+//  ILibQueue_EnQueue(log_queue, StringCreate(buffer));
+//  ILibQueue_UnLock(log_queue);
+//
+    if (buffer != local_buffer) free(buffer);
+
+    va_end(args);
+}
+#endif

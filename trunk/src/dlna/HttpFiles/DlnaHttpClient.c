@@ -47,12 +47,12 @@ void DHC_Pool(ILibThreadPool sender, void *var)
 
     if(data->TransferStatus->TotalBytesToBeSent==-1)
     {
-        sem_wait(&(data->TransferStatus->syncLock));
+        lock_wait(&(data->TransferStatus->syncLock));
         currentPosition = ftell(data->f);
         fseek(data->f,0,SEEK_END);
         data->TransferStatus->TotalBytesToBeSent = ftell(data->f) - currentPosition;
         fseek(data->f,currentPosition,SEEK_SET);
-        sem_post(&(data->TransferStatus->syncLock));
+        lock_post(&(data->TransferStatus->syncLock));
     }
 
     if(data->f!=NULL && feof(data->f))
@@ -70,9 +70,9 @@ void DHC_Pool(ILibThreadPool sender, void *var)
         {
             ILibWebClient_StreamRequestBody(data->token,data->buffer,bytesRead,ILibAsyncSocket_MemoryOwnership_USER,0);
             
-            sem_wait(&(data->TransferStatus->syncLock));
+            lock_wait(&(data->TransferStatus->syncLock));
             data->TransferStatus->ActualBytesSent += (long)bytesRead;
-            sem_post(&(data->TransferStatus->syncLock));
+            lock_post(&(data->TransferStatus->syncLock));
         }
         else
         {
@@ -97,7 +97,7 @@ void DHC_OnSendOK(ILibWebClient_StateObject sender, void *user1, void *user2)
     int ok = 0;
     void *Abort = NULL;
 
-    sem_wait(&(data->TransferStatus->syncLock));
+    lock_wait(&(data->TransferStatus->syncLock));
     if(data->TransferStatus->Reserved1!=0)
     {
         data->TransferStatus->Reserved2 = 1;
@@ -115,7 +115,7 @@ void DHC_OnSendOK(ILibWebClient_StateObject sender, void *user1, void *user2)
         Abort = data->TransferStatus->RequestToken;
         data->TransferStatus->RequestToken = NULL;
     }
-    sem_post(&(data->TransferStatus->syncLock));
+    lock_post(&(data->TransferStatus->syncLock));
 
     if(Abort==NULL && ok && data->f!=NULL && data->GotContinue!=0)
     {
@@ -194,9 +194,9 @@ void DH_Pool_RequestResponse(ILibThreadPool sender, void *obj)
         fwrite(data->buffer,sizeof(char),data->bufferLength,data->f);
     }
 
-    sem_wait(&(data->TransferStatus->syncLock));
+    lock_wait(&(data->TransferStatus->syncLock));
     data->TransferStatus->ActualBytesReceived += data->bufferLength;
-    sem_post(&(data->TransferStatus->syncLock));
+    lock_post(&(data->TransferStatus->syncLock));
 
     if(data->GotContinue)
     {
@@ -211,7 +211,7 @@ void DH_Pool_RequestResponse(ILibThreadPool sender, void *obj)
 
     if(!okToFree)
     {
-        sem_wait(&(data->TransferStatus->syncLock));
+        lock_wait(&(data->TransferStatus->syncLock));
         if(data->TransferStatus->Reserved1!=0)
         {
             data->TransferStatus->Reserved2 = 1;
@@ -220,7 +220,7 @@ void DH_Pool_RequestResponse(ILibThreadPool sender, void *obj)
         {
             ILibWebClient_Resume(data->webState);
         }
-        sem_post(&(data->TransferStatus->syncLock));
+        lock_post(&(data->TransferStatus->syncLock));
     }
     else
     {
@@ -401,9 +401,9 @@ void DH_RequestResponse(ILibWebClient_StateObject WebStateObject,int InterruptFl
                     total = atol(pr->LastResult->data);
                     ILibDestructParserResults(pr);
                     total -= data->StartPosition;
-                    sem_wait(&(data->TransferStatus->syncLock));
+                    lock_wait(&(data->TransferStatus->syncLock));
                     data->TransferStatus->TotalBytesToBeReceived = total;
-                    sem_post(&(data->TransferStatus->syncLock));
+                    lock_post(&(data->TransferStatus->syncLock));
                 }
                 else
                 {
@@ -709,9 +709,9 @@ DH_TransferStatus DHC_IssuePostRequestFromFile(ILibWebClient_RequestManager requ
 }
 void DHC_Pause(DH_TransferStatus tstatus)
 {
-    sem_wait(&(tstatus->syncLock));
+    lock_wait(&(tstatus->syncLock));
     tstatus->Reserved1=1;
-    sem_post(&(tstatus->syncLock));
+    lock_post(&(tstatus->syncLock));
 }
 void DHC_Resume(DH_TransferStatus tstatus)
 {
@@ -721,7 +721,7 @@ void DHC_Resume(DH_TransferStatus tstatus)
     void *token = NULL;
     ILibWebClient_StateObject WebState=NULL;
 
-    sem_wait(&(tstatus->syncLock));
+    lock_wait(&(tstatus->syncLock));
     paused = tstatus->Reserved2;
     tstatus->Reserved2 = 0;
     tstatus->Reserved1 = 0;
@@ -736,7 +736,7 @@ void DHC_Resume(DH_TransferStatus tstatus)
     {
         ok = 1;
     }
-    sem_post(&(tstatus->syncLock));
+    lock_post(&(tstatus->syncLock));
 
     if(paused)
     {

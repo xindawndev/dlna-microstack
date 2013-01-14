@@ -6,6 +6,7 @@
 ###############################################################################
 
 include $(ROOT_MAKE_DIRECTORY)/cmd.mk
+include $(ROOT_MAKE_DIRECTORY)/name.mk
 
 include $(ROOT_MAKE_DIRECTORY)/func/info.mk
 

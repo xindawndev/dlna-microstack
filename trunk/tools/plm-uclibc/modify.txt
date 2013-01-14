@@ -1,0 +1,5 @@
+----opt/timesys/toolchains/mipsisa32r2-linux/mipsisa32r2-linux-uclibc/include/bits/uClibc_config.h----
+89c89
+< #undef __UCLIBC_SUSV3_LEGACY__
+---
+> #define __UCLIBC_SUSV3_LEGACY__

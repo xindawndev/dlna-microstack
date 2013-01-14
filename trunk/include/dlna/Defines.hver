@@ -1,0 +1,6 @@
+#ifndef _DEFINES_H_
+#define _DEFINES_H_
+
+#define SVN_SUB_VER "1.0.0.0000"
+
+#endif /* _DEFINES_H_ */

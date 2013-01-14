@@ -27,7 +27,7 @@
 
 #define DMS_UDN_SIZE            80
 #define DMS_NOTIFY_CYCLE        1800
-#define DMS_USE_THREADPOOL        1
+#define DMS_USE_THREADPOOL        0
 #define DMS_VIRTUAL_DIRNAME        "content"
 #define DMS_VIRTUAL_DIRNAME_LEN    7
 #define DMS_UPLOAD_VIRTUAL_DIRNAME "upload"
@@ -67,7 +67,7 @@ struct DMS_State
     char*                    State_SinkProtocolInfo;
     char*                    State_SourceProtocolInfo;
 
-    sem_t                    Lock;
+    lock_t                    Lock;
 
     void*                    ContainderUpdateIDTable;
     void*                    Token_Ltm;
@@ -80,7 +80,7 @@ struct DMS_State
     void*                    Token_BackEnd;
     ILibThreadPool            Token_ThreadPool;
 
-    sem_t IPAddressLock;        /* read/write lock for list of IP addresses */
+    lock_t IPAddressLock;        /* read/write lock for list of IP addresses */
     int IPAddressLength;        /* number of IP addresses for the machine */
     int *IPAddressList;        /* array of IP addresses for the machine */
 #if defined(INCLUDE_FEATURE_UPLOAD)
@@ -125,7 +125,7 @@ char *_DMS_SetImportUriValue(int RequestIPAddress, int RequestPort, char *Upload
 
 void _DMS_IncrementContainerUpdateID(struct DMS_State* dms, char* containerID)
 {
-    unsigned int* updateID;
+    int* updateID;
     int length;
 
     if(containerID == NULL) return;
@@ -452,7 +452,8 @@ static void _DMS_ProcessQuery(MSA msa_obj, void* upnp_session, struct MSA_CdsQue
 
     char *didl;
     int didlLen;
-    unsigned int numberReturned = 0, totalMatched = 0, updateID = 0, status = 0;
+    unsigned int numberReturned = 0, totalMatched = 0, updateID = 0;
+    int status = 0;
 
     /*
     *    SOLUTION_REFERENCE#3.6.3.2c
@@ -1751,11 +1752,11 @@ DMS_StateObj DMS_Create(void* thread_chain,
     /*
      *    Obtain initial set of IP addresses and update MSA
      */
-    sem_init(&(retval->IPAddressLock), 0, 1);
-    sem_wait(&(retval->IPAddressLock));
+    lock_init(&(retval->IPAddressLock), 0, 1);
+    lock_wait(&(retval->IPAddressLock));
     retval->IPAddressLength = ILibGetLocalIPAddressList(&(retval->IPAddressList));
     MSA_UpdateIpInfo(retval->Token_Msa, retval->IPAddressList, retval->IPAddressLength);
-    sem_post(&(retval->IPAddressLock));
+    lock_post(&(retval->IPAddressLock));
 
     {
         char* addrList = _IPAddressListToString(retval->IPAddressList, retval->IPAddressLength);
@@ -1765,7 +1766,7 @@ DMS_StateObj DMS_Create(void* thread_chain,
 
 
     /* add the semaphore */
-    sem_init(&(retval->Lock), 0, 1);
+    lock_init(&(retval->Lock), 0, 1);
 
     /* TODO: initialize your back-end */
     retval->Token_BackEnd = FSE_InitFSEState(retval->Token_ThreadChain, back_end_init->Path, DMS_VIRTUAL_DIRNAME);
@@ -1806,7 +1807,7 @@ void DMS_Lock(DMS_StateObj dms_obj)
 {
     if(dms_obj != NULL)
     {
-        sem_wait(&(((struct DMS_State*)dms_obj)->Lock));
+        lock_wait(&(((struct DMS_State*)dms_obj)->Lock));
     }
 }
 
@@ -1814,7 +1815,7 @@ void DMS_UnLock(DMS_StateObj dms_obj)
 {
     if(dms_obj != NULL)
     {
-        sem_post(&(((struct DMS_State*)dms_obj)->Lock));
+        lock_post(&(((struct DMS_State*)dms_obj)->Lock));
     }
 }
 

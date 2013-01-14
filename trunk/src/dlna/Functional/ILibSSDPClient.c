@@ -51,6 +51,7 @@ struct SSDPClientModule
     void *Reserved;
 };
 
+
 void ILibReadSSDP(struct packetheader *packet,int remoteInterface, unsigned short remotePort, struct SSDPClientModule *module)
 {
     struct packetheader_field_node *node;
@@ -63,6 +64,7 @@ void ILibReadSSDP(struct packetheader *packet,int remoteInterface, unsigned shor
     int Alive = 0;
     int OK;
     int rt;
+
 
     char *IP;
     unsigned short PORT;
@@ -208,7 +210,7 @@ void ILibReadSSDP(struct packetheader *packet,int remoteInterface, unsigned shor
                         prf = prf->NextResult;
                         ILibDestructParserResults(pnode2);
                     }
-                    ILibDestructParserResults(pnode);
+                    ILibDestructParserResults(pnode);                    
                 }
                 node = node->NextField;
             }
@@ -241,7 +243,6 @@ void ILibReadSSDP(struct packetheader *packet,int remoteInterface, unsigned shor
         }
     }
 }
-
 void ILibSSDPClient_OnData(ILibAsyncUDPSocket_SocketModule socketModule,char* buffer, int bufferLength, int remoteInterface, unsigned short remotePort, void *user, void *user2, int *PAUSE)
 {
     struct packetheader *packet;
@@ -251,7 +252,6 @@ void ILibSSDPClient_OnData(ILibAsyncUDPSocket_SocketModule socketModule,char* bu
     ILibReadSSDP(packet,remoteInterface,remotePort,(struct SSDPClientModule*)user);
     ILibDestructPacket(packet);
 }
-
 void ILibSSDPClientModule_Destroy(void *object)
 {
     struct SSDPClientModule *s = (struct SSDPClientModule*)object;
@@ -260,19 +260,47 @@ void ILibSSDPClientModule_Destroy(void *object)
     if(s->IPAddress!=NULL)
     {
         free(s->IPAddress);
+        s->IPAddress = NULL;
     }
+}
+
+void ILibSSDP_LoopSearch(void *SSDPToken)
+{
+    struct SSDPClientModule *RetVal = (struct SSDPClientModule*)SSDPToken;
+    int i;
+    char* buffer;
+    int bufferlength;
+
+    buffer = (char*)malloc(105+RetVal->DeviceURNLength);
+    bufferlength = sprintf(buffer,"M-SEARCH * HTTP/1.1\r\nMX: 0\r\nST: %s\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\n\r\n",RetVal->DeviceURN);
+
+    for(i=0;i<RetVal->NumIPAddress;++i)
+    {
+#if defined(_WIN32_WCE) && _WIN32_WCE < 400
+        ILibAsyncUDPSocket_SendTo(RetVal->MSEARCH_Response_Socket, inet_addr(UPNP_GROUP), UPNP_PORT, buffer, bufferlength, ILibAsyncSocket_MemoryOwnership_USER);
+#else
+        ILibAsyncUDPSocket_SendTo(RetVal->MSEARCH_Response_Socket, inet_addr(UPNP_GROUP), UPNP_PORT, buffer, bufferlength, ILibAsyncSocket_MemoryOwnership_USER);
+#endif
+    }
+    free(buffer);
+}
+
+void ILibSSDPDeviceSearch(void * SSDPToken)
+{
+    ILibSSDP_LoopSearch(SSDPToken);
 }
 
 void ILibSSDP_IPAddressListChanged(void *SSDPToken)
 {
     struct SSDPClientModule *RetVal = (struct SSDPClientModule*)SSDPToken;
-    int i, u;
+    int i;
     char* buffer;
     int bufferlength;
 
     if(RetVal->IPAddress!=NULL)
     {
         free(RetVal->IPAddress);
+        RetVal->IPAddress = NULL;
     }
     RetVal->NumIPAddress = ILibGetLocalIPAddressList(&(RetVal->IPAddress));
 
@@ -283,7 +311,7 @@ void ILibSSDP_IPAddressListChanged(void *SSDPToken)
     }
 
     buffer = (char*)malloc(105+RetVal->DeviceURNLength);
-    bufferlength = sprintf(buffer,"M-SEARCH * HTTP/1.1\r\nMX: 3\r\nST: %s\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\n\r\n",RetVal->DeviceURN);
+    bufferlength = sprintf(buffer,"M-SEARCH * HTTP/1.1\r\nMX: 0\r\nST: %s\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\n\r\n",RetVal->DeviceURN);
 
     for(i=0;i<RetVal->NumIPAddress;++i)
     {
@@ -297,10 +325,16 @@ void ILibSSDP_IPAddressListChanged(void *SSDPToken)
 #endif
     }
     free(buffer);
+}
 
-    // 产生一个[10, 20)秒的随机值
-    u = (int)((double) rand() / (RAND_MAX + 1) * (20 - 10) + 10);
-    ILibLifeTime_Add( RetVal->IP_SSDP_Mointor, SSDPToken, u, (void*)&ILibSSDP_IPAddressListChanged, NULL );
+void ILibSSDPSearchTimer(void * SSDPToken)
+{
+    struct SSDPClientModule *RetVal = (struct SSDPClientModule *)SSDPToken;
+    int u;
+    ILibSSDP_LoopSearch(SSDPToken);
+    //u = (int)((double) rand() / (RAND_MAX + 1) * (20 - 10) + 10);
+    u = 8;
+    ILibLifeTime_Add( RetVal->IP_SSDP_Mointor, SSDPToken, u, (void*)&ILibSSDPSearchTimer, NULL );
 }
 
 void ILibSSDPClientModule_PreSelect(void* object,void *readset, void *writeset, void *errorset, int* blocktime)
@@ -308,6 +342,7 @@ void ILibSSDPClientModule_PreSelect(void* object,void *readset, void *writeset, 
     struct SSDPClientModule *s = (struct SSDPClientModule*)object;
     s->PreSelect = NULL;
     ILibSSDP_IPAddressListChanged(object);
+    ILibSSDPSearchTimer(object);
 }
 
 void* ILibCreateSSDPClientModule(void *chain, char* DeviceURN, int DeviceURNLength, void (*CallbackPtr)(void *sender, char* UDN, int Alive, char* LocationURL, int Timeout, UPnPSSDP_MESSAGE m,void *user),void *user)
@@ -316,34 +351,38 @@ void* ILibCreateSSDPClientModule(void *chain, char* DeviceURN, int DeviceURNLeng
     unsigned char TTL = 4;
     struct parser_result *pr;
 
-    RetVal->Destroy                                     = &ILibSSDPClientModule_Destroy;
-    RetVal->PreSelect                                   = &ILibSSDPClientModule_PreSelect;
-    RetVal->PostSelect                                  = NULL;
-    RetVal->Reserved                                    = user;
-    RetVal->Terminate                                   = 0;
-    RetVal->FunctionCallback                            = CallbackPtr;
-    RetVal->DeviceURN                                   = (char*)malloc(DeviceURNLength+1);
+    memset(RetVal, 0, sizeof(struct SSDPClientModule));
+
+    RetVal->Destroy = &ILibSSDPClientModule_Destroy;
+    RetVal->PreSelect = &ILibSSDPClientModule_PreSelect;
+    RetVal->PostSelect = NULL;
+    RetVal->Reserved = user;
+    RetVal->Terminate = 0;
+    RetVal->FunctionCallback = CallbackPtr;
+    RetVal->DeviceURN = (char*)malloc(DeviceURNLength+1);
     memcpy(RetVal->DeviceURN,DeviceURN,DeviceURNLength);
-    RetVal->DeviceURN[DeviceURNLength]                  = '\0';
-    RetVal->DeviceURNLength                             = DeviceURNLength;
+    RetVal->DeviceURN[DeviceURNLength] = '\0';
+    RetVal->DeviceURNLength = DeviceURNLength;
 
     // Populate the Prefix portion of the URN, for matching purposes
-    RetVal->DeviceURN_Prefix                            = RetVal->DeviceURN;
+    RetVal->DeviceURN_Prefix = RetVal->DeviceURN;
     pr = ILibParseString(RetVal->DeviceURN,0,RetVal->DeviceURNLength,":",1);
-    RetVal->DeviceURN_PrefixLength                      = (int)((pr->LastResult->data)-(RetVal->DeviceURN));
-    pr->LastResult->data[pr->LastResult->datalength]    = 0;
-    RetVal->BaseDeviceVersionNumber                     = atoi(pr->LastResult->data);
+    RetVal->DeviceURN_PrefixLength = (int)((pr->LastResult->data)-(RetVal->DeviceURN));
+    pr->LastResult->data[pr->LastResult->datalength]=0;
+    RetVal->BaseDeviceVersionNumber = atoi(pr->LastResult->data);
     ILibDestructParserResults(pr);
 
-    RetVal->IPAddress                                   = NULL;
+    RetVal->IPAddress=NULL;
 
-    RetVal->IP_SSDP_Mointor                             = ILibCreateLifeTime( chain );
+    RetVal->IP_SSDP_Mointor = ILibCreateLifeTime( chain );
 
-    RetVal->SSDPListenSocket                            = ILibAsyncUDPSocket_Create(chain, 4096, 0, 1900, ILibAsyncUDPSocket_Reuse_SHARED, ILibSSDPClient_OnData , NULL, RetVal);
-    RetVal->MSEARCH_Response_Socket                     = ILibAsyncUDPSocket_Create(chain, 4096, 0, 0, ILibAsyncUDPSocket_Reuse_EXCLUSIVE, ILibSSDPClient_OnData , NULL, RetVal);
+    RetVal->SSDPListenSocket = ILibAsyncUDPSocket_Create(chain, 4096, 0, 1900, ILibAsyncUDPSocket_Reuse_SHARED, ILibSSDPClient_OnData , NULL, RetVal);
+    RetVal->MSEARCH_Response_Socket = ILibAsyncUDPSocket_Create(chain, 4096, 0, 0, ILibAsyncUDPSocket_Reuse_EXCLUSIVE, ILibSSDPClient_OnData , NULL, RetVal);
+
 
     ILibAddToChain(chain,RetVal);
     ILibAsyncUDPSocket_SetMulticastTTL(RetVal->MSEARCH_Response_Socket, TTL);
+
 
     return(RetVal);
 }

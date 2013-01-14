@@ -1,0 +1,7 @@
+PLATFORM_COMPILE_FLAGS		:= $(PLATFORM_COMPILE_FLAGS) -arch i386
+PLATFORM_COMPILE_FLAGS		:= $(PLATFORM_COMPILE_FLAGS) -gdwarf-2
+PLATFORM_COMPILE_FLAGS		:= $(PLATFORM_COMPILE_FLAGS) -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.3.sdk
+
+PLATFORM_LINK_FLAGS		:= $(PLATFORM_COMPILE_FLAGS)
+
+PLATFORM_DISABLE_FLAGS		:= -Wl,-Os -Wl,--exclude-libs -Wl,-rpath

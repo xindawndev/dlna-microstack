@@ -18,7 +18,7 @@ struct _IndexBlockNode
 
 struct _IndexBlocks
 {
-    sem_t                    _sync;
+    lock_t                    _sync;
     struct _IndexBlockNode*    _firstNode;
     int                    _blockCount;
 #if defined(_POSIX)
@@ -41,9 +41,9 @@ IndexBlocks IndexBlocks_Create()
         instance->_blockCount = 0;
         instance->_firstNode = NULL;
 #if defined(_POSIX)
-        instance->_sem_ret = sem_init(&instance->_sync, 0, 1);
+        instance->_sem_ret = lock_init(&instance->_sync, 0, 1);
 #else
-        sem_init(&instance->_sync, 0, 1);
+        lock_init(&instance->_sync, 0, 1);
 #endif
     }
     return (IndexBlocks)instance;
@@ -65,8 +65,8 @@ void IndexBlocks_Destroy(IndexBlocks blocks)
         return;
     }
 
-    sem_wait(&instance->_sync);
-    sem_destroy(&instance->_sync);
+    lock_wait(&instance->_sync);
+    lock_destroy(&instance->_sync);
 #if defined(_POSIX)
     instance->_sem_ret = -1;
 #else
@@ -105,7 +105,7 @@ int IndexBlocks_AddBlock(IndexBlocks blocks, int streamOffset, int length, int t
     {
         return 0;
     }
-    sem_wait(&instance->_sync);
+    lock_wait(&instance->_sync);
 
     lastNode = _GetLastNode(instance->_firstNode);
     if(lastNode != NULL)
@@ -114,14 +114,14 @@ int IndexBlocks_AddBlock(IndexBlocks blocks, int streamOffset, int length, int t
     }
     if((trackOffset + trackCount) >= 65536)
     {
-        sem_post(&instance->_sync);
+        lock_post(&instance->_sync);
         return 0;
     }
 
     node = (struct _IndexBlockNode*)malloc(sizeof(struct _IndexBlockNode));
     if(node == NULL)
     {
-        sem_post(&instance->_sync);
+        lock_post(&instance->_sync);
         return 0;
     }
 
@@ -142,7 +142,7 @@ int IndexBlocks_AddBlock(IndexBlocks blocks, int streamOffset, int length, int t
 
     instance->_blockCount++;
 
-    sem_post(&instance->_sync);
+    lock_post(&instance->_sync);
 
     return 1;
 }
@@ -163,7 +163,7 @@ int IndexBlocks_GetTrackCount(IndexBlocks blocks)
         {
             return result;
         }
-        sem_wait(&instance->_sync);
+        lock_wait(&instance->_sync);
         if(instance->_firstNode == NULL)
         {
             result = 0;
@@ -173,7 +173,7 @@ int IndexBlocks_GetTrackCount(IndexBlocks blocks)
             struct _IndexBlockNode* lastNode = _GetLastNode(instance->_firstNode);
             result = (int)lastNode->FirstTrackNumber + (int)lastNode->TrackCount;
         }
-        sem_post(&instance->_sync);
+        lock_post(&instance->_sync);
     }
     return result;
 }
@@ -206,11 +206,11 @@ int IndexBlocks_GetTrackRangeInfo(IndexBlocks blocks, int trackNumber, int* byte
     {
         return 0;
     }
-    sem_wait(&instance->_sync);
+    lock_wait(&instance->_sync);
 
     node = _FindTrackBlock(instance->_firstNode, trackNumber);
 
-    sem_post(&instance->_sync);
+    lock_post(&instance->_sync);
 
     if(node == NULL)
     {

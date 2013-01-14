@@ -19,7 +19,7 @@ struct _PlaySingleUri
 
 struct _BrowseState
 {
-    sem_t Lock;        /* in */
+    lock_t Lock;        /* in */
     char* Result;    /* out */
 };
 
@@ -182,7 +182,7 @@ void _Callback(struct UPnPService *sender, int ErrorCode, void *user,
         strcpy(state->Result, Result);
     }
 
-    sem_post(&state->Lock);
+    lock_post(&state->Lock);
 }
 
 struct CdsObject* ResolvePlaySingleURI(void* MSCPToken, char* playSingleUri)
@@ -217,16 +217,16 @@ struct CdsObject* ResolvePlaySingleURI(void* MSCPToken, char* playSingleUri)
     }
 
     state = (struct _BrowseState*)malloc(sizeof(struct _BrowseState));
-    sem_init(&state->Lock, 0, 1);
+    lock_init(&state->Lock, 0, 1);
     state->Result = NULL;
 
-    sem_wait(&state->Lock);
+    lock_wait(&state->Lock);
 
     MediaServerCP_Invoke_ContentDirectory_Browse(service, &_Callback, state, psUri->ItemID, "BrowseMetadata", "res", 0, 0, "");
 
-    sem_wait(&state->Lock);
-    sem_destroy(&state->Lock);
-    state->Lock = *( sem_t * )NULL;// leochen
+    lock_wait(&state->Lock);
+    lock_destroy(&state->Lock);
+    state->Lock = *( lock_t * )NULL;// leochen
 
     rawResult = state->Result;
 

@@ -3,8 +3,6 @@
 #        include "stdafx.h"
 #    endif
 char* MediaServer_PLATFORM = "WINDOWS";
-#elif defined(__SYMBIAN32__)
-char* MediaServer_PLATFORM = "SYMBIAN";
 #else
 char* MediaServer_PLATFORM = "POSIX";
 #endif
@@ -752,7 +750,7 @@ struct MediaServer_DataObject
    
    
    
-   sem_t EventLock;
+   lock_t EventLock;
    struct SubscriberInfo *HeadSubscriberPtr_ConnectionManager;
     int NumberOfSubscribers_ConnectionManager;
     struct SubscriberInfo *HeadSubscriberPtr_ContentDirectory;
@@ -853,8 +851,6 @@ repeatedly call \a MediaServer_AsyncResponse_OUT for each argument in the respon
       int RetVal=0;
       #if defined(WIN32) || defined(_WIN32_WCE)
       char* RESPONSE_HEADER = "\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: WINDOWS, UPnP/1.0, PPTV MicroStack/1.0.2777";
-      #elif defined(__SYMBIAN32__)
-      char* RESPONSE_HEADER = "\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: SYMBIAN, UPnP/1.0, PPTV MicroStack/1.0.2777";
       #else
       char* RESPONSE_HEADER = "\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: POSIX, UPnP/1.0, PPTV MicroStack/1.0.2777";
       #endif
@@ -1112,10 +1108,21 @@ void MediaServer_PostMX_MSEARCH(void *object)
    if(STLength==15 && memcmp(ST,"upnp:rootdevice",15)==0)
    {
       
-      MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
-      
-      
-      rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+      //MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
+      //
+      //
+      //rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+       // 增加发现几率
+       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",upnp->NotifyCycleTime);
+       rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"",upnp->UUID,"",upnp->NotifyCycleTime);
+       rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",upnp->NotifyCycleTime);
+       rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",upnp->NotifyCycleTime);
+       rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
+       MediaServer_BuildSsdpResponsePacket(b,&packetlength,mss->localIPAddress,(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
+       rcode = ILibAsyncUDPSocket_SendTo(response_socket,mss->dest_addr.sin_addr.s_addr, ntohs(mss->dest_addr.sin_port), b, packetlength, ILibAsyncSocket_MemoryOwnership_USER);
    }
    //
    // Search for everything
@@ -2226,7 +2233,7 @@ void MediaServer_ProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebS
       }
       f = f->NextField;
    }
-   sem_wait(&(((struct MediaServer_DataObject*)session->User)->EventLock));
+   lock_wait(&(((struct MediaServer_DataObject*)session->User)->EventLock));
    if(header->DirectiveObjLength==24 && memcmp(header->DirectiveObj + 1,"ConnectionManager/event",23)==0)
     {
         Info = MediaServer_RemoveSubscriberInfo(&(((struct MediaServer_DataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),&(((struct MediaServer_DataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
@@ -2266,7 +2273,7 @@ void MediaServer_ProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebS
         }
     }
 
-   sem_post(&(((struct MediaServer_DataObject*)session->User)->EventLock));
+   lock_post(&(((struct MediaServer_DataObject*)session->User)->EventLock));
 }
 void MediaServer_TryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLength,struct ILibWebServer_Session *session)
 {
@@ -2685,8 +2692,6 @@ void MediaServer_ProcessHTTPPacket(struct ILibWebServer_Session *session, struct
    
    #if defined(WIN32) || defined(_WIN32_WCE)
    char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: WINDOWS, UPnP/1.0, PPTV MicroStack/1.0.2777";
-   #elif defined(__SYMBIAN32__)
-   char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: SYMBIAN, UPnP/1.0, PPTV MicroStack/1.0.2777";
    #else
    char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, PPTV MicroStack/1.0.2777";
    #endif
@@ -3040,11 +3045,11 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
       //
       for(i=0;i<MediaServer_Object->AddressListLength;++i)
       {
-          if (MediaServer_Object->NOTIFY_SEND_socks[i] == NULL)
-              continue;
+        if (MediaServer_Object->NOTIFY_SEND_socks[i] == NULL)
+            continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_SEND_socks[i]);
       }
-      freesafe(MediaServer_Object->NOTIFY_SEND_socks);
+      Safefree(MediaServer_Object->NOTIFY_SEND_socks);
       
       for(i=0;i<MediaServer_Object->AddressListLength;++i)
       {
@@ -3052,7 +3057,7 @@ void MediaServer_MasterPreSelect(void* object,void *socketset, void *writeset, v
               continue;
          ILibChain_SafeRemove(MediaServer_Object->Chain,MediaServer_Object->NOTIFY_RECEIVE_socks[i]);
       }
-      freesafe(MediaServer_Object->NOTIFY_RECEIVE_socks);
+      Safefree(MediaServer_Object->NOTIFY_RECEIVE_socks);
       
       
       //
@@ -3172,40 +3177,40 @@ void MediaServer_FragmentedSendNotify(void *data)
       ILibLifeTime_Add(FNS->upnp->WebServerTimer,FNS,timeout,&MediaServer_FragmentedSendNotify,&MediaServer_FragmentedSendNotify_Destroy);
    }
    
-   for(i=0;i<FNS->upnp->AddressListLength;++i)
-   {
-       if (FNS->upnp->NOTIFY_SEND_socks[i] == NULL)
-           continue;
-       ILibAsyncUDPSocket_SetMulticastInterface(FNS->upnp->NOTIFY_SEND_socks[i],FNS->upnp->AddressList[i]);
-       switch(FNS->packetNumber)
-       {
-       case 1:
-           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
-           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-           break;
-       case 2:
-           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
-           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-           break;
-       case 3:
-           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
-           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-           break;
-       case 4:
-           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
-           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-           break;
-       case 5:
-           MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
-           ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-           break;
-       }
-   }
-   free(packet);
-   if(FNS->packetNumber!=0)
-   {
-       free(FNS);
-   }
+    for(i=0;i<FNS->upnp->AddressListLength;++i)
+    {
+        if (FNS->upnp->NOTIFY_SEND_socks[i] == NULL)
+            continue;
+        ILibAsyncUDPSocket_SetMulticastInterface(FNS->upnp->NOTIFY_SEND_socks[i],FNS->upnp->AddressList[i]);
+        switch(FNS->packetNumber)
+        {
+        case 1:
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",FNS->upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            break;
+        case 2:
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"","uuid:",FNS->upnp->UDN,FNS->upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            break;
+        case 3:
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",FNS->upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            break;
+        case 4:
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",FNS->upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            break;
+        case 5:
+            MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,FNS->upnp->AddressList[i],(unsigned short)FNS->upnp->WebSocketPortNumber,0,FNS->upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",FNS->upnp->NotifyCycleTime);
+            ILibAsyncUDPSocket_SendTo(FNS->upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+            break;
+        }
+    }
+    free(packet);
+    if(FNS->packetNumber!=0)
+    {
+        free(FNS);
+    }
 }
 void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
 {
@@ -3230,9 +3235,9 @@ void MediaServer_SendNotify(const struct MediaServer_DataObject *upnp)
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
             MediaServer_BuildSsdpNotifyPacket(packet,&packetlength,upnp->AddressList[i],(unsigned short)upnp->WebSocketPortNumber,0,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",upnp->NotifyCycleTime);
             ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-      }
-   }
-   free(packet);
+        }
+    }
+    free(packet);
 }
 
 #define MediaServer_BuildSsdpByeByePacket(outpacket,outlength,USN,USNex,NT,NTex,DeviceID)\
@@ -3260,9 +3265,9 @@ void MediaServer_SendByeBye(const struct MediaServer_DataObject *upnp)
     int packetlength;
     char* packet = (char*)malloc(5000);
     int i, i2;
-
+   
     for(i=0;i<upnp->AddressListLength;++i)
-    {
+    {    
         if (upnp->NOTIFY_SEND_socks[i] == NULL)
             continue;
         ILibAsyncUDPSocket_SetMulticastInterface(upnp->NOTIFY_SEND_socks[i],upnp->AddressList[i]);
@@ -3270,15 +3275,16 @@ void MediaServer_SendByeBye(const struct MediaServer_DataObject *upnp)
         for (i2=0;i2<2;i2++)
         {
             MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::upnp:rootdevice","upnp:rootdevice","",0);
-            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"","uuid:",upnp->UDN,0);
-            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",0);
-            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",0);
-            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
-            MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",0);
-            ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+                    ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+        MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"","uuid:",upnp->UDN,0);
+        ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+        MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:device:MediaServer:1","urn:schemas-upnp-org:device:MediaServer:1","",0);
+        ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+        MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ConnectionManager:1","urn:schemas-upnp-org:service:ConnectionManager:1","",0);
+        ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+        MediaServer_BuildSsdpByeByePacket(packet,&packetlength,upnp->UDN,"::urn:schemas-upnp-org:service:ContentDirectory:1","urn:schemas-upnp-org:service:ContentDirectory:1","",0);
+        ILibAsyncUDPSocket_SendTo(upnp->NOTIFY_SEND_socks[i],inet_addr(UPNP_GROUP),UPNP_PORT,packet,packetlength,ILibAsyncSocket_MemoryOwnership_USER);
+
         }
     }
     free(packet);
@@ -3326,8 +3332,6 @@ void MediaServer_ResponseGeneric(const MediaServer_MicroStackToken MediaServer_T
    LVL3DEBUG(printf("SendBody: %s\r\n",packet);)
    #if defined(WIN32) || defined(_WIN32_WCE)
    RVAL=ILibWebServer_StreamHeader_Raw(session,200,"OK","\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: WINDOWS, UPnP/1.0, PPTV MicroStack/1.0.2777",1);
-   #elif defined(__SYMBIAN32__)
-   RVAL=ILibWebServer_StreamHeader_Raw(session,200,"OK","\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: SYMBIAN, UPnP/1.0, PPTV MicroStack/1.0.2777",1);
    #else
    RVAL=ILibWebServer_StreamHeader_Raw(session,200,"OK","\r\nEXT:\r\nCONTENT-TYPE: text/xml; charset=\"utf-8\"\r\nSERVER: POSIX, UPnP/1.0, PPTV MicroStack/1.0.2777",1);
    #endif
@@ -3538,7 +3542,7 @@ int *PAUSE)
 {
    if(done!=0 && ((struct SubscriberInfo*)subscriber)->Disposing==0)
    {
-      sem_wait(&(((struct MediaServer_DataObject*)upnp)->EventLock));
+      lock_wait(&(((struct MediaServer_DataObject*)upnp)->EventLock));
       --((struct SubscriberInfo*)subscriber)->RefCount;
       if(((struct SubscriberInfo*)subscriber)->RefCount==0)
       {
@@ -3552,7 +3556,7 @@ int *PAUSE)
          ((struct SubscriberInfo*)subscriber)->Disposing = 1;
          MediaServer_ExpireSubscriberInfo(upnp,subscriber);
       }
-      sem_post(&(((struct MediaServer_DataObject*)upnp)->EventLock));
+      lock_post(&(((struct MediaServer_DataObject*)upnp)->EventLock));
    }
 }
 void MediaServer_SendEvent_Body(void *upnptoken,char *body,int bodylength,struct SubscriberInfo *info)
@@ -3588,7 +3592,7 @@ void MediaServer_SendEvent(void *upnptoken, char* body, const int bodylength, co
       free(body);
       return;
    }
-   sem_wait(&(MediaServer_Object->EventLock));
+   lock_wait(&(MediaServer_Object->EventLock));
    if(strncmp(eventname,"ConnectionManager",17)==0)
     {
         info = MediaServer_Object->HeadSubscriberPtr_ConnectionManager;
@@ -3616,7 +3620,7 @@ void MediaServer_SendEvent(void *upnptoken, char* body, const int bodylength, co
       info = info->Next;
    }
    
-   sem_post(&(MediaServer_Object->EventLock));
+   lock_post(&(MediaServer_Object->EventLock));
 }
 
 /*! \fn MediaServer_SetState_ConnectionManager_SourceProtocolInfo(MediaServer_MicroStackToken upnptoken, char* val)
@@ -3737,7 +3741,7 @@ void MediaServer_DestroyMicroStack(void *object)
    struct SubscriberInfo  *sinfo,*sinfo2;
    MediaServer_SendByeBye(upnp);
    
-   sem_destroy(&(upnp->EventLock));
+   lock_destroy(&(upnp->EventLock));
    
    free(upnp->ConnectionManager_SourceProtocolInfo);
     free(upnp->ConnectionManager_SinkProtocolInfo);
@@ -3847,7 +3851,7 @@ MediaServer_MicroStackToken MediaServer_CreateMicroStack(void *Chain, const char
     MediaServer__Device_MediaServer_Impl.UDN = UDN;
     MediaServer__Device_MediaServer_Impl.Serial = SerialNumber;
     if(MediaServer__Device_MediaServer_Impl.Manufacturer == NULL) {MediaServer__Device_MediaServer_Impl.Manufacturer = "PPTV MTBU SDK Dev";}
-   if(MediaServer__Device_MediaServer_Impl.ManufacturerURL == NULL) {MediaServer__Device_MediaServer_Impl.ManufacturerURL = "http://www.pptv.com";}
+   if(MediaServer__Device_MediaServer_Impl.ManufacturerURL == NULL) {MediaServer__Device_MediaServer_Impl.ManufacturerURL = "http://www.intel.com";}
    if(MediaServer__Device_MediaServer_Impl.ModelDescription == NULL) {MediaServer__Device_MediaServer_Impl.ModelDescription = "UPnP/AV 1.0 Compliant Media Server";}
    if(MediaServer__Device_MediaServer_Impl.ModelName == NULL) {MediaServer__Device_MediaServer_Impl.ModelName = "Digital Media Server";}
    if(MediaServer__Device_MediaServer_Impl.ModelNumber == NULL) {MediaServer__Device_MediaServer_Impl.ModelNumber = "None";}
@@ -3892,7 +3896,7 @@ MediaServer_MicroStackToken MediaServer_CreateMicroStack(void *Chain, const char
    
    
    
-   sem_init(&(RetVal->EventLock),0,1);
+   lock_init(&(RetVal->EventLock),0,1);
    MediaServer_GetConfiguration()->MicrostackToken=RetVal;
    return(RetVal);
 }
@@ -3906,8 +3910,6 @@ void MediaServer_StreamDescriptionDocument(struct ILibWebServer_Session *session
 {
    #if defined(WIN32) || defined(_WIN32_WCE)
    char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: WINDOWS, UPnP/1.0, PPTV MicroStack/1.0.2777";
-   #elif defined(__SYMBIAN32__)
-   char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: SYMBIAN, UPnP/1.0, PPTV MicroStack/1.0.2777";
    #else
    char *responseHeader = "\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, PPTV MicroStack/1.0.2777";
    #endif

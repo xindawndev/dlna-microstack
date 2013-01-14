@@ -12,7 +12,7 @@ enum cmdloop_dmrcmds
     HELP = 0, RCP_PRINT, RCP_GETDLNADOC, RCP_GETDLNACAP, RCP_GETDEVCAP, RCP_SUPPORTPLAYMODE,
     RCP_SUPPORTVOLUME, RCP_SUPPORTMUTE, RCP_PLAY, RCP_SEEK, RCP_STOP, RCP_PAUSE,
     RCP_NEXT, RCP_PREV, RCP_SETURI, RCP_SETVOLUME, RCP_SETMUTE, RCP_SETPLAYMODE,
-    RCP_GETMEDIAINFO, RCP_GETPOSITION, MRCP_EXIT,
+    RCP_GETMEDIAINFO, RCP_GETPOSITION, RCP_GETTRANSPORTINFO, MRCP_EXIT,
 };
 
 struct cmdloop_commands
@@ -44,6 +44,7 @@ static struct cmdloop_commands cmdloop_cmdlist[] = {
     {"DmrSetPlayMode", RCP_SETPLAYMODE, 3, "<dev_udn> <playmode (int)>"},
     {"DmrGetMediaInfo", RCP_GETMEDIAINFO, 2, "<dev_udn>"},
     {"DmrGetPos", RCP_GETPOSITION, 2, "<dev_udn>"},
+    {"DmrGetTra", RCP_GETTRANSPORTINFO, 2, "<dev_udn>"},
     {"Exit", MRCP_EXIT, 1, ""},
 };
 
@@ -83,6 +84,8 @@ int paraseCmd( char * cmdline )
     int i;
     int invalidargs = 0;
     int validargs;
+    char * ret = NULL;
+    int nret;
 
     if ( cmdline == NULL || cmdline[0] == '\n' ) return 0;
 
@@ -125,11 +128,13 @@ int paraseCmd( char * cmdline )
         break;
 
     case RCP_GETDLNADOC:
-        dmrGetDlnaDoc( arg1 );
+        ret = dmrGetDlnaDoc( arg1 );
+        printf("++++++%s dmrGetDlnaDoc = %s ++++++", __FUNCTION__, ret ? ret : "");
         break;
 
     case RCP_GETDLNACAP:
-        dmrGetDlnaCap( arg1 );
+        ret = dmrGetDlnaCap( arg1 );
+        printf("++++++%s dmrGetDlnaCap = %s ++++++", __FUNCTION__, ret ? ret : "");
         break;
 
     case RCP_GETDEVCAP:
@@ -137,15 +142,19 @@ int paraseCmd( char * cmdline )
         break;
 
     case RCP_SUPPORTPLAYMODE:
-        dmrSupportPlayMode( arg1, to_int(arg2) );
+        nret = dmrSupportPlayMode( arg1, to_int(arg2) );
+        printf("++++++%s dmrSupportPlayMode = %s ++++++", __FUNCTION__, nret ? "true" : "false");
         break;
 
     case RCP_SUPPORTVOLUME:
-        dmrSupportVolume( arg1 );
+        nret = dmrSupportVolume( arg1 );
+        printf("++++++%s dmrSupportVolume = %s ++++++", __FUNCTION__, nret ? "true" : "false");
+
         break;
 
     case RCP_SUPPORTMUTE:
-        dmrSupportMute( arg1 );
+        nret = dmrSupportMute( arg1 );
+        printf("++++++%s dmrSupportMute = %s ++++++", __FUNCTION__, nret ? "true" : "false");
         break;
 
     case RCP_PLAY:
@@ -194,6 +203,10 @@ int paraseCmd( char * cmdline )
 
     case RCP_GETPOSITION:
         dmrGetPosition( arg1 );
+        break;
+
+    case RCP_GETTRANSPORTINFO:
+        dmrGetTransportInfo( arg1 );
         break;
 
     case MRCP_EXIT:
@@ -261,6 +274,7 @@ int main(int argc, char **argv)
     setplaymode_callback = callback_setplaymode;
     getmediainfo_callback= callback_getmediainfo;
     getposition_callback = callback_getposition;
+    gettransportinfo_callback = callback_gettransportinfo;
 
 #if defined(WIN32)
     // command thread

@@ -11,7 +11,7 @@ CONFIG_COMPILE_LIST	:= debug release
 
 CONFIG_THREAD_LIST	:= multi single
 
-CONFIG_LIB_LIST		:= static dynamic
+CONFIG_LIB_LIST		:= static dynamic static2
 
 CONFIG_COMPILE		:= $(call get_config,$(CONFIG),$(CONFIG_COMPILE_LIST),debug)
 
@@ -34,7 +34,7 @@ ifeq ($(PROJECT_TYPE),lib)
 
 	TARGET_DIRECTORY	:= $(TARGET_DIRECTORY)/$(CONFIG_LIB)
 
-        ifeq ($(CONFIG_LIB),static)
+        ifneq ($(CONFIG_LIB),dynamic)
 
 		NAME_CONFIG		:= s$(NAME_CONFIG)
 

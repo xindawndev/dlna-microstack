@@ -22,6 +22,8 @@ include $(ROOT_MAKE_DIRECTORY)/mkdirs.mk
 
 include $(PROJ_MAKE_DIRECTORY)/version.mk
 
+include $(PROJ_MAKE_DIRECTORY)/shell.mk
+
 DEPENDS                 := $(PROJECT_DEPENDS) $(PLATFORM_DEPENDS)
 
 #include $(TARGET_MAKE_DIRECTORY)/link.mk
