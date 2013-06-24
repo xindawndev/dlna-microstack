@@ -241,6 +241,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\include\dlna\ILibLog.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\include\dlna\ILibParsers.h"
 					>
 				</File>
@@ -474,6 +478,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\src\dlna\Functional\ILibAsyncUDPSocket.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\dlna\Functional\ILibLog.c"
 					>
 				</File>
 				<File
